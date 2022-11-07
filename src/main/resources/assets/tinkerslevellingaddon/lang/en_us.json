@@ -3,5 +3,11 @@
   "modifier.tinkerslevellingaddon.improvement.flavor": "Grind! Improve! Overcome!",
   "modifier.tinkerslevellingaddon.improvement.description": "Gain bonus modifier slots from hardworking with your tool",
   "modifier.tinkerslevellingaddon.improvement.tooltip.xp": "XP: %s/%s",
-  "modifier.tinkerslevellingaddon.improvement.tooltip.level": "Level: %s"
+  "modifier.tinkerslevellingaddon.improvement.tooltip.level": "Level: %s",
+
+  "config.tinkerslevellingaddon.general.maxLevel": "Maximum tool level",
+  "config.tinkerslevellingaddon.general.baseExperience": "Base experience",
+  "config.tinkerslevellingaddon.general.levelMultiplier": "Experience per level multiplier",
+  "config.tinkerslevellingaddon.general.toolsModifierTypeRotation": "Tools modifiers type rotation",
+  "config.tinkerslevellingaddon.general.armorModifierTypeRotation": "Armor modifiers type rotation"
 }

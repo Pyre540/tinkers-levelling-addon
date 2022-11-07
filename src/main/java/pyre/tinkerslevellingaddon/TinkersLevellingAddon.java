@@ -8,6 +8,7 @@ import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.forge.event.lifecycle.GatherDataEvent;
 import org.slf4j.Logger;
+import pyre.tinkerslevellingaddon.config.Config;
 import pyre.tinkerslevellingaddon.data.ModifierRecipeProvider;
 import pyre.tinkerslevellingaddon.setup.Registration;
 
@@ -19,6 +20,7 @@ public class TinkersLevellingAddon {
     public static final String MOD_ID = "tinkerslevellingaddon";
 
     public TinkersLevellingAddon() {
+        Config.init();
         Registration.init();
 
         FMLJavaModLoadingContext.get().getModEventBus().addListener(this::setup);

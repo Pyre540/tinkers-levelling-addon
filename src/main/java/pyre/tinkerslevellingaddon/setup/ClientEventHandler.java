@@ -11,7 +11,7 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import pyre.tinkerslevellingaddon.ImprovementModifier;
 import pyre.tinkerslevellingaddon.TinkersLevellingAddon;
-import slimeknights.tconstruct.library.tools.item.IModifiable;
+import slimeknights.tconstruct.library.tools.helper.ModifierUtil;
 import slimeknights.tconstruct.library.tools.nbt.ModDataNBT;
 import slimeknights.tconstruct.library.tools.nbt.ToolStack;
 
@@ -28,23 +28,20 @@ public class ClientEventHandler {
         }
 
         ItemStack stack = event.getItemStack();
-        if(!(stack.getItem() instanceof IModifiable)) {
-            return;
-        }
-
-        ToolStack tool = ToolStack.from(stack);
-        if (tool.getModifierLevel(Registration.improvement.get()) > 0) {
-            ModDataNBT data = tool.getPersistentData();
+        if (ModifierUtil.getModifierLevel(stack, Registration.improvement.get().getId()) > 0) {
+            ModDataNBT data = ToolStack.from(stack).getPersistentData();
             int xp = data.getInt(ImprovementModifier.EXPERIENCE_KEY);
             int level = data.getInt(ImprovementModifier.LEVEL_KEY);
-            int experienceNeeded = ImprovementModifier.getXpForLevel(level + 1);
+            int experienceNeeded = ImprovementModifier.getXpNeededForLevel(level + 1);
 
             TranslatableComponent levelTooltip = new TranslatableComponent(TOOLTIP_LEVEL_KEY,
                     new TextComponent(Integer.toString(level)).withStyle(ChatFormatting.GOLD));
-            TranslatableComponent xpTooltip = new TranslatableComponent(TOOLTIP_XP_KEY, xp, experienceNeeded);
             //add tooltips under tool durability
             event.getToolTip().add(2, levelTooltip);
-            event.getToolTip().add(3, xpTooltip);
+            if (ImprovementModifier.canLevelUp(level)) {
+                TranslatableComponent xpTooltip = new TranslatableComponent(TOOLTIP_XP_KEY, xp, experienceNeeded);
+                event.getToolTip().add(3, xpTooltip);
+            }
         }
     }
 }
