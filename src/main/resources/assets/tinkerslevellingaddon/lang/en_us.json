@@ -9,5 +9,23 @@
   "config.tinkerslevellingaddon.general.baseExperience": "Base experience",
   "config.tinkerslevellingaddon.general.levelMultiplier": "Experience per level multiplier",
   "config.tinkerslevellingaddon.general.toolsModifierTypeRotation": "Tools modifiers type rotation",
-  "config.tinkerslevellingaddon.general.armorModifierTypeRotation": "Armor modifiers type rotation"
+  "config.tinkerslevellingaddon.general.armorModifierTypeRotation": "Armor modifiers type rotation",
+
+  "config.tinkerslevellingaddon.levelling.damageDealt": "Damage dealt",
+  "config.tinkerslevellingaddon.levelling.damageTaken": "Damage taken",
+  "config.tinkerslevellingaddon.levelling.enablePvp": "Enable PvP",
+
+  "config.tinkerslevellingaddon.levelling.actions.mining": "Mining",
+  "config.tinkerslevellingaddon.levelling.actions.harvesting": "Harvesting",
+  "config.tinkerslevellingaddon.levelling.actions.shearing": "Shearing",
+  "config.tinkerslevellingaddon.levelling.actions.attacking": "Attacking",
+  "config.tinkerslevellingaddon.levelling.actions.takingDamage": "Taking damage",
+  "config.tinkerslevellingaddon.levelling.actions.thorns": "Thorns",
+
+  "config.tinkerslevellingaddon.levelling.bonuses.mining": "Mining",
+  "config.tinkerslevellingaddon.levelling.bonuses.harvesting": "Harvesting",
+  "config.tinkerslevellingaddon.levelling.bonuses.shearing": "Shearing",
+  "config.tinkerslevellingaddon.levelling.bonuses.attacking": "Attacking",
+  "config.tinkerslevellingaddon.levelling.bonuses.takingDamage": "Taking damage",
+  "config.tinkerslevellingaddon.levelling.bonuses.thorns": "Thorns"
 }

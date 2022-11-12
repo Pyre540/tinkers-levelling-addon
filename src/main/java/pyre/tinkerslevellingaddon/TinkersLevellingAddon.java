@@ -15,7 +15,8 @@ import pyre.tinkerslevellingaddon.setup.Registration;
 @Mod(TinkersLevellingAddon.MOD_ID)
 @Mod.EventBusSubscriber(bus = Mod.EventBusSubscriber.Bus.MOD)
 public class TinkersLevellingAddon {
-    private static final Logger LOGGER = LogUtils.getLogger();
+
+    public static final Logger LOGGER = LogUtils.getLogger();
 
     public static final String MOD_ID = "tinkerslevellingaddon";
 
