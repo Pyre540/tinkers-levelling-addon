@@ -1,6 +1,8 @@
 package pyre.tinkerslevellingaddon.setup;
 
 import net.minecraft.ChatFormatting;
+import net.minecraft.client.resources.language.I18n;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.item.ItemStack;
@@ -14,6 +16,8 @@ import pyre.tinkerslevellingaddon.TinkersLevellingAddon;
 import slimeknights.tconstruct.library.tools.helper.ModifierUtil;
 import slimeknights.tconstruct.library.tools.nbt.ModDataNBT;
 import slimeknights.tconstruct.library.tools.nbt.ToolStack;
+
+import java.awt.*;
 
 @Mod.EventBusSubscriber(modid = TinkersLevellingAddon.MOD_ID, value = Dist.CLIENT, bus = Mod.EventBusSubscriber.Bus.FORGE)
 public class ClientEventHandler {
@@ -30,18 +34,39 @@ public class ClientEventHandler {
         ItemStack stack = event.getItemStack();
         if (ModifierUtil.getModifierLevel(stack, Registration.improvement.get().getId()) > 0) {
             ModDataNBT data = ToolStack.from(stack).getPersistentData();
-            int xp = data.getInt(ImprovementModifier.EXPERIENCE_KEY);
             int level = data.getInt(ImprovementModifier.LEVEL_KEY);
-            int experienceNeeded = ImprovementModifier.getXpNeededForLevel(level + 1);
 
-            TranslatableComponent levelTooltip = new TranslatableComponent(TOOLTIP_LEVEL_KEY,
-                    new TextComponent(Integer.toString(level)).withStyle(ChatFormatting.GOLD));
+            MutableComponent levelTooltip = new TranslatableComponent(TOOLTIP_LEVEL_KEY,
+                    new TextComponent(getLevelName(level)).withStyle(s -> s.withColor(getLevelColor(level))))
+                    .append(new TextComponent(" [" + level + "]").withStyle(ChatFormatting.GRAY));
             //add tooltips under tool durability
             event.getToolTip().add(2, levelTooltip);
             if (ImprovementModifier.canLevelUp(level)) {
-                TranslatableComponent xpTooltip = new TranslatableComponent(TOOLTIP_XP_KEY, xp, experienceNeeded);
+                MutableComponent xp = new TextComponent("" + data.getInt(ImprovementModifier.EXPERIENCE_KEY))
+                        .withStyle(ChatFormatting.GOLD);
+                MutableComponent xpNeeded = new TextComponent("" + ImprovementModifier.getXpNeededForLevel(level + 1))
+                        .withStyle(ChatFormatting.GOLD);
+                TranslatableComponent xpTooltip = new TranslatableComponent(TOOLTIP_XP_KEY, xp, xpNeeded);
                 event.getToolTip().add(3, xpTooltip);
             }
         }
+    }
+
+    private static String getLevelName(int level) {
+        if(I18n.exists(TOOLTIP_LEVEL_KEY + "." + level)) {
+            return I18n.get(TOOLTIP_LEVEL_KEY + "." + level);
+        }
+
+        int i = 1;
+        while(I18n.exists(TOOLTIP_LEVEL_KEY + "." + i)) {
+            i++;
+        }
+        return I18n.get(TOOLTIP_LEVEL_KEY + "." + (level % i)) + "+".repeat(level / i);
+    }
+
+    private static int getLevelColor(int level) {
+        float hue = (0.277777f * level);
+        hue = hue - (int) hue;
+        return Color.HSBtoRGB(hue, 0.75f, 0.8f);
     }
 }

@@ -1,6 +1,7 @@
 package pyre.tinkerslevellingaddon;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -13,6 +14,8 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.block.state.BlockState;
 import pyre.tinkerslevellingaddon.config.Config;
+import pyre.tinkerslevellingaddon.network.LevelUpPacket;
+import pyre.tinkerslevellingaddon.network.Messages;
 import slimeknights.tconstruct.common.TinkerTags;
 import slimeknights.tconstruct.library.modifiers.hooks.IHarvestModifier;
 import slimeknights.tconstruct.library.modifiers.hooks.IShearModifier;
@@ -61,12 +64,13 @@ public class ImprovementModifier extends NoLevelsModifier implements IHarvestMod
             return;
         }
         ToolStack toolStack = getHeldTool(player, InteractionHand.MAIN_HAND);
+        Component toolName = player.getMainHandItem().getDisplayName();
         if (!isEqualTinkersItem(tool, toolStack)) {
             toolStack = getHeldTool(player, InteractionHand.OFF_HAND);
+            toolName = player.getOffhandItem().getDisplayName();
         }
-        addExperience(toolStack, 1 + Config.bonusMiningXp.get(), player);
+        addExperience(toolStack, 1 + Config.bonusMiningXp.get(), player, toolName);
     }
-
 
     @Override
     public void afterHarvest(IToolStackView tool, int level, UseOnContext context, ServerLevel world,
@@ -76,7 +80,8 @@ public class ImprovementModifier extends NoLevelsModifier implements IHarvestMod
             return;
         }
         ToolStack toolStack = getHeldTool(player, context.getHand());
-        addExperience(toolStack, 1 + Config.bonusHarvestingXp.get(), player);
+        Component toolName = player.getItemInHand(context.getHand()).getDisplayName();
+        addExperience(toolStack, 1 + Config.bonusHarvestingXp.get(), player, toolName);
     }
 
     @Override
@@ -85,10 +90,12 @@ public class ImprovementModifier extends NoLevelsModifier implements IHarvestMod
             return;
         }
         ToolStack toolStack = getHeldTool(player, InteractionHand.MAIN_HAND);
+        Component toolName = player.getMainHandItem().getDisplayName();
         if (!isEqualTinkersItem(tool, toolStack)) {
             toolStack = getHeldTool(player, InteractionHand.OFF_HAND);
+            toolName = player.getOffhandItem().getDisplayName();
         }
-        addExperience(toolStack, 1 + Config.bonusShearingXp.get(), player);
+        addExperience(toolStack, 1 + Config.bonusShearingXp.get(), player, toolName);
     }
 
     @Override
@@ -99,19 +106,21 @@ public class ImprovementModifier extends NoLevelsModifier implements IHarvestMod
         }
         int xp = (Config.damageDealt.get() ? Math.round(damageDealt) : 1) + Config.bonusAttackingXp.get();
         ToolStack toolStack = getHeldTool(context.getPlayerAttacker(), context.getSlotType());
-        addExperience(toolStack, xp, context.getPlayerAttacker());
+        Component toolName = context.getPlayerAttacker().getItemBySlot(context.getSlotType()).getDisplayName();
+        addExperience(toolStack, xp, context.getPlayerAttacker(), toolName);
         return 0;
     }
 
     @Override
     public void onAttacked(IToolStackView tool, int level, EquipmentContext context, EquipmentSlot slotType,
                            DamageSource source, float amount, boolean isDirectDamage) {
-        if (!Config.enableTakingDamageXp.get() || slotType.getType() != EquipmentSlot.Type.ARMOR ||
-                !(context.getEntity() instanceof Player player) || !isValidDamageSource(source, player)) {
+        if (!Config.enableTakingDamageXp.get() || slotType.getType() != EquipmentSlot.Type.ARMOR || !isDirectDamage ||
+                !(context.getEntity() instanceof ServerPlayer player) || !isValidDamageSource(source, player)) {
             return;
         }
         int xp = (Config.damageTaken.get() ? Math.round(amount) : 1) + Config.bonusTakingDamageXp.get() + getThornsBonus(tool);
-        addExperience(getHeldTool(player, slotType), xp, player);
+        Component toolName = player.getItemBySlot(slotType).getDisplayName();
+        addExperience(getHeldTool(player, slotType), xp, player, toolName);
     }
 
     //currently no hooks for tilling, striping wood, making paths...
@@ -126,7 +135,7 @@ public class ImprovementModifier extends NoLevelsModifier implements IHarvestMod
         return null;
     }
 
-    private void addExperience(ToolStack tool, int amount, Player player) {
+    private void addExperience(ToolStack tool, int amount, Player player, Component toolName) {
         if (tool == null) {
             return;
         }
@@ -144,7 +153,7 @@ public class ImprovementModifier extends NoLevelsModifier implements IHarvestMod
             currentExperience -= experienceNeeded;
             experienceNeeded = getXpNeededForLevel(currentLevel + 1);
 
-            //todo add player feedback (message, sound)
+            Messages.sendToPlayer(new LevelUpPacket(currentLevel, toolName), (ServerPlayer) player);
             tool.rebuildStats();
         }
         data.putInt(EXPERIENCE_KEY, currentExperience);

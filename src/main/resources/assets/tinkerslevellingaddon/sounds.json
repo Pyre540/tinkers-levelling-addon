@@ -1,0 +1,20 @@
+{
+  "tool_level_up_chime": {
+    "subtitle": "sounds.tinkerslevellingaddon.tool_level_up",
+    "sounds": [
+      "tinkerslevellingaddon:tool_level_up_chime"
+    ]
+  },
+  "tool_level_up_snare_drum": {
+    "subtitle": "sounds.tinkerslevellingaddon.tool_level_up",
+    "sounds": [
+      "tinkerslevellingaddon:tool_level_up_snare_drum"
+    ]
+  },
+  "tool_level_up_yay": {
+    "subtitle": "sounds.tinkerslevellingaddon.tool_level_up",
+    "sounds": [
+      "tinkerslevellingaddon:tool_level_up_yay"
+    ]
+  }
+}

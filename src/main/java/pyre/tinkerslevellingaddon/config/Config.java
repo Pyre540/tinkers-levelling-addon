@@ -1,8 +1,12 @@
 package pyre.tinkerslevellingaddon.config;
 
+import com.electronwill.nightconfig.core.EnumGetMethod;
+import net.minecraft.sounds.SoundEvent;
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.config.ModConfig;
+import net.minecraftforge.registries.RegistryObject;
+import pyre.tinkerslevellingaddon.setup.Registration;
 import slimeknights.tconstruct.library.tools.SlotType;
 
 import java.util.LinkedHashMap;
@@ -16,7 +20,6 @@ public class Config {
 
     private static final String UPGRADE = "upgrade";
     private static final String ABILITY = "ability";
-
     private static final String SOUL = "soul";
     private static final String DEFENSE = "defense";
 
@@ -34,14 +37,19 @@ public class Config {
     }
 
     public static final ForgeConfigSpec COMMON_CONFIG;
+    public static final ForgeConfigSpec CLIENT_CONFIG;
 
     static {
-        ForgeConfigSpec.Builder configBuilder = new ForgeConfigSpec.Builder();
-        generaConfig(configBuilder);
-        toolLevellingConfig(configBuilder);
-        COMMON_CONFIG = configBuilder.build();
+        ForgeConfigSpec.Builder commonConfigBuilder = new ForgeConfigSpec.Builder();
+        generaConfig(commonConfigBuilder);
+        toolLevellingConfig(commonConfigBuilder);
+        COMMON_CONFIG = commonConfigBuilder.build();
+        ForgeConfigSpec.Builder clientConfigBuilder = new ForgeConfigSpec.Builder();
+        clientConfig(clientConfigBuilder);
+        CLIENT_CONFIG = clientConfigBuilder.build();
     }
 
+    //COMMON
     public static ForgeConfigSpec.IntValue maxLevel;
     public static ForgeConfigSpec.IntValue baseExperience;
     public static ForgeConfigSpec.DoubleValue levelMultiplier;
@@ -65,6 +73,10 @@ public class Config {
     public static ForgeConfigSpec.IntValue bonusAttackingXp;
     public static ForgeConfigSpec.IntValue bonusTakingDamageXp;
     public static ForgeConfigSpec.IntValue bonusThornsXp;
+
+    //CLIENT
+    public static ForgeConfigSpec.BooleanValue enableLevelUpMessage;
+    public static ForgeConfigSpec.EnumValue<LevelUpSound> levelUpSound;
 
     private static void generaConfig(ForgeConfigSpec.Builder builder) {
         builder.comment("General addon settings").push("general");
@@ -167,8 +179,21 @@ public class Config {
         builder.pop();
     }
 
+    private static void clientConfig(ForgeConfigSpec.Builder builder) {
+        builder.comment("Client only settings").push("client");
+
+        enableLevelUpMessage = builder.comment("If true, shows chat message on tool level ups.")
+                .translation("config.tinkerslevellingaddon.client.messages")
+                .define("message", true);
+
+        levelUpSound = builder.comment("")
+                .translation("config.tinkerslevellingaddon.client.sound")
+                .defineEnum("sound", LevelUpSound.SNARE_DRUM, EnumGetMethod.NAME_IGNORECASE, LevelUpSound.values());
+    }
+
     public static void init() {
         ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, COMMON_CONFIG);
+        ModLoadingContext.get().registerConfig(ModConfig.Type.CLIENT, CLIENT_CONFIG);
     }
 
     public static List<SlotType> getToolsSlotsRotation() {
@@ -191,5 +216,22 @@ public class Config {
         return toolsRotation.stream()
                 .map(s -> armorSlotTypes.get(s))
                 .toList();
+    }
+
+    public enum LevelUpSound {
+        NONE(null),
+        CHIME(Registration.SOUND_TOOL_LEVEL_UP_CHIME),
+        SNARE_DRUM(Registration.SOUND_TOOL_LEVEL_UP_SNARE_DRUM),
+        YAY(Registration.SOUND_TOOL_LEVEL_UP_YAY);
+
+        RegistryObject<SoundEvent> soundEvent;
+
+        LevelUpSound(RegistryObject<SoundEvent> soundEvent) {
+            this.soundEvent = soundEvent;
+        }
+
+        public SoundEvent getSoundEvent() {
+            return soundEvent == null ? null : soundEvent.get();
+        }
     }
 }
