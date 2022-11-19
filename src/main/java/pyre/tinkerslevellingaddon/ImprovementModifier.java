@@ -25,20 +25,27 @@ import slimeknights.tconstruct.library.tools.context.EquipmentContext;
 import slimeknights.tconstruct.library.tools.context.ToolAttackContext;
 import slimeknights.tconstruct.library.tools.context.ToolHarvestContext;
 import slimeknights.tconstruct.library.tools.context.ToolRebuildContext;
+import slimeknights.tconstruct.library.tools.definition.ToolDefinition;
 import slimeknights.tconstruct.library.tools.nbt.IModDataView;
 import slimeknights.tconstruct.library.tools.nbt.IToolStackView;
 import slimeknights.tconstruct.library.tools.nbt.ModDataNBT;
 import slimeknights.tconstruct.library.tools.nbt.ToolStack;
 import slimeknights.tconstruct.library.utils.RestrictedCompoundTag;
 import slimeknights.tconstruct.tools.TinkerModifiers;
+import slimeknights.tconstruct.tools.ToolDefinitions;
 
 import javax.annotation.Nullable;
 import java.util.List;
+import java.util.Set;
 
 public class ImprovementModifier extends NoLevelsModifier implements IHarvestModifier, IShearModifier {
 
     public static final ResourceLocation EXPERIENCE_KEY = new ResourceLocation(TinkersLevellingAddon.MOD_ID, "experience");
     public static final ResourceLocation LEVEL_KEY = new ResourceLocation(TinkersLevellingAddon.MOD_ID, "level");
+
+    private static final Set<ToolDefinition> BROAD_TOOLS = Set.of(ToolDefinitions.SLEDGE_HAMMER,
+            ToolDefinitions.VEIN_HAMMER, ToolDefinitions.EXCAVATOR, ToolDefinitions.BROAD_AXE, ToolDefinitions.SCYTHE,
+            ToolDefinitions.CLEAVER);
 
     @Override
     public void beforeRemoved(IToolStackView tool, RestrictedCompoundTag tag) {
@@ -143,7 +150,8 @@ public class ImprovementModifier extends NoLevelsModifier implements IHarvestMod
         ModDataNBT data = tool.getPersistentData();
         int currentLevel = data.getInt(LEVEL_KEY);
         int currentExperience = data.getInt(EXPERIENCE_KEY) + amount;
-        int experienceNeeded = getXpNeededForLevel(currentLevel + 1);
+        boolean isBroadTool = isBroadTool(tool);
+        int experienceNeeded = getXpNeededForLevel(currentLevel + 1, isBroadTool);
 
         while (currentExperience >= experienceNeeded) {
             if (!canLevelUp(currentLevel)) {
@@ -151,7 +159,7 @@ public class ImprovementModifier extends NoLevelsModifier implements IHarvestMod
             }
             data.putInt(LEVEL_KEY, ++currentLevel);
             currentExperience -= experienceNeeded;
-            experienceNeeded = getXpNeededForLevel(currentLevel + 1);
+            experienceNeeded = getXpNeededForLevel(currentLevel + 1, isBroadTool);
 
             Messages.sendToPlayer(new LevelUpPacket(currentLevel, toolName), (ServerPlayer) player);
             tool.rebuildStats();
@@ -179,15 +187,22 @@ public class ImprovementModifier extends NoLevelsModifier implements IHarvestMod
         return RANDOM.nextFloat() < (thornsLevel * 0.15f) ? 1 + RANDOM.nextInt(Config.bonusThornsXp.get() + 1) : 0;
     }
 
-    public static int getXpNeededForLevel(int level) {
+    public static int getXpNeededForLevel(int level, boolean isBroadTool) {
         int experienceNeeded = Config.baseExperience.get();
         if (level > 1) {
-            experienceNeeded = (int) (getXpNeededForLevel(level - 1) * Config.levelMultiplier.get());
+            experienceNeeded = (int) (getXpNeededForLevel(level - 1, false) * Config.requiredXpMultiplier.get());
+        }
+        if (isBroadTool) {
+            experienceNeeded *= Config.broadToolRequiredXpMultiplier.get();
         }
         return experienceNeeded;
     }
 
     public static boolean canLevelUp(int level) {
         return Config.maxLevel.get() == 0 || Config.maxLevel.get() > level;
+    }
+
+    public static boolean isBroadTool(IToolStackView tool) {
+        return BROAD_TOOLS.contains(tool.getDefinition());
     }
 }

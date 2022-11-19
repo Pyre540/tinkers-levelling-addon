@@ -48,7 +48,8 @@
 
   "config.tinkerslevellingaddon.general.maxLevel": "Maximum tool level",
   "config.tinkerslevellingaddon.general.baseExperience": "Base experience",
-  "config.tinkerslevellingaddon.general.levelMultiplier": "Experience per level multiplier",
+  "config.tinkerslevellingaddon.general.requiredXpMultiplier": "Experience per level multiplier",
+  "config.tinkerslevellingaddon.general.broadToolRequiredXpMultiplier": "Broad tools required experience multiplier",
   "config.tinkerslevellingaddon.general.toolsModifierTypeRotation": "Tools modifiers type rotation",
   "config.tinkerslevellingaddon.general.armorModifierTypeRotation": "Armor modifiers type rotation",
 

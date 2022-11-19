@@ -52,7 +52,8 @@ public class Config {
     //COMMON
     public static ForgeConfigSpec.IntValue maxLevel;
     public static ForgeConfigSpec.IntValue baseExperience;
-    public static ForgeConfigSpec.DoubleValue levelMultiplier;
+    public static ForgeConfigSpec.DoubleValue requiredXpMultiplier;
+    public static ForgeConfigSpec.DoubleValue broadToolRequiredXpMultiplier;
     private static ForgeConfigSpec.ConfigValue<List<? extends String>> toolsModifierTypeRotation;
     private static ForgeConfigSpec.ConfigValue<List<? extends String>> armorModifierTypeRotation;
 
@@ -85,13 +86,17 @@ public class Config {
                 .translation("config.tinkerslevellingaddon.general.maxLevel")
                 .defineInRange("maxLevel", 5, 0, Integer.MAX_VALUE);
 
-        baseExperience = builder.comment("Base amount of experience needed to reach next level.")
+        baseExperience = builder.comment("Base amount of experience required to reach next level.")
                 .translation("config.tinkerslevellingaddon.general.baseExperience")
                 .defineInRange("baseExperience", 2500, 1, Integer.MAX_VALUE);
 
-        levelMultiplier = builder.comment("How much the amount of experience needed to reach next level will be multiplied per level.")
-                .translation("config.tinkerslevellingaddon.general.levelMultiplier")
-                .defineInRange("levelMultiplier", 2D, 1D, 10D);
+        requiredXpMultiplier = builder.comment("How much the amount of experience required to reach next level will be multiplied per level.")
+                .translation("config.tinkerslevellingaddon.general.requiredXpMultiplier")
+                .defineInRange("requiredXpMultiplier", 2D, 1D, 10D);
+
+        broadToolRequiredXpMultiplier = builder.comment("Additional modifier for broad tools for experience required to level up.")
+                .translation("config.tinkerslevellingaddon.general.broadToolRequiredXpMultiplier")
+                .defineInRange("broadToolRequiredXpMultiplier", 3D, 1D, 10D);
 
         toolsModifierTypeRotation = builder.comment("List of slot types (in order) that will be awarded when leveling up tools. If level is higher than list size the mod will start over.",
                         "If empty default rotation will be used (" + String.join(", ", DEFAULT_TOOLS_SLOTS_ROTATION) + ").",

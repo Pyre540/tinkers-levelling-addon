@@ -33,7 +33,8 @@ public class ClientEventHandler {
 
         ItemStack stack = event.getItemStack();
         if (ModifierUtil.getModifierLevel(stack, Registration.improvement.get().getId()) > 0) {
-            ModDataNBT data = ToolStack.from(stack).getPersistentData();
+            ToolStack tool = ToolStack.from(stack);
+            ModDataNBT data = tool.getPersistentData();
             int level = data.getInt(ImprovementModifier.LEVEL_KEY);
 
             MutableComponent levelTooltip = new TranslatableComponent(TOOLTIP_LEVEL_KEY,
@@ -44,8 +45,8 @@ public class ClientEventHandler {
             if (ImprovementModifier.canLevelUp(level)) {
                 MutableComponent xp = new TextComponent("" + data.getInt(ImprovementModifier.EXPERIENCE_KEY))
                         .withStyle(ChatFormatting.GOLD);
-                MutableComponent xpNeeded = new TextComponent("" + ImprovementModifier.getXpNeededForLevel(level + 1))
-                        .withStyle(ChatFormatting.GOLD);
+                MutableComponent xpNeeded = new TextComponent("" + ImprovementModifier.getXpNeededForLevel(level + 1,
+                        ImprovementModifier.isBroadTool(tool))).withStyle(ChatFormatting.GOLD);
                 TranslatableComponent xpTooltip = new TranslatableComponent(TOOLTIP_XP_KEY, xp, xpNeeded);
                 event.getToolTip().add(3, xpTooltip);
             }
