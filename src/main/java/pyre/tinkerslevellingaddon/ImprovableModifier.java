@@ -82,8 +82,7 @@ public class ImprovableModifier extends NoLevelsModifier implements IHarvestModi
     @Override
     public void afterHarvest(IToolStackView tool, int level, UseOnContext context, ServerLevel world,
                              BlockState state, BlockPos pos) {
-        Player player = context.getPlayer();
-        if (!Config.enableHarvestingXp.get() || player == null) {
+        if (!Config.enableHarvestingXp.get() || !(context.getPlayer() instanceof ServerPlayer player)) {
             return;
         }
         ToolStack toolStack = getHeldTool(player, context.getHand());
@@ -93,7 +92,7 @@ public class ImprovableModifier extends NoLevelsModifier implements IHarvestModi
 
     @Override
     public void afterShearEntity(IToolStackView tool, int level, Player player, Entity entity, boolean isTarget) {
-        if (!Config.enableShearingXp.get() || player == null) {
+        if (!Config.enableShearingXp.get() || !(player instanceof ServerPlayer)) {
             return;
         }
         ToolStack toolStack = getHeldTool(player, InteractionHand.MAIN_HAND);
@@ -102,19 +101,19 @@ public class ImprovableModifier extends NoLevelsModifier implements IHarvestModi
             toolStack = getHeldTool(player, InteractionHand.OFF_HAND);
             toolName = player.getOffhandItem().getDisplayName();
         }
-        addExperience(toolStack, 1 + Config.bonusShearingXp.get(), player, toolName);
+        addExperience(toolStack, 1 + Config.bonusShearingXp.get(), (ServerPlayer) player, toolName);
     }
 
     @Override
     public int afterEntityHit(IToolStackView tool, int level, ToolAttackContext context, float damageDealt) {
-        if (!Config.enableAttackingXp.get() || context.getPlayerAttacker() == null ||
+        if (!Config.enableAttackingXp.get() || !(context.getPlayerAttacker() instanceof ServerPlayer player) ||
                 (Config.enablePvp.get() && context.getLivingTarget() instanceof Player) || context.getLivingTarget() == null) {
             return 0;
         }
         int xp = (Config.damageDealt.get() ? Math.round(damageDealt) : 1) + Config.bonusAttackingXp.get();
         ToolStack toolStack = getHeldTool(context.getPlayerAttacker(), context.getSlotType());
         Component toolName = context.getPlayerAttacker().getItemBySlot(context.getSlotType()).getDisplayName();
-        addExperience(toolStack, xp, context.getPlayerAttacker(), toolName);
+        addExperience(toolStack, xp, player, toolName);
         return 0;
     }
 
@@ -142,7 +141,7 @@ public class ImprovableModifier extends NoLevelsModifier implements IHarvestModi
         return null;
     }
 
-    private void addExperience(ToolStack tool, int amount, Player player, Component toolName) {
+    private void addExperience(ToolStack tool, int amount, ServerPlayer player, Component toolName) {
         if (tool == null) {
             return;
         }
@@ -161,7 +160,7 @@ public class ImprovableModifier extends NoLevelsModifier implements IHarvestModi
             currentExperience -= experienceNeeded;
             experienceNeeded = getXpNeededForLevel(currentLevel + 1, isBroadTool);
 
-            Messages.sendToPlayer(new LevelUpPacket(currentLevel, toolName), (ServerPlayer) player);
+            Messages.sendToPlayer(new LevelUpPacket(currentLevel, toolName), player);
             tool.rebuildStats();
         }
         data.putInt(EXPERIENCE_KEY, currentExperience);
