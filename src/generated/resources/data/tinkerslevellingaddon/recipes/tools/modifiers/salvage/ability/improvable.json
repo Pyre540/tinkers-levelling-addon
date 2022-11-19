@@ -6,6 +6,6 @@
   "slots": {
     "abilities": 1
   },
-  "modifier": "tinkerslevellingaddon:improvement",
+  "modifier": "tinkerslevellingaddon:improvable",
   "min_level": 1
 }

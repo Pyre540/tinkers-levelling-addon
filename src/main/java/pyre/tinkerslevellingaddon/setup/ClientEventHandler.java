@@ -11,7 +11,7 @@ import net.minecraftforge.client.settings.KeyModifier;
 import net.minecraftforge.event.entity.player.ItemTooltipEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
-import pyre.tinkerslevellingaddon.ImprovementModifier;
+import pyre.tinkerslevellingaddon.ImprovableModifier;
 import pyre.tinkerslevellingaddon.TinkersLevellingAddon;
 import slimeknights.tconstruct.library.tools.helper.ModifierUtil;
 import slimeknights.tconstruct.library.tools.nbt.ModDataNBT;
@@ -22,8 +22,8 @@ import java.awt.*;
 @Mod.EventBusSubscriber(modid = TinkersLevellingAddon.MOD_ID, value = Dist.CLIENT, bus = Mod.EventBusSubscriber.Bus.FORGE)
 public class ClientEventHandler {
 
-    public static final String TOOLTIP_LEVEL_KEY = "modifier.tinkerslevellingaddon.improvement.tooltip.level";
-    public static final String TOOLTIP_XP_KEY = "modifier.tinkerslevellingaddon.improvement.tooltip.xp";
+    public static final String TOOLTIP_LEVEL_KEY = "modifier.tinkerslevellingaddon.improvable.tooltip.level";
+    public static final String TOOLTIP_XP_KEY = "modifier.tinkerslevellingaddon.improvable.tooltip.xp";
 
     @SubscribeEvent
     static void onTooltipEvent(ItemTooltipEvent event) {
@@ -32,21 +32,21 @@ public class ClientEventHandler {
         }
 
         ItemStack stack = event.getItemStack();
-        if (ModifierUtil.getModifierLevel(stack, Registration.improvement.get().getId()) > 0) {
+        if (ModifierUtil.getModifierLevel(stack, Registration.IMPROVABLE.get().getId()) > 0) {
             ToolStack tool = ToolStack.from(stack);
             ModDataNBT data = tool.getPersistentData();
-            int level = data.getInt(ImprovementModifier.LEVEL_KEY);
+            int level = data.getInt(ImprovableModifier.LEVEL_KEY);
 
             MutableComponent levelTooltip = new TranslatableComponent(TOOLTIP_LEVEL_KEY,
                     new TextComponent(getLevelName(level)).withStyle(s -> s.withColor(getLevelColor(level))))
                     .append(new TextComponent(" [" + level + "]").withStyle(ChatFormatting.GRAY));
             //add tooltips under tool durability
             event.getToolTip().add(2, levelTooltip);
-            if (ImprovementModifier.canLevelUp(level)) {
-                MutableComponent xp = new TextComponent("" + data.getInt(ImprovementModifier.EXPERIENCE_KEY))
+            if (ImprovableModifier.canLevelUp(level)) {
+                MutableComponent xp = new TextComponent("" + data.getInt(ImprovableModifier.EXPERIENCE_KEY))
                         .withStyle(ChatFormatting.GOLD);
-                MutableComponent xpNeeded = new TextComponent("" + ImprovementModifier.getXpNeededForLevel(level + 1,
-                        ImprovementModifier.isBroadTool(tool))).withStyle(ChatFormatting.GOLD);
+                MutableComponent xpNeeded = new TextComponent("" + ImprovableModifier.getXpNeededForLevel(level + 1,
+                        ImprovableModifier.isBroadTool(tool))).withStyle(ChatFormatting.GOLD);
                 TranslatableComponent xpTooltip = new TranslatableComponent(TOOLTIP_XP_KEY, xp, xpNeeded);
                 event.getToolTip().add(3, xpTooltip);
             }

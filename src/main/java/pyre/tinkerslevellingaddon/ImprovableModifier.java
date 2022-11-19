@@ -38,7 +38,7 @@ import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Set;
 
-public class ImprovementModifier extends NoLevelsModifier implements IHarvestModifier, IShearModifier {
+public class ImprovableModifier extends NoLevelsModifier implements IHarvestModifier, IShearModifier {
 
     public static final ResourceLocation EXPERIENCE_KEY = new ResourceLocation(TinkersLevellingAddon.MOD_ID, "experience");
     public static final ResourceLocation LEVEL_KEY = new ResourceLocation(TinkersLevellingAddon.MOD_ID, "level");

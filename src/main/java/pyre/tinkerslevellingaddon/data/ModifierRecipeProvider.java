@@ -29,16 +29,16 @@ public class ModifierRecipeProvider extends RecipeProvider implements ICondition
         String abilityFolder = "tools/modifiers/ability/";
         String abilitySalvage = "tools/modifiers/salvage/ability/";
 
-        ModifierId improvementId = new ModifierId(TinkersLevellingAddon.MOD_ID, "improvement");
-        ModifierRecipeBuilder.modifier(improvementId)
+        ModifierId improvableId = new ModifierId(TinkersLevellingAddon.MOD_ID, "improvable");
+        ModifierRecipeBuilder.modifier(improvableId)
                 .addInput(Items.EXPERIENCE_BOTTLE)
                 .addInput(Items.NETHER_STAR)
                 .addInput(Items.EXPERIENCE_BOTTLE)
                 .addInput(Items.EXPERIENCE_BOTTLE)
                 .addInput(Items.EXPERIENCE_BOTTLE)
                 .setSlots(SlotType.ABILITY, 1)
-                .saveSalvage(consumer, prefix(improvementId, abilitySalvage))
-                .save(consumer, prefix(improvementId, abilityFolder));
+                .saveSalvage(consumer, prefix(improvableId, abilitySalvage))
+                .save(consumer, prefix(improvableId, abilityFolder));
     }
 
     @Override
