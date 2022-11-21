@@ -7,10 +7,8 @@ issueTrackerURL="https://github.com/Pyre540/tinkers-levelling-addon/issues"
 modId="tinkerslevellingaddon"
 version="${file.jarVersion}"
 displayName="Tinkers' Levelling Addon"
-#updateJSONURL="https://change.me.example.invalid/updates.json" #optional
-#displayURL="https://change.me.to.your.mods.homepage.example.invalid/"
-#logoFile="examplemod.png" #optional
-#credits="Thanks for this example mod goes to Java" #optional
+displayURL="https://www.curseforge.com/minecraft/mc-mods/tinkers-levelling-addon/"
+logoFile="logo.png"
 authors="Pyre540"
 description='''
 Tinkers' Construct addon that adds tool leveling system.
