@@ -6,17 +6,27 @@ This addon adds a single new modifier for Tinkers' tools and armors - _Improvabl
 
 **Disclaimer:** Since Tinkers' Construct is based around limited amount of modifier slots, this addon completely disrupts its balance!
 
-This is an <u>**unofficial**</u> addon. Please do **not** reach out to the Tinkers' Construct developers for support, and please be sure to mention that this mod is installed if you do have an issue with Tinkers' Construct itself. You can report bugs and crashes related to Tinkers' Levelling Addon [here](https://github.com/Pyre540/tinkers-levelling-addon/issues).
+This is an <u>**unofficial**</u> addon. Please do **not** reach out to the Tinkers' Construct developers for support and be sure to mention that this mod is installed if you do have an issue with Tinkers' Construct itself. You can report bugs and crashes related to Tinkers' Levelling Addon [here](https://github.com/Pyre540/tinkers-levelling-addon/issues).
+
+## Features
+
+- Earn tool XP by performing actions with your tools (mining, harvesting, shearing, attacking)
+- Earn armor XP by taking damage or using Thorns modifier
+- Gain 1 free modifier per level up
+- Customize the order of modifier slot types gained after each level up
+- Set maximum level (or make it unlimited)
+- Adjust level requirements and experience sources
+- Customize level up sound and messages
 
 ## Getting started
 
 To get started simply apply _Improvable_ modifier to your tool/armor piece. As it's designed to be an endgame modifier, the default recipe is pricey (1x Nether Star, 4x Bottle o' Enchanting) and requires Tinker's Anvil and 1 ability slot (This recipe can be easily changed by simple datapack - [example](https://github.com/Pyre540/tinkers-levelling-addon/tree/master/examples/datapacks/override_improvable_recipe_1.18.2)).
 
-<img src="https://raw.githubusercontent.com/Pyre540/tinkers-levelling-addon/master/examples/image/default-modifier-recipe.png" alt="Example tool" width="400px"/>
+<img src="https://raw.githubusercontent.com/Pyre540/tinkers-levelling-addon/master/examples/image/default-modifier-recipe.png" alt="Default modifier recipe" width="400px"/>
 
 After that your tool is ready to earn some XP, so go and mine some stuff, cut some trees and kill some mobs!
 
-<img src="https://raw.githubusercontent.com/Pyre540/tinkers-levelling-addon/master/examples/image/example-tool.png" alt="Default modifier recipe" height="300px"/>
+<img src="https://raw.githubusercontent.com/Pyre540/tinkers-levelling-addon/master/examples/image/example-tool.png" alt="Example tool" height="300px"/>
 
 ## License
 
