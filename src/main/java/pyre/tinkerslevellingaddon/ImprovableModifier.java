@@ -107,7 +107,7 @@ public class ImprovableModifier extends NoLevelsModifier implements IHarvestModi
     @Override
     public int afterEntityHit(IToolStackView tool, int level, ToolAttackContext context, float damageDealt) {
         if (!Config.enableAttackingXp.get() || !(context.getPlayerAttacker() instanceof ServerPlayer player) ||
-                (Config.enablePvp.get() && context.getLivingTarget() instanceof Player) || context.getLivingTarget() == null) {
+                !(Config.enablePvp.get() && context.getLivingTarget() instanceof Player) || context.getLivingTarget() == null) {
             return 0;
         }
         int xp = (Config.damageDealt.get() ? Math.round(damageDealt) : 1) + Config.bonusAttackingXp.get();
@@ -180,7 +180,7 @@ public class ImprovableModifier extends NoLevelsModifier implements IHarvestModi
 
     private int getThornsBonus(IToolStackView tool) {
         int thornsLevel = tool.getModifierLevel(TinkerModifiers.thorns.getId());
-        if (Config.enableThornsXp.get() || thornsLevel == 0) {
+        if (!Config.enableThornsXp.get() || thornsLevel == 0) {
             return 0;
         }
         return RANDOM.nextFloat() < (thornsLevel * 0.15f) ? 1 + RANDOM.nextInt(Config.bonusThornsXp.get() + 1) : 0;

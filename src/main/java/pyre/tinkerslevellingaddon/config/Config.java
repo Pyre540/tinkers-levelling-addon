@@ -36,14 +36,14 @@ public class Config {
         armorSlotTypes.put(DEFENSE, SlotType.DEFENSE);
     }
 
-    public static final ForgeConfigSpec COMMON_CONFIG;
+    public static final ForgeConfigSpec SERVER_CONFIG;
     public static final ForgeConfigSpec CLIENT_CONFIG;
 
     static {
-        ForgeConfigSpec.Builder commonConfigBuilder = new ForgeConfigSpec.Builder();
-        generaConfig(commonConfigBuilder);
-        toolLevellingConfig(commonConfigBuilder);
-        COMMON_CONFIG = commonConfigBuilder.build();
+        ForgeConfigSpec.Builder serverConfigBuilder = new ForgeConfigSpec.Builder();
+        generaConfig(serverConfigBuilder);
+        toolLevellingConfig(serverConfigBuilder);
+        SERVER_CONFIG = serverConfigBuilder.build();
         ForgeConfigSpec.Builder clientConfigBuilder = new ForgeConfigSpec.Builder();
         clientConfig(clientConfigBuilder);
         CLIENT_CONFIG = clientConfigBuilder.build();
@@ -88,7 +88,7 @@ public class Config {
 
         baseExperience = builder.comment("Base amount of experience required to reach next level.")
                 .translation("config.tinkerslevellingaddon.general.baseExperience")
-                .defineInRange("baseExperience", 2500, 1, Integer.MAX_VALUE);
+                .defineInRange("baseExperience", 500, 1, Integer.MAX_VALUE);
 
         requiredXpMultiplier = builder.comment("How much the amount of experience required to reach next level will be multiplied per level.")
                 .translation("config.tinkerslevellingaddon.general.requiredXpMultiplier")
@@ -197,7 +197,7 @@ public class Config {
     }
 
     public static void init() {
-        ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, COMMON_CONFIG);
+        ModLoadingContext.get().registerConfig(ModConfig.Type.SERVER, SERVER_CONFIG);
         ModLoadingContext.get().registerConfig(ModConfig.Type.CLIENT, CLIENT_CONFIG);
     }
 
