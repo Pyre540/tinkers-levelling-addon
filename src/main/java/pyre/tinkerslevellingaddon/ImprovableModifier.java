@@ -107,7 +107,6 @@ public class ImprovableModifier extends NoLevelsModifier implements IHarvestModi
     @Override
     public int afterEntityHit(IToolStackView tool, int level, ToolAttackContext context, float damageDealt) {
         if (!Config.enableAttackingXp.get() || !(context.getPlayerAttacker() instanceof ServerPlayer player) || (!Config.enablePvp.get() && context.getLivingTarget() instanceof Player) || context.getLivingTarget() == null) {
-            System.out.println("Condition failed");
             return 0;
         }
         int xp = (Config.damageDealt.get() ? Math.round(damageDealt) : 1) + Config.bonusAttackingXp.get();
