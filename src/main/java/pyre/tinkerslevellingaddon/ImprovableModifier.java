@@ -67,7 +67,7 @@ public class ImprovableModifier extends NoLevelsModifier implements IHarvestModi
     @Override
     public void afterBlockBreak(IToolStackView tool, int level, ToolHarvestContext context) {
         ServerPlayer player = context.getPlayer();
-        if (!Config.enableMiningXp.get() || player == null) {
+        if (!Config.enableMiningXp.get() || !context.isEffective() || player == null) {
             return;
         }
         ToolStack toolStack = getHeldTool(player, InteractionHand.MAIN_HAND);
@@ -106,7 +106,8 @@ public class ImprovableModifier extends NoLevelsModifier implements IHarvestModi
 
     @Override
     public int afterEntityHit(IToolStackView tool, int level, ToolAttackContext context, float damageDealt) {
-        if (!Config.enableAttackingXp.get() || !(context.getPlayerAttacker() instanceof ServerPlayer player) || (!Config.enablePvp.get() && context.getLivingTarget() instanceof Player) || context.getLivingTarget() == null) {
+        if (!Config.enableAttackingXp.get() || !(context.getPlayerAttacker() instanceof ServerPlayer player) ||
+                (!Config.enablePvp.get() && context.getLivingTarget() instanceof Player) || context.getLivingTarget() == null) {
             return 0;
         }
         int xp = (Config.damageDealt.get() ? Math.round(damageDealt) : 1) + Config.bonusAttackingXp.get();
