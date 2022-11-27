@@ -121,7 +121,8 @@ public class ImprovableModifier extends NoLevelsModifier implements IHarvestModi
     public void onAttacked(IToolStackView tool, int level, EquipmentContext context, EquipmentSlot slotType,
                            DamageSource source, float amount, boolean isDirectDamage) {
         if (!Config.enableTakingDamageXp.get() || slotType.getType() != EquipmentSlot.Type.ARMOR || !isDirectDamage ||
-                !(context.getEntity() instanceof ServerPlayer player) || !isValidDamageSource(source, player)) {
+                !(context.getEntity() instanceof ServerPlayer player) || player.invulnerableTime > 10 ||
+                !isValidDamageSource(source, player)) {
             return;
         }
         int xp = (Config.damageTaken.get() ? Math.round(amount) : 1) + Config.bonusTakingDamageXp.get() + getThornsBonus(tool);

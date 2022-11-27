@@ -1,4 +1,7 @@
 # CHANGELOG
+## 1.0.2
+### Fixed
+- Gaining experience by taking damage triggers too often.
 ## 1.0.1
 ### Fixed
 - Breaking blocks yields experience regardless of tool type. Now only the tools that are effective on the block will receive experience.
