@@ -16,6 +16,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import pyre.tinkerslevellingaddon.config.Config;
 import pyre.tinkerslevellingaddon.network.LevelUpPacket;
 import pyre.tinkerslevellingaddon.network.Messages;
+import pyre.tinkerslevellingaddon.util.ModifierUtil;
 import slimeknights.tconstruct.common.TinkerTags;
 import slimeknights.tconstruct.library.modifiers.hooks.IHarvestModifier;
 import slimeknights.tconstruct.library.modifiers.hooks.IShearModifier;
@@ -26,10 +27,11 @@ import slimeknights.tconstruct.library.tools.context.ToolAttackContext;
 import slimeknights.tconstruct.library.tools.context.ToolHarvestContext;
 import slimeknights.tconstruct.library.tools.context.ToolRebuildContext;
 import slimeknights.tconstruct.library.tools.definition.ToolDefinition;
-import slimeknights.tconstruct.library.tools.nbt.IModDataView;
 import slimeknights.tconstruct.library.tools.nbt.IToolStackView;
 import slimeknights.tconstruct.library.tools.nbt.ModDataNBT;
 import slimeknights.tconstruct.library.tools.nbt.ToolStack;
+import slimeknights.tconstruct.library.tools.stat.FloatToolStat;
+import slimeknights.tconstruct.library.tools.stat.ModifierStatsBuilder;
 import slimeknights.tconstruct.library.utils.RestrictedCompoundTag;
 import slimeknights.tconstruct.tools.TinkerModifiers;
 import slimeknights.tconstruct.tools.ToolDefinitions;
@@ -38,10 +40,15 @@ import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Set;
 
+import static pyre.tinkerslevellingaddon.util.ModifierUtil.parseSlotsHistory;
+import static pyre.tinkerslevellingaddon.util.ModifierUtil.parseStatsHistory;
+
 public class ImprovableModifier extends NoLevelsModifier implements IHarvestModifier, IShearModifier {
 
     public static final ResourceLocation EXPERIENCE_KEY = new ResourceLocation(TinkersLevellingAddon.MOD_ID, "experience");
     public static final ResourceLocation LEVEL_KEY = new ResourceLocation(TinkersLevellingAddon.MOD_ID, "level");
+    public static final ResourceLocation MODIFIER_HISTORY_KEY = new ResourceLocation(TinkersLevellingAddon.MOD_ID, "modifier_history");
+    public static final ResourceLocation STAT_HISTORY_KEY = new ResourceLocation(TinkersLevellingAddon.MOD_ID, "stat_history");
 
     private static final Set<ToolDefinition> BROAD_TOOLS = Set.of(ToolDefinitions.SLEDGE_HAMMER,
             ToolDefinitions.VEIN_HAMMER, ToolDefinitions.EXCAVATOR, ToolDefinitions.BROAD_AXE, ToolDefinitions.SCYTHE,
@@ -51,16 +58,28 @@ public class ImprovableModifier extends NoLevelsModifier implements IHarvestModi
     public void beforeRemoved(IToolStackView tool, RestrictedCompoundTag tag) {
         tool.getPersistentData().remove(EXPERIENCE_KEY);
         tool.getPersistentData().remove(LEVEL_KEY);
+        tool.getPersistentData().remove(MODIFIER_HISTORY_KEY);
+        tool.getPersistentData().remove(STAT_HISTORY_KEY);
     }
 
     @Override
     public void addVolatileData(ToolRebuildContext context, int level, ModDataNBT volatileData) {
-        IModDataView data = context.getPersistentData();
-        List<SlotType> slotRotation = context.hasTag(TinkerTags.Items.ARMOR) ? Config.getArmorSlotsRotation() :
-                Config.getToolsSlotsRotation();
-        int lvl = data.getInt(LEVEL_KEY);
-        for (int i = 0; i < lvl; i++) {
-            volatileData.addSlots(slotRotation.get(i % slotRotation.size()), 1);
+        if (Config.enableModifierSlots.get()) {
+            List<SlotType> slots = parseSlotsHistory(context.getPersistentData().getString(MODIFIER_HISTORY_KEY));
+            for (SlotType slot : slots) {
+                volatileData.addSlots(slot, 1);
+            }
+        }
+    }
+
+    @Override
+    public void addToolStats(ToolRebuildContext context, int level, ModifierStatsBuilder builder) {
+        if (Config.enableStats.get()) {
+            List<FloatToolStat> stats = parseStatsHistory(context.getPersistentData().getString(STAT_HISTORY_KEY));
+            boolean isArmor = context.hasTag(TinkerTags.Items.ARMOR);
+            for (FloatToolStat stat : stats) {
+                stat.add(builder, isArmor ? Config.getArmorStatValue(stat) : Config.getToolStatValue(stat));
+            }
         }
     }
 
@@ -161,10 +180,50 @@ public class ImprovableModifier extends NoLevelsModifier implements IHarvestModi
             currentExperience -= experienceNeeded;
             experienceNeeded = getXpNeededForLevel(currentLevel + 1, isBroadTool);
 
+            boolean isArmor = tool.hasTag(TinkerTags.Items.ARMOR);
+            if (Config.enableModifierSlots.get()) {
+                String slotName = getSlotName(currentLevel, isArmor);
+                appendHistory(MODIFIER_HISTORY_KEY, slotName, data);
+            }
+            if (Config.enableStats.get()) {
+                String statName = getStatName(currentLevel, isArmor);
+                appendHistory(STAT_HISTORY_KEY, statName, data);
+            }
+
             Messages.sendToPlayer(new LevelUpPacket(currentLevel, toolName), player);
             tool.rebuildStats();
         }
         data.putInt(EXPERIENCE_KEY, currentExperience);
+    }
+
+    private String getSlotName(int level, boolean isArmor) {
+        if (!isArmor && !Config.toolsModifierTypeRandomOrder.get()) {
+            return ModifierUtil.getToolSlotForLevel(level);
+        } else if (!isArmor && Config.toolsModifierTypeRandomOrder.get()) {
+            return ModifierUtil.getRandomToolSlot();
+        } else if (isArmor && !Config.armorModifierTypeRandomOrder.get()) {
+            return ModifierUtil.getArmorSlotForLevel(level);
+        } else { //random armor
+            return ModifierUtil.getRandomArmorSlot();
+        }
+    }
+
+    private String getStatName(int level, boolean isArmor) {
+        if (!isArmor && !Config.toolsStatTypeRandomOrder.get()) {
+            return ModifierUtil.getToolStatForLevel(level);
+        } else if (!isArmor && Config.toolsStatTypeRandomOrder.get()) {
+            return ModifierUtil.getRandomToolStat();
+        } else if (isArmor && !Config.armorStatTypeRandomOrder.get()) {
+            return ModifierUtil.getArmorStatForLevel(level);
+        } else { //random armor
+            return ModifierUtil.getRandomArmorStat();
+        }
+    }
+
+    private void appendHistory(ResourceLocation historyKey, String value, ModDataNBT data) {
+        String modifierHistory = data.getString(historyKey);
+        modifierHistory = modifierHistory + value + ";";
+        data.putString(historyKey, modifierHistory);
     }
 
     private boolean isEqualTinkersItem(IToolStackView item1, IToolStackView item2) {

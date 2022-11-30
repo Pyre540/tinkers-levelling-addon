@@ -46,12 +46,36 @@
   "message.tinkerslevellingaddon.levelUp.540": "Może %s zainsPyruje cię do stworzenia własnego moda?",
   "message.tinkerslevellingaddon.levelUp.generic": "Twój %s osiągnął poziom %s!",
 
+  "config.tinkerslevellingaddon.general.enableModifierSlots": "Włącz modyfikatory",
+  "config.tinkerslevellingaddon.general.enableStats": "Włącz statystyki",
   "config.tinkerslevellingaddon.general.maxLevel": "Maksymalny poziom narzędzia",
   "config.tinkerslevellingaddon.general.baseExperience": "Podstawowa ilość doświadczenia",
   "config.tinkerslevellingaddon.general.requiredXpMultiplier": "Mnożnik doświadczenia na poziom",
   "config.tinkerslevellingaddon.general.broadToolRequiredXpMultiplier": "Mnożnik wymaganego doświadczenia dla szerokich narzędzi",
-  "config.tinkerslevellingaddon.general.toolsModifierTypeRotation": "Sekwencja typów modyfikatorów dla narzędzi",
-  "config.tinkerslevellingaddon.general.armorModifierTypeRotation": "Sekwencja typów modyfikatorów dla zbroi",
+
+  "config.tinkerslevellingaddon.general.modifiers.toolsModifierTypeRandomOrder": "Losowe modyfikatory dla narzędzi",
+  "config.tinkerslevellingaddon.general.modifiers.toolsModifierTypeRandomPool": "Pula losowych typów modyfikatorów dla narzędzi",
+  "config.tinkerslevellingaddon.general.modifiers.toolsModifierTypeRotation": "Sekwencja typów modyfikatorów dla narzędzi",
+  "config.tinkerslevellingaddon.general.modifiers.armorModifierTypeRandomOrder": "Losowe modyfikatory dla zbroi",
+  "config.tinkerslevellingaddon.general.modifiers.armorModifierTypeRandomPool": "Pula losowych typów modyfikatorów dla zbroi",
+  "config.tinkerslevellingaddon.general.modifiers.armorModifierTypeRotation": "Sekwencja typów modyfikatorów dla zbroi",
+
+  "config.tinkerslevellingaddon.general.stats.toolsStatTypeRandomOrder": "Losowe statystyki dla narzędzi",
+  "config.tinkerslevellingaddon.general.stats.toolsStatTypeRandomPool": "Pula losowych typów statyk dla narzędzi",
+  "config.tinkerslevellingaddon.general.stats.toolsStatTypeRotation": "Sekwencja typów statystyk dla narzędzi",
+  "config.tinkerslevellingaddon.general.stats.armorStatTypeRandomOrder": "Losowe statystyki dla zbroi",
+  "config.tinkerslevellingaddon.general.stats.armorStatTypeRandomPool": "Pula losowych typów statyk dla zbroi",
+  "config.tinkerslevellingaddon.general.stats.armorStatTypeRotation": "Sekwencja typów statystyk dla zbroi",
+
+  "config.tinkerslevellingaddon.general.stats.toolValues.durability": "Wytrzymałość",
+  "config.tinkerslevellingaddon.general.stats.toolValues.attackDamage": "Obrażenia",
+  "config.tinkerslevellingaddon.general.stats.toolValues.attackSpeed": "Szybkość ataku",
+  "config.tinkerslevellingaddon.general.stats.toolValues.miningSpeed": "Szybkość kopania",
+
+  "config.tinkerslevellingaddon.general.stats.armorValues.durability": "Wytrzymałość",
+  "config.tinkerslevellingaddon.general.stats.armorValues.armor": "Zbroja",
+  "config.tinkerslevellingaddon.general.stats.armorValues.armorToughness": "Wytrzymałość zbroi",
+  "config.tinkerslevellingaddon.general.stats.armorValues.knockbackResistance": "Odporność na odrzut",
 
   "config.tinkerslevellingaddon.levelling.damageDealt": "Zadane obrażenia",
   "config.tinkerslevellingaddon.levelling.damageTaken": "Otrzymane obrażenia",

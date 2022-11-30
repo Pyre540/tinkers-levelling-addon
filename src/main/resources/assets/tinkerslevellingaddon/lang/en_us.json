@@ -46,12 +46,36 @@
   "message.tinkerslevellingaddon.levelUp.540": "Maybe %s will insPyre you to create your own mod?",
   "message.tinkerslevellingaddon.levelUp.generic": "Your %s has reached level %s!",
 
+  "config.tinkerslevellingaddon.general.enableModifierSlots": "Enable modifier slots",
+  "config.tinkerslevellingaddon.general.enableStats": "Enable stats",
   "config.tinkerslevellingaddon.general.maxLevel": "Maximum tool level",
   "config.tinkerslevellingaddon.general.baseExperience": "Base experience",
   "config.tinkerslevellingaddon.general.requiredXpMultiplier": "Experience per level multiplier",
   "config.tinkerslevellingaddon.general.broadToolRequiredXpMultiplier": "Broad tools required experience multiplier",
-  "config.tinkerslevellingaddon.general.toolsModifierTypeRotation": "Tools modifiers type rotation",
-  "config.tinkerslevellingaddon.general.armorModifierTypeRotation": "Armor modifiers type rotation",
+
+  "config.tinkerslevellingaddon.general.modifiers.toolsModifierTypeRandomOrder": "Random tool modifiers",
+  "config.tinkerslevellingaddon.general.modifiers.toolsModifierTypeRandomPool": "Random tool modifier types pool",
+  "config.tinkerslevellingaddon.general.modifiers.toolsModifierTypeRotation": "Tool modifier types rotation",
+  "config.tinkerslevellingaddon.general.modifiers.armorModifierTypeRandomOrder": "Random armor modifiers",
+  "config.tinkerslevellingaddon.general.modifiers.armorModifierTypeRandomPool": "Random Armor modifier types pool",
+  "config.tinkerslevellingaddon.general.modifiers.armorModifierTypeRotation": "Armor modifier types rotation",
+
+  "config.tinkerslevellingaddon.general.stats.toolsStatTypeRandomOrder": "Random tool stats",
+  "config.tinkerslevellingaddon.general.stats.toolsStatTypeRandomPool": "Random tool stat types pool",
+  "config.tinkerslevellingaddon.general.stats.toolsStatTypeRotation": "Tools stat types rotation",
+  "config.tinkerslevellingaddon.general.stats.armorStatTypeRandomOrder": "Random armor stats",
+  "config.tinkerslevellingaddon.general.stats.armorStatTypeRandomPool": "Random armor stat types pool",
+  "config.tinkerslevellingaddon.general.stats.armorStatTypeRotation": "Armor stat types rotation",
+
+  "config.tinkerslevellingaddon.general.stats.toolValues.durability": "Durability",
+  "config.tinkerslevellingaddon.general.stats.toolValues.attackDamage": "Attack Damage",
+  "config.tinkerslevellingaddon.general.stats.toolValues.attackSpeed": "Attack Speed",
+  "config.tinkerslevellingaddon.general.stats.toolValues.miningSpeed": "Mining Speed",
+
+  "config.tinkerslevellingaddon.general.stats.armorValues.durability": "Durability",
+  "config.tinkerslevellingaddon.general.stats.armorValues.armor": "Armor",
+  "config.tinkerslevellingaddon.general.stats.armorValues.armorToughness": "Armor Toughness",
+  "config.tinkerslevellingaddon.general.stats.armorValues.knockbackResistance": "Knockback Resistance",
 
   "config.tinkerslevellingaddon.levelling.damageDealt": "Damage dealt",
   "config.tinkerslevellingaddon.levelling.damageTaken": "Damage taken",

@@ -7,41 +7,31 @@ import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.registries.RegistryObject;
 import pyre.tinkerslevellingaddon.setup.Registration;
-import slimeknights.tconstruct.library.tools.SlotType;
+import slimeknights.tconstruct.library.tools.stat.FloatToolStat;
+import slimeknights.tconstruct.library.tools.stat.ToolStats;
 
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
+
+import static pyre.tinkerslevellingaddon.util.ModifierUtil.*;
 
 public class Config {
 
-    private static Map<String, SlotType> toolSlotTypes;
-    private static Map<String, SlotType> armorSlotTypes;
-
-    private static final String UPGRADE = "upgrade";
-    private static final String ABILITY = "ability";
-    private static final String SOUL = "soul";
-    private static final String DEFENSE = "defense";
-
     private static final List<String> DEFAULT_TOOLS_SLOTS_ROTATION = List.of(UPGRADE, UPGRADE, UPGRADE, ABILITY, UPGRADE);
+    private static final List<String> DEFAULT_TOOLS_SLOTS_RANDOM_POOL = List.of(UPGRADE, UPGRADE, UPGRADE, UPGRADE, ABILITY);
     private static final List<String> DEFAULT_ARMOR_SLOTS_ROTATION = List.of(UPGRADE, DEFENSE, UPGRADE, ABILITY, DEFENSE);
+    private static final List<String> DEFAULT_ARMOR_SLOTS_RANDOM_POOL = List.of(UPGRADE, UPGRADE, DEFENSE, DEFENSE, ABILITY);
 
-    static {
-        toolSlotTypes = new LinkedHashMap<>();
-        toolSlotTypes.put(UPGRADE, SlotType.UPGRADE);
-        toolSlotTypes.put(ABILITY, SlotType.ABILITY);
-        toolSlotTypes.put(SOUL, SlotType.SOUL);
-
-        armorSlotTypes = new LinkedHashMap<>(toolSlotTypes);
-        armorSlotTypes.put(DEFENSE, SlotType.DEFENSE);
-    }
+    private static final List<String> DEFAULT_TOOLS_STATS_ROTATION = List.of(DURABILITY, ATTACK_DAMAGE, ATTACK_SPEED, MINING_SPEED);
+    private static final List<String> DEFAULT_TOOLS_STATS_RANDOM_POOL = List.of(DURABILITY, ATTACK_DAMAGE, ATTACK_SPEED, MINING_SPEED);
+    private static final List<String> DEFAULT_ARMOR_STATS_ROTATION = List.of(DURABILITY, ARMOR, ARMOR_TOUGHNESS, KNOCKBACK_RESISTANCE);
+    private static final List<String> DEFAULT_ARMOR_STATS_RANDOM_POOL = List.of(DURABILITY, ARMOR, ARMOR_TOUGHNESS, KNOCKBACK_RESISTANCE);
 
     public static final ForgeConfigSpec SERVER_CONFIG;
     public static final ForgeConfigSpec CLIENT_CONFIG;
 
     static {
         ForgeConfigSpec.Builder serverConfigBuilder = new ForgeConfigSpec.Builder();
-        generaConfig(serverConfigBuilder);
+        generalConfig(serverConfigBuilder);
         toolLevellingConfig(serverConfigBuilder);
         SERVER_CONFIG = serverConfigBuilder.build();
         ForgeConfigSpec.Builder clientConfigBuilder = new ForgeConfigSpec.Builder();
@@ -49,18 +39,49 @@ public class Config {
         CLIENT_CONFIG = clientConfigBuilder.build();
     }
 
-    //COMMON
+    //SERVER
+    //General
+    public static ForgeConfigSpec.BooleanValue enableModifierSlots;
+    public static ForgeConfigSpec.BooleanValue enableStats;
     public static ForgeConfigSpec.IntValue maxLevel;
     public static ForgeConfigSpec.IntValue baseExperience;
     public static ForgeConfigSpec.DoubleValue requiredXpMultiplier;
     public static ForgeConfigSpec.DoubleValue broadToolRequiredXpMultiplier;
+
+    //general.modifiers
+    public static ForgeConfigSpec.BooleanValue toolsModifierTypeRandomOrder;
+    private static ForgeConfigSpec.ConfigValue<List<? extends String>> toolsModifierTypeRandomPool;
     private static ForgeConfigSpec.ConfigValue<List<? extends String>> toolsModifierTypeRotation;
+    public static ForgeConfigSpec.BooleanValue armorModifierTypeRandomOrder;
+    private static ForgeConfigSpec.ConfigValue<List<? extends String>> armorModifierTypeRandomPool;
     private static ForgeConfigSpec.ConfigValue<List<? extends String>> armorModifierTypeRotation;
 
+    //general.stats
+    public static ForgeConfigSpec.BooleanValue toolsStatTypeRandomOrder;
+    private static ForgeConfigSpec.ConfigValue<List<? extends String>> toolsStatTypeRandomPool;
+    private static ForgeConfigSpec.ConfigValue<List<? extends String>> toolsStatTypeRotation;
+    public static ForgeConfigSpec.BooleanValue armorStatTypeRandomOrder;
+    private static ForgeConfigSpec.ConfigValue<List<? extends String>> armorStatTypeRandomPool;
+    private static ForgeConfigSpec.ConfigValue<List<? extends String>> armorStatTypeRotation;
+
+    //general.stats.toolValues
+    public static ForgeConfigSpec.IntValue toolDurabilityValue;
+    public static ForgeConfigSpec.DoubleValue toolAttackDamageValue;
+    public static ForgeConfigSpec.DoubleValue toolAttackSpeedValue;
+    public static ForgeConfigSpec.DoubleValue toolMiningSpeedValue;
+
+    //general.stats.armorValues
+    public static ForgeConfigSpec.IntValue armorDurabilityValue;
+    public static ForgeConfigSpec.DoubleValue armorArmorValue;
+    public static ForgeConfigSpec.DoubleValue armorArmorToughnessValue;
+    public static ForgeConfigSpec.DoubleValue armorKnockbackResistanceValue;
+
+    //toolLevelling
     public static ForgeConfigSpec.BooleanValue damageDealt;
     public static ForgeConfigSpec.BooleanValue damageTaken;
     public static ForgeConfigSpec.BooleanValue enablePvp;
 
+    //toolLevelling.actions
     public static ForgeConfigSpec.BooleanValue enableMiningXp;
     public static ForgeConfigSpec.BooleanValue enableHarvestingXp;
     public static ForgeConfigSpec.BooleanValue enableShearingXp;
@@ -68,6 +89,7 @@ public class Config {
     public static ForgeConfigSpec.BooleanValue enableTakingDamageXp;
     public static ForgeConfigSpec.BooleanValue enableThornsXp;
 
+    //toolLevelling.bonuses
     public static ForgeConfigSpec.IntValue bonusMiningXp;
     public static ForgeConfigSpec.IntValue bonusHarvestingXp;
     public static ForgeConfigSpec.IntValue bonusShearingXp;
@@ -79,8 +101,20 @@ public class Config {
     public static ForgeConfigSpec.BooleanValue enableLevelUpMessage;
     public static ForgeConfigSpec.EnumValue<LevelUpSound> levelUpSound;
 
-    private static void generaConfig(ForgeConfigSpec.Builder builder) {
+    private static void generalConfig(ForgeConfigSpec.Builder builder) {
         builder.comment("General addon settings").push("general");
+
+        enableModifierSlots = builder.comment("If true, modifier slots will be rewarded on level ups.")
+                .translation("config.tinkerslevellingaddon.general.enableModifierSlots")
+                .define("enableModifierSlots", true);
+
+        modifiersConfig(builder);
+
+        enableStats = builder.comment("If true, raw stats will be rewarded on level ups.")
+                .translation("config.tinkerslevellingaddon.general.enableStats")
+                .define("enableStats", false);
+
+        statsConfig(builder);
 
         maxLevel = builder.comment("Maximum tool level tha could be achieved. If set to 0 there is no upper limit.")
                 .translation("config.tinkerslevellingaddon.general.maxLevel")
@@ -98,17 +132,121 @@ public class Config {
                 .translation("config.tinkerslevellingaddon.general.broadToolRequiredXpMultiplier")
                 .defineInRange("broadToolRequiredXpMultiplier", 3D, 1D, 10D);
 
+        builder.pop();
+    }
+
+    private static void modifiersConfig(ForgeConfigSpec.Builder builder) {
+        builder.comment("Modifiers settings").push("modifiers");
+
+        toolsModifierTypeRandomOrder = builder.comment("If true, instead of defined rotation order, tool modifiers will be awarded randomly on level ups.")
+                .translation("config.tinkerslevellingaddon.general.modifiers.toolsModifierTypeRandomOrder")
+                .define("toolsModifierTypeRandomOrder", false);
+
+        toolsModifierTypeRandomPool = builder.comment("Set of modifier slot types from which random modifier will be awarded when leveling up tools.",
+                        "If empty default pool will be used (" + String.join(", ", DEFAULT_TOOLS_SLOTS_RANDOM_POOL) + "). 80% chance for upgrade and 20% chance for ability.",
+                        "Possible values: " + String.join(", ", getToolSlotTypes()))
+                .translation("config.tinkerslevellingaddon.general.modifiers.toolsModifierTypeRandomPool")
+                .defineList("toolsModifierTypeRandomPool", DEFAULT_TOOLS_SLOTS_RANDOM_POOL, t -> getToolSlotTypes().contains(t));
+
         toolsModifierTypeRotation = builder.comment("List of slot types (in order) that will be awarded when leveling up tools. If level is higher than list size the mod will start over.",
                         "If empty default rotation will be used (" + String.join(", ", DEFAULT_TOOLS_SLOTS_ROTATION) + ").",
-                        "Possible values: " + String.join(", ", toolSlotTypes.keySet()))
-                .translation("config.tinkerslevellingaddon.general.toolsModifierTypeRotation")
-                .defineList("toolsModifierTypeRotation", DEFAULT_TOOLS_SLOTS_ROTATION, t -> toolSlotTypes.containsKey(t));
+                        "Possible values: " + String.join(", ", getToolSlotTypes()))
+                .translation("config.tinkerslevellingaddon.general.modifiers.toolsModifierTypeRotation")
+                .defineList("toolsModifierTypeRotation", DEFAULT_TOOLS_SLOTS_ROTATION, t -> getToolSlotTypes().contains(t));
+
+        armorModifierTypeRandomOrder = builder.comment("If true, instead of defined rotation order, armor modifiers will be awarded randomly on level ups.")
+                .translation("config.tinkerslevellingaddon.general.modifiers.armorModifierTypeRandomOrder")
+                .define("armorModifierTypeRandomOrder", false);
+
+        armorModifierTypeRandomPool = builder.comment("Set of stat types from which random modifier will be awarded when leveling up armor.",
+                        "If empty default pool will be used (" + String.join(", ", DEFAULT_ARMOR_SLOTS_ROTATION) + ").",
+                        "Possible values: " + String.join(", ", getArmorSlotTypes()))
+                .translation("config.tinkerslevellingaddon.general.modifiers.armorModifierTypeRandomPool")
+                .defineList("armorModifierTypeRandomPool", DEFAULT_ARMOR_SLOTS_ROTATION, t -> getArmorSlotTypes().contains(t));
 
         armorModifierTypeRotation = builder.comment("List of slot types (in order) that will be awarded when leveling up armor. If level is higher than list size the mod will start over.",
                         "If empty default rotation will be used (" + String.join(", ", DEFAULT_ARMOR_SLOTS_ROTATION) + ").",
-                        "Possible values: " + String.join(", ", armorSlotTypes.keySet()))
-                .translation("config.tinkerslevellingaddon.general.armorModifierTypeRotation")
-                .defineList("armorModifierTypeRotation", DEFAULT_ARMOR_SLOTS_ROTATION, t -> armorSlotTypes.containsKey(t));
+                        "Possible values: " + String.join(", ", getArmorSlotTypes()))
+                .translation("config.tinkerslevellingaddon.general.modifiers.armorModifierTypeRotation")
+                .defineList("armorModifierTypeRotation", DEFAULT_ARMOR_SLOTS_ROTATION, t -> getArmorSlotTypes().contains(t));
+
+        builder.pop();
+    }
+
+    private static void statsConfig(ForgeConfigSpec.Builder builder) {
+        builder.comment("Stats settings").push("stats");
+
+        toolsStatTypeRandomOrder = builder.comment("If true, instead of defined rotation order, tool stats will be awarded randomly on level ups.")
+                .translation("config.tinkerslevellingaddon.general.stats.toolsStatTypeRandomOrder")
+                .define("toolsStatTypeRandomOrder", false);
+
+        toolsStatTypeRandomPool = builder.comment("Set of stat types from which random stat will be awarded when leveling up tools.",
+                        "If empty default pool will be used (" + String.join(", ", DEFAULT_TOOLS_STATS_RANDOM_POOL) + "). 25% chance for every stat.",
+                        "Possible values: " + String.join(", ", getToolStatTypes()))
+                .translation("config.tinkerslevellingaddon.general.stats.toolsStatTypeRandomPool")
+                .defineList("toolsStatTypeRandomPool", DEFAULT_TOOLS_STATS_RANDOM_POOL, t -> getToolStatTypes().contains(t));
+
+        toolsStatTypeRotation = builder.comment("List of slot types (in order) that will be awarded when leveling up tools. If level is higher than list size the mod will start over.",
+                        "If empty default rotation will be used (" + String.join(", ", DEFAULT_TOOLS_STATS_ROTATION) + ").",
+                        "Possible values: " + String.join(", ", getToolStatTypes()))
+                .translation("config.tinkerslevellingaddon.general.stats.toolsStatTypeRotation")
+                .defineList("toolsStatTypeRotation", DEFAULT_TOOLS_STATS_ROTATION, t -> getToolStatTypes().contains(t));
+
+        toolStatsValuesConfig(builder);
+
+        armorStatTypeRandomOrder = builder.comment("If true, instead of defined rotation order, armor modifiers will be awarded randomly on level ups.")
+                .translation("config.tinkerslevellingaddon.general.stats.armorStatTypeRandomOrder")
+                .define("armorStatTypeRandomOrder", false);
+
+        armorStatTypeRandomPool = builder.comment("Set of stat types from which random modifier will be awarded when leveling up armor.",
+                        "If empty default pool will be used (" + String.join(", ", DEFAULT_ARMOR_STATS_RANDOM_POOL) + ").",
+                        "Possible values: " + String.join(", ", getArmorStatTypes()))
+                .translation("config.tinkerslevellingaddon.general.stats.armorStatTypeRandomPool")
+                .defineList("armorStatTypeRandomPool", DEFAULT_ARMOR_STATS_RANDOM_POOL, t -> getArmorStatTypes().contains(t));
+
+        armorStatTypeRotation = builder.comment("List of stat types (in order) that will be awarded when leveling up armor. If level is higher than list size the mod will start over.",
+                        "If empty default rotation will be used (" + String.join(", ", DEFAULT_ARMOR_STATS_ROTATION) + ").",
+                        "Possible values: " + String.join(", ", getArmorStatTypes()))
+                .translation("config.tinkerslevellingaddon.general.stats.armorStatTypeRotation")
+                .defineList("armorStatTypeRotation", DEFAULT_ARMOR_STATS_ROTATION, t -> getArmorStatTypes().contains(t));
+
+        armorStatsValuesConfig(builder);
+
+        builder.pop();
+    }
+
+    private static void toolStatsValuesConfig(ForgeConfigSpec.Builder builder) {
+        builder.comment("Tool stat values rewarded on level ups").push("toolValues");
+
+        toolDurabilityValue = builder.translation("config.tinkerslevellingaddon.general.stats.toolValues.durability")
+                .defineInRange(DURABILITY, 50, 1, 1000);
+
+        toolAttackDamageValue = builder.translation("config.tinkerslevellingaddon.general.stats.toolValues.attackDamage")
+                .defineInRange(ATTACK_DAMAGE, 0.5D, 0.1D, 10D);
+
+        toolAttackSpeedValue = builder.translation("config.tinkerslevellingaddon.general.stats.toolValues.attackSpeed")
+                .defineInRange(ATTACK_SPEED, 0.25D, 0.1D, 10D);
+
+        toolMiningSpeedValue = builder.translation("config.tinkerslevellingaddon.general.stats.toolValues.miningSpeed")
+                .defineInRange(MINING_SPEED, 1D, 0.1D, 10D);
+
+        builder.pop();
+    }
+
+    private static void armorStatsValuesConfig(ForgeConfigSpec.Builder builder) {
+        builder.comment("Armor stat values rewarded on level ups").push("armorValues");
+
+        armorDurabilityValue = builder.translation("config.tinkerslevellingaddon.general.stats.armorValues.durability")
+                .defineInRange(DURABILITY, 50, 1, 1000);
+
+        armorArmorValue = builder.translation("config.tinkerslevellingaddon.general.stats.armorValues.armor")
+                .defineInRange(ARMOR, 0.25D, 0.1D, 10D);
+
+        armorArmorToughnessValue = builder.translation("config.tinkerslevellingaddon.general.stats.armorValues.armorToughness")
+                .defineInRange(ARMOR_TOUGHNESS, 0.1D, 0.1D, 10D);
+
+        armorKnockbackResistanceValue = builder.translation("config.tinkerslevellingaddon.general.stats.armorValues.knockbackResistance")
+                .defineInRange(KNOCKBACK_RESISTANCE, 0.1D, 0.1D, 1D);
 
         builder.pop();
     }
@@ -201,26 +339,100 @@ public class Config {
         ModLoadingContext.get().registerConfig(ModConfig.Type.CLIENT, CLIENT_CONFIG);
     }
 
-    public static List<SlotType> getToolsSlotsRotation() {
+    public static List<String> getToolsSlotsRotation() {
         List<? extends String> toolsRotation = toolsModifierTypeRotation.get();
         if (toolsRotation.isEmpty()) {
             toolsRotation = DEFAULT_TOOLS_SLOTS_ROTATION;
         }
-
-        return toolsRotation.stream()
-                .map(s -> toolSlotTypes.get(s))
-                .toList();
+        return (List<String>) toolsRotation;
     }
 
-    public static List<SlotType> getArmorSlotsRotation() {
-        List<? extends String> toolsRotation = armorModifierTypeRotation.get();
-        if (toolsRotation.isEmpty()) {
-            toolsRotation = DEFAULT_ARMOR_SLOTS_ROTATION;
+    public static List<String> getToolsSlotsRandomPool() {
+        List<? extends String> toolsRandomPool = toolsModifierTypeRandomPool.get();
+        if (toolsRandomPool.isEmpty()) {
+            toolsRandomPool = DEFAULT_TOOLS_SLOTS_RANDOM_POOL;
         }
+        return (List<String>) toolsRandomPool;
+    }
 
-        return toolsRotation.stream()
-                .map(s -> armorSlotTypes.get(s))
-                .toList();
+    public static List<String> getToolsStatsRotation() {
+        List<? extends String> toolsRotation = toolsStatTypeRotation.get();
+        if (toolsRotation.isEmpty()) {
+            toolsRotation = DEFAULT_TOOLS_STATS_ROTATION;
+        }
+        return (List<String>) toolsRotation;
+    }
+
+    public static List<String> getToolsStatsRandomPool() {
+        List<? extends String> toolsRandomPool = toolsStatTypeRandomPool.get();
+        if (toolsRandomPool.isEmpty()) {
+            toolsRandomPool = DEFAULT_TOOLS_STATS_RANDOM_POOL;
+        }
+        return (List<String>) toolsRandomPool;
+    }
+
+    public static List<String> getArmorSlotsRotation() {
+        List<? extends String> armorRotation = armorModifierTypeRotation.get();
+        if (armorRotation.isEmpty()) {
+            armorRotation = DEFAULT_ARMOR_SLOTS_ROTATION;
+        }
+        return (List<String>) armorRotation;
+    }
+
+    public static List<String> getArmorSlotsRandomPool() {
+        List<? extends String> armorRandomPool = armorModifierTypeRandomPool.get();
+        if (armorRandomPool.isEmpty()) {
+            armorRandomPool = DEFAULT_ARMOR_SLOTS_RANDOM_POOL;
+        }
+        return (List<String>) armorRandomPool;
+    }
+
+    public static List<String> getArmorStatsRotation() {
+        List<? extends String> armorRotation = armorStatTypeRotation.get();
+        if (armorRotation.isEmpty()) {
+            armorRotation = DEFAULT_ARMOR_STATS_ROTATION;
+        }
+        return (List<String>) armorRotation;
+    }
+
+    public static List<String> getArmorStatsRandomPool() {
+        List<? extends String> armorRandomPool = armorStatTypeRandomPool.get();
+        if (armorRandomPool.isEmpty()) {
+            armorRandomPool = DEFAULT_ARMOR_STATS_RANDOM_POOL;
+        }
+        return (List<String>) armorRandomPool;
+    }
+
+    public static double getToolStatValue(FloatToolStat stat) {
+        if (stat.equals(ToolStats.DURABILITY)) {
+            return toolDurabilityValue.get();
+        }
+        if (stat.equals(ToolStats.ATTACK_DAMAGE)) {
+            return toolAttackDamageValue.get();
+        }
+        if (stat.equals(ToolStats.ATTACK_SPEED)) {
+            return toolAttackSpeedValue.get();
+        }
+        if (stat.equals(ToolStats.MINING_SPEED)) {
+            return toolMiningSpeedValue.get();
+        }
+        return 0;
+    }
+
+    public static double getArmorStatValue(FloatToolStat stat) {
+        if (stat.equals(ToolStats.DURABILITY)) {
+            return armorDurabilityValue.get();
+        }
+        if (stat.equals(ToolStats.ARMOR)) {
+            return armorArmorValue.get();
+        }
+        if (stat.equals(ToolStats.ARMOR_TOUGHNESS)) {
+            return armorArmorToughnessValue.get();
+        }
+        if (stat.equals(ToolStats.KNOCKBACK_RESISTANCE)) {
+            return armorKnockbackResistanceValue.get();
+        }
+        return 0;
     }
 
     public enum LevelUpSound {
