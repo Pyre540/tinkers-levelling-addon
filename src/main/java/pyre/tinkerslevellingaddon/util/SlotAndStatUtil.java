@@ -1,5 +1,6 @@
 package pyre.tinkerslevellingaddon.util;
 
+import net.minecraft.network.chat.TextColor;
 import pyre.tinkerslevellingaddon.config.Config;
 import slimeknights.tconstruct.library.tools.SlotType;
 import slimeknights.tconstruct.library.tools.stat.FloatToolStat;
@@ -7,7 +8,7 @@ import slimeknights.tconstruct.library.tools.stat.ToolStats;
 
 import java.util.*;
 
-public class ModifierUtil {
+public class SlotAndStatUtil {
     //modifier types
     public static final String UPGRADE = "upgrade";
     public static final String ABILITY = "ability";
@@ -147,7 +148,19 @@ public class ModifierUtil {
         return result;
     }
 
-    private ModifierUtil() {
+    public static FloatToolStat getStatForName(String statName) {
+        return ALL_STAT_TYPES.get(statName);
+    }
+
+    public static TextColor getModifierColor(String modifierName) {
+        return ALL_SLOT_TYPES.get(modifierName).getColor();
+    }
+
+    public static TextColor getStatColor(String statName) {
+        return ALL_STAT_TYPES.get(statName).getColor();
+    }
+
+    private SlotAndStatUtil() {
         //hide constructor
     }
 }

@@ -12,7 +12,7 @@ import slimeknights.tconstruct.library.tools.stat.ToolStats;
 
 import java.util.List;
 
-import static pyre.tinkerslevellingaddon.util.ModifierUtil.*;
+import static pyre.tinkerslevellingaddon.util.SlotAndStatUtil.*;
 
 public class Config {
 

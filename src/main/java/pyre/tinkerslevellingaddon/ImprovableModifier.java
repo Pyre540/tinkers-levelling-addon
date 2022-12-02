@@ -16,7 +16,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import pyre.tinkerslevellingaddon.config.Config;
 import pyre.tinkerslevellingaddon.network.LevelUpPacket;
 import pyre.tinkerslevellingaddon.network.Messages;
-import pyre.tinkerslevellingaddon.util.ModifierUtil;
+import pyre.tinkerslevellingaddon.util.SlotAndStatUtil;
 import slimeknights.tconstruct.common.TinkerTags;
 import slimeknights.tconstruct.library.modifiers.hooks.IHarvestModifier;
 import slimeknights.tconstruct.library.modifiers.hooks.IShearModifier;
@@ -40,8 +40,8 @@ import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Set;
 
-import static pyre.tinkerslevellingaddon.util.ModifierUtil.parseSlotsHistory;
-import static pyre.tinkerslevellingaddon.util.ModifierUtil.parseStatsHistory;
+import static pyre.tinkerslevellingaddon.util.SlotAndStatUtil.parseSlotsHistory;
+import static pyre.tinkerslevellingaddon.util.SlotAndStatUtil.parseStatsHistory;
 
 public class ImprovableModifier extends NoLevelsModifier implements IHarvestModifier, IShearModifier {
 
@@ -198,25 +198,25 @@ public class ImprovableModifier extends NoLevelsModifier implements IHarvestModi
 
     private String getSlotName(int level, boolean isArmor) {
         if (!isArmor && !Config.toolsModifierTypeRandomOrder.get()) {
-            return ModifierUtil.getToolSlotForLevel(level);
+            return SlotAndStatUtil.getToolSlotForLevel(level);
         } else if (!isArmor && Config.toolsModifierTypeRandomOrder.get()) {
-            return ModifierUtil.getRandomToolSlot();
+            return SlotAndStatUtil.getRandomToolSlot();
         } else if (isArmor && !Config.armorModifierTypeRandomOrder.get()) {
-            return ModifierUtil.getArmorSlotForLevel(level);
+            return SlotAndStatUtil.getArmorSlotForLevel(level);
         } else { //random armor
-            return ModifierUtil.getRandomArmorSlot();
+            return SlotAndStatUtil.getRandomArmorSlot();
         }
     }
 
     private String getStatName(int level, boolean isArmor) {
         if (!isArmor && !Config.toolsStatTypeRandomOrder.get()) {
-            return ModifierUtil.getToolStatForLevel(level);
+            return SlotAndStatUtil.getToolStatForLevel(level);
         } else if (!isArmor && Config.toolsStatTypeRandomOrder.get()) {
-            return ModifierUtil.getRandomToolStat();
+            return SlotAndStatUtil.getRandomToolStat();
         } else if (isArmor && !Config.armorStatTypeRandomOrder.get()) {
-            return ModifierUtil.getArmorStatForLevel(level);
+            return SlotAndStatUtil.getArmorStatForLevel(level);
         } else { //random armor
-            return ModifierUtil.getRandomArmorStat();
+            return SlotAndStatUtil.getRandomArmorStat();
         }
     }
 
