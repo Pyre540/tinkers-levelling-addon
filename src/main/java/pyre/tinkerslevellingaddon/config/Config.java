@@ -116,7 +116,7 @@ public class Config {
 
         statsConfig(builder);
 
-        maxLevel = builder.comment("Maximum tool level tha could be achieved. If set to 0 there is no upper limit.")
+        maxLevel = builder.comment("Maximum tool level that could be achieved. If set to 0 there is no upper limit.")
                 .translation("config.tinkerslevellingaddon.general.maxLevel")
                 .defineInRange("maxLevel", 5, 0, Integer.MAX_VALUE);
 
