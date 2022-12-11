@@ -1,24 +1,23 @@
 package pyre.tinkerslevellingaddon.setup;
 
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.sounds.SoundEvent;
+import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.SoundEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
+import net.minecraftforge.fml.RegistryObject;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
-import net.minecraftforge.registries.RegistryObject;
 import pyre.tinkerslevellingaddon.ImprovableModifier;
 import pyre.tinkerslevellingaddon.TinkersLevellingAddon;
-import slimeknights.tconstruct.library.modifiers.util.ModifierDeferredRegister;
-import slimeknights.tconstruct.library.modifiers.util.StaticModifier;
+import slimeknights.tconstruct.library.modifiers.Modifier;
 
 public class Registration {
 
-    private static final ModifierDeferredRegister MODIFIERS = ModifierDeferredRegister.create(TinkersLevellingAddon.MOD_ID);
+    private static final DeferredRegister<Modifier> MODIFIERS = DeferredRegister.create(Modifier.class, TinkersLevellingAddon.MOD_ID);
     private static final DeferredRegister<SoundEvent> SOUND_EVENTS =
             DeferredRegister.create(ForgeRegistries.SOUND_EVENTS, TinkersLevellingAddon.MOD_ID);
 
-    public static final StaticModifier<ImprovableModifier> IMPROVABLE = MODIFIERS.register("improvable", ImprovableModifier::new);
+    public static final RegistryObject<ImprovableModifier> IMPROVABLE = MODIFIERS.register("improvable", ImprovableModifier::new);
 
     public static final RegistryObject<SoundEvent> SOUND_TOOL_LEVEL_UP_CHIME = registerSoundEvent("tool_level_up_chime");
     public static final RegistryObject<SoundEvent> SOUND_TOOL_LEVEL_UP_SNARE_DRUM = registerSoundEvent("tool_level_up_snare_drum");

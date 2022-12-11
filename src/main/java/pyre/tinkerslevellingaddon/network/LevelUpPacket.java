@@ -1,29 +1,29 @@
 package pyre.tinkerslevellingaddon.network;
 
-import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.chat.Component;
+import net.minecraft.network.PacketBuffer;
+import net.minecraft.util.text.ITextComponent;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.fml.DistExecutor;
-import net.minecraftforge.network.NetworkEvent;
+import net.minecraftforge.fml.network.NetworkEvent;
 
 import java.util.function.Supplier;
 
 public class LevelUpPacket {
 
     private final int level;
-    private final Component toolName;
+    private final ITextComponent toolName;
 
-    public LevelUpPacket(int level, Component toolName) {
+    public LevelUpPacket(int level, ITextComponent toolName) {
         this.level = level;
         this.toolName = toolName;
     }
 
-    public LevelUpPacket(FriendlyByteBuf buf) {
+    public LevelUpPacket(PacketBuffer buf) {
         level = buf.readInt();
         toolName = buf.readComponent();
     }
 
-    public void toBytes(FriendlyByteBuf buf) {
+    public void toBytes(PacketBuffer buf) {
         buf.writeInt(level);
         buf.writeComponent(toolName);
     }

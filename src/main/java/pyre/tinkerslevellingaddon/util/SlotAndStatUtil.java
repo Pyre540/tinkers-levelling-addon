@@ -1,6 +1,6 @@
 package pyre.tinkerslevellingaddon.util;
 
-import net.minecraft.network.chat.TextColor;
+import net.minecraft.util.text.Color;
 import pyre.tinkerslevellingaddon.config.Config;
 import slimeknights.tconstruct.library.tools.SlotType;
 import slimeknights.tconstruct.library.tools.stat.FloatToolStat;
@@ -120,7 +120,7 @@ public class SlotAndStatUtil {
 
     public static List<SlotType> parseSlotsHistory(String historyString) {
         ArrayList<SlotType> result = new ArrayList<>();
-        if (!historyString.isBlank()) {
+        if (!historyString.isEmpty()) {
             for (String statString : historyString.split(";")) {
                 SlotType stat = ALL_SLOT_TYPES.get(statString);
                 if (stat != null) {
@@ -135,7 +135,7 @@ public class SlotAndStatUtil {
 
     public static List<FloatToolStat> parseStatsHistory(String historyString) {
         ArrayList<FloatToolStat> result = new ArrayList<>();
-        if (!historyString.isBlank()) {
+        if (!historyString.isEmpty()) {
             for (String statString : historyString.split(";")) {
                 FloatToolStat stat = ALL_STAT_TYPES.get(statString);
                 if (stat != null) {
@@ -152,11 +152,11 @@ public class SlotAndStatUtil {
         return ALL_STAT_TYPES.get(statName);
     }
 
-    public static TextColor getModifierColor(String modifierName) {
+    public static Color getModifierColor(String modifierName) {
         return ALL_SLOT_TYPES.get(modifierName).getColor();
     }
 
-    public static TextColor getStatColor(String statName) {
+    public static Color getStatColor(String statName) {
         return ALL_STAT_TYPES.get(statName).getColor();
     }
 

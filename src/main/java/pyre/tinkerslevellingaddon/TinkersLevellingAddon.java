@@ -1,11 +1,11 @@
 package pyre.tinkerslevellingaddon;
 
-import com.mojang.logging.LogUtils;
 import net.minecraft.data.DataGenerator;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.forge.event.lifecycle.GatherDataEvent;
-import org.slf4j.Logger;
+import net.minecraftforge.fml.event.lifecycle.GatherDataEvent;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import pyre.tinkerslevellingaddon.config.Config;
 import pyre.tinkerslevellingaddon.data.ModifierRecipeProvider;
 import pyre.tinkerslevellingaddon.network.Messages;
@@ -15,7 +15,7 @@ import pyre.tinkerslevellingaddon.setup.Registration;
 @Mod.EventBusSubscriber(bus = Mod.EventBusSubscriber.Bus.MOD)
 public class TinkersLevellingAddon {
 
-    public static final Logger LOGGER = LogUtils.getLogger();
+    public static final Logger LOGGER = LogManager.getLogger();
 
     public static final String MOD_ID = "tinkerslevellingaddon";
 

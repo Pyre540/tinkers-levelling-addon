@@ -1,11 +1,8 @@
 package pyre.tinkerslevellingaddon.setup;
 
-import net.minecraft.ChatFormatting;
-import net.minecraft.client.resources.language.I18n;
-import net.minecraft.network.chat.*;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.world.item.ItemStack;
+import net.minecraft.client.resources.I18n;
+import net.minecraft.item.ItemStack;
+import net.minecraft.util.text.*;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.settings.KeyModifier;
 import net.minecraftforge.event.entity.player.ItemTooltipEvent;
@@ -20,7 +17,6 @@ import slimeknights.tconstruct.library.tools.helper.TooltipUtil;
 import slimeknights.tconstruct.library.tools.nbt.ModDataNBT;
 import slimeknights.tconstruct.library.tools.nbt.ToolStack;
 
-import java.awt.*;
 import java.util.*;
 import java.util.List;
 import java.util.function.Function;
@@ -31,7 +27,7 @@ import static slimeknights.tconstruct.common.TinkerTags.Items.ARMOR;
 @Mod.EventBusSubscriber(modid = TinkersLevellingAddon.MOD_ID, value = Dist.CLIENT, bus = Mod.EventBusSubscriber.Bus.FORGE)
 public class ClientEventHandler {
 
-    private static final TextColor IMPROVABLE_MODIFIER_COLOR = TextColor.fromRgb(9337340);
+    private static final Color IMPROVABLE_MODIFIER_COLOR = Color.fromRgb(9337340);
 
     private static final String TOOLTIP_LEVEL_KEY = "tooltip.tinkerslevellingaddon.improvable.tooltip.level";
     private static final String TOOLTIP_LEVEL_NAME_KEY = "tooltip.tinkerslevellingaddon.improvable.tooltip.level.";
@@ -50,14 +46,14 @@ public class ClientEventHandler {
     private static final String TOOLTIP_MODIFIER_KEY = "tooltip.tinkerslevellingaddon.improvable.tooltip.info.modifier.";
     private static final String TOOLTIP_STAT_KEY = "tooltip.tinkerslevellingaddon.improvable.tooltip.info.stat.";
 
-    private static final Component TOOLTIP_HOLD_ALT = new TranslatableComponent(TOOLTIP_HOLD_ALT_KEY,
-            new TranslatableComponent(TOOLTIP_ALT_KEY_KEY).withStyle(s -> s.withItalic(true).withColor(IMPROVABLE_MODIFIER_COLOR)));
-    private static final Component TOOLTIP_MODIFIERS_GAINED =
-            new TranslatableComponent(TOOLTIP_MODIFIERS_GAINED_KEY).withStyle(s -> s.withUnderlined(true).withColor(IMPROVABLE_MODIFIER_COLOR));
-    private static final Component TOOLTIP_STATS_GAINED =
-            new TranslatableComponent(TOOLTIP_STATS_GAINED_KEY).withStyle(s -> s.withUnderlined(true).withColor(IMPROVABLE_MODIFIER_COLOR));
-    private static final Component TOOLTIP_NEXT_LEVEL =
-            new TranslatableComponent(TOOLTIP_NEXT_LEVEL_KEY).withStyle(s -> s.withUnderlined(true).withColor(IMPROVABLE_MODIFIER_COLOR));
+    private static final ITextComponent TOOLTIP_HOLD_ALT = new TranslationTextComponent(TOOLTIP_HOLD_ALT_KEY,
+            new TranslationTextComponent(TOOLTIP_ALT_KEY_KEY).withStyle(s -> s.withItalic(true).withColor(IMPROVABLE_MODIFIER_COLOR)));
+    private static final ITextComponent TOOLTIP_MODIFIERS_GAINED =
+            new TranslationTextComponent(TOOLTIP_MODIFIERS_GAINED_KEY).withStyle(s -> s.withUnderlined(true).withColor(IMPROVABLE_MODIFIER_COLOR));
+    private static final ITextComponent TOOLTIP_STATS_GAINED =
+            new TranslationTextComponent(TOOLTIP_STATS_GAINED_KEY).withStyle(s -> s.withUnderlined(true).withColor(IMPROVABLE_MODIFIER_COLOR));
+    private static final ITextComponent TOOLTIP_NEXT_LEVEL =
+            new TranslationTextComponent(TOOLTIP_NEXT_LEVEL_KEY).withStyle(s -> s.withUnderlined(true).withColor(IMPROVABLE_MODIFIER_COLOR));
 
     @SubscribeEvent
     static void onTooltipEvent(ItemTooltipEvent event) {
@@ -67,7 +63,7 @@ public class ClientEventHandler {
         }
 
         ItemStack stack = event.getItemStack();
-        if (ModifierUtil.getModifierLevel(stack, Registration.IMPROVABLE.get().getId()) <= 0) {
+        if (ModifierUtil.getModifierLevel(stack, Registration.IMPROVABLE.get()) <= 0) {
             return;
         }
 
@@ -79,7 +75,7 @@ public class ClientEventHandler {
             }
         }
 
-        List<Component> infoEntries = new ArrayList<>();
+        List<ITextComponent> infoEntries = new ArrayList<>();
         ToolStack tool = ToolStack.from(stack);
         ModDataNBT data = tool.getPersistentData();
         if (activeModifierKey == KeyModifier.ALT) {
@@ -96,48 +92,48 @@ public class ClientEventHandler {
         }
     }
 
-    private static List<Component> prepareGeneralInfo(ToolStack tool, ModDataNBT data) {
-        List<Component> infoEntries = new ArrayList<>();
+    private static List<ITextComponent> prepareGeneralInfo(ToolStack tool, ModDataNBT data) {
+        List<ITextComponent> infoEntries = new ArrayList<>();
         int level = data.getInt(ImprovableModifier.LEVEL_KEY);
 
-        MutableComponent levelTooltip = new TranslatableComponent(TOOLTIP_LEVEL_KEY,
-                new TextComponent(getLevelName(level)).withStyle(s -> s.withColor(getLevelColor(level))))
-                .append(new TextComponent(" [" + level + "]").withStyle(ChatFormatting.GRAY));
+        ITextComponent levelTooltip = new TranslationTextComponent(TOOLTIP_LEVEL_KEY,
+                new StringTextComponent(getLevelName(level)).withStyle(s -> s.withColor(getLevelColor(level))))
+                .append(new StringTextComponent(" [" + level + "]").withStyle(TextFormatting.GRAY));
         infoEntries.add(levelTooltip);
 
         if (ImprovableModifier.canLevelUp(level)) {
-            MutableComponent xp = new TextComponent("" + data.getInt(ImprovableModifier.EXPERIENCE_KEY))
-                    .withStyle(ChatFormatting.GOLD);
-            MutableComponent xpNeeded = new TextComponent("" + ImprovableModifier.getXpNeededForLevel(level + 1,
-                    ImprovableModifier.isBroadTool(tool))).withStyle(ChatFormatting.GOLD);
-            TranslatableComponent xpTooltip = new TranslatableComponent(TOOLTIP_XP_KEY, xp, xpNeeded);
+            ITextComponent xp = new StringTextComponent("" + data.getInt(ImprovableModifier.EXPERIENCE_KEY))
+                    .withStyle(TextFormatting.GOLD);
+            ITextComponent xpNeeded = new StringTextComponent("" + ImprovableModifier.getXpNeededForLevel(level + 1,
+                    ImprovableModifier.isBroadTool(tool))).withStyle(TextFormatting.GOLD);
+            TranslationTextComponent xpTooltip = new TranslationTextComponent(TOOLTIP_XP_KEY, xp, xpNeeded);
             infoEntries.add(xpTooltip);
         }
         return infoEntries;
     }
 
-    private static List<Component> prepareLevelInfo(ToolStack tool, ModDataNBT data) {
-        List<Component> infoEntries = new ArrayList<>();
+    private static List<ITextComponent> prepareLevelInfo(ToolStack tool, ModDataNBT data) {
+        List<ITextComponent> infoEntries = new ArrayList<>();
         boolean isArmor = tool.hasTag(ARMOR);
 
         String modifierHistory = data.getString(ImprovableModifier.MODIFIER_HISTORY_KEY);
-        if (!modifierHistory.isBlank()) {
+        if (!modifierHistory.isEmpty()) {
             Map<String, Long> gainedModifiers = Arrays.stream(modifierHistory.split(";"))
                     .sorted(Comparator.reverseOrder())
                     .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
             infoEntries.add(TOOLTIP_MODIFIERS_GAINED);
             for (Map.Entry<String, Long> entry : gainedModifiers.entrySet()) {
-                TranslatableComponent modifierEntry = new TranslatableComponent(TOOLTIP_MODIFIERS_KEY + entry.getKey(),
-                        new TextComponent("" + entry.getValue())
+                TranslationTextComponent modifierEntry = new TranslationTextComponent(TOOLTIP_MODIFIERS_KEY + entry.getKey(),
+                        new StringTextComponent("" + entry.getValue())
                                 .withStyle(s -> s.withColor(SlotAndStatUtil.getModifierColor(entry.getKey()))));
                 infoEntries.add(modifierEntry);
             }
         }
 
         String statHistory = data.getString(ImprovableModifier.STAT_HISTORY_KEY);
-        if (!statHistory.isBlank()) {
+        if (!statHistory.isEmpty()) {
             if (!infoEntries.isEmpty()) {
-                infoEntries.add(TextComponent.EMPTY);
+                infoEntries.add(StringTextComponent.EMPTY);
             }
             Map<String, Double> gainedStats = Arrays.stream(statHistory.split(";"))
                     .sorted()
@@ -149,24 +145,24 @@ public class ClientEventHandler {
             gainedStats.computeIfPresent(SlotAndStatUtil.KNOCKBACK_RESISTANCE, (k, v) -> v * 10);
             infoEntries.add(TOOLTIP_STATS_GAINED);
             for (Map.Entry<String, Double> entry : gainedStats.entrySet()) {
-                TranslatableComponent statEntry = new TranslatableComponent(TOOLTIP_STATS_KEY + entry.getKey(),
-                        new TextComponent("" + entry.getValue())
+                TranslationTextComponent statEntry = new TranslationTextComponent(TOOLTIP_STATS_KEY + entry.getKey(),
+                        new StringTextComponent("" + entry.getValue())
                                 .withStyle(s -> s.withColor(SlotAndStatUtil.getStatColor(entry.getKey()))));
                 infoEntries.add(statEntry);
             }
         }
 
-        List<Component> nextLevelInfo = prepareNextLevelInfo(data, isArmor);
+        List<ITextComponent> nextLevelInfo = prepareNextLevelInfo(data, isArmor);
         if (!infoEntries.isEmpty() && !nextLevelInfo.isEmpty()) {
-            infoEntries.add(TextComponent.EMPTY);
+            infoEntries.add(StringTextComponent.EMPTY);
         }
         infoEntries.addAll(nextLevelInfo);
 
         return infoEntries;
     }
 
-    private static List<Component> prepareNextLevelInfo(ModDataNBT data, boolean isArmor) {
-        List<Component> infoEntries = new ArrayList<>();
+    private static List<ITextComponent> prepareNextLevelInfo(ModDataNBT data, boolean isArmor) {
+        List<ITextComponent> infoEntries = new ArrayList<>();
         int level = data.getInt(ImprovableModifier.LEVEL_KEY);
         boolean canLevelUp = ImprovableModifier.canLevelUp(level);
         boolean isRandomModifier = isArmor ? Config.armorModifierTypeRandomOrder.get() :
@@ -179,8 +175,8 @@ public class ClientEventHandler {
             if (Config.enableModifierSlots.get() && !isRandomModifier) {
                 String nextSlot = isArmor ? SlotAndStatUtil.getArmorSlotForLevel(level + 1) :
                         SlotAndStatUtil.getToolSlotForLevel(level + 1);
-                infoEntries.add(new TranslatableComponent(TOOLTIP_NEXT_MODIFIER_KEY,
-                        new TranslatableComponent(TOOLTIP_MODIFIER_KEY + nextSlot)
+                infoEntries.add(new TranslationTextComponent(TOOLTIP_NEXT_MODIFIER_KEY,
+                        new TranslationTextComponent(TOOLTIP_MODIFIER_KEY + nextSlot)
                                 .withStyle(s -> s.withColor(SlotAndStatUtil.getModifierColor(nextSlot)))));
             }
             if (Config.enableStats.get() && !isRandomStat) {
@@ -192,10 +188,10 @@ public class ClientEventHandler {
                 if (nextStat.equals(SlotAndStatUtil.KNOCKBACK_RESISTANCE)) {
                     statValue *= 10;
                 }
-                infoEntries.add(new TranslatableComponent(TOOLTIP_NEXT_STAT_KEY,
-                        new TextComponent(ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(statValue))
+                infoEntries.add(new TranslationTextComponent(TOOLTIP_NEXT_STAT_KEY,
+                        new StringTextComponent(ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(statValue))
                                 .withStyle(s -> s.withColor(SlotAndStatUtil.getStatColor(nextStat))),
-                        new TranslatableComponent(TOOLTIP_STAT_KEY + nextStat)));
+                        new TranslationTextComponent(TOOLTIP_STAT_KEY + nextStat)));
             }
         }
 
@@ -211,12 +207,17 @@ public class ClientEventHandler {
         while(I18n.exists(TOOLTIP_LEVEL_NAME_KEY + i)) {
             i++;
         }
-        return I18n.get(TOOLTIP_LEVEL_NAME_KEY + (level % i)) + "+".repeat(level / i);
+        StringBuilder plusSigns = new StringBuilder();
+        for (int j = 0; j < level / i; j++) {
+            plusSigns.append("+");
+        }
+
+        return I18n.get(TOOLTIP_LEVEL_NAME_KEY + (level % i)) + plusSigns;
     }
 
-    private static int getLevelColor(int level) {
+    private static Color getLevelColor(int level) {
         float hue = (0.277777f * level);
         hue = hue - (int) hue;
-        return Color.HSBtoRGB(hue, 0.75f, 0.8f);
+        return Color.fromRgb(java.awt.Color.HSBtoRGB(hue, 0.75f, 0.8f));
     }
 }

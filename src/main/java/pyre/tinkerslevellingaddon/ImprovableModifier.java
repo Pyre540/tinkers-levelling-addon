@@ -1,33 +1,33 @@
 package pyre.tinkerslevellingaddon;
 
-import net.minecraft.core.BlockPos;
-import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.InteractionHand;
-import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EquipmentSlot;
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.context.UseOnContext;
-import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.block.BlockState;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.inventory.EquipmentSlotType;
+import net.minecraft.item.ItemUseContext;
+import net.minecraft.util.DamageSource;
+import net.minecraft.util.Hand;
+import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.world.server.ServerWorld;
 import pyre.tinkerslevellingaddon.config.Config;
 import pyre.tinkerslevellingaddon.network.LevelUpPacket;
 import pyre.tinkerslevellingaddon.network.Messages;
 import pyre.tinkerslevellingaddon.util.SlotAndStatUtil;
 import slimeknights.tconstruct.common.TinkerTags;
+import slimeknights.tconstruct.library.modifiers.SingleUseModifier;
 import slimeknights.tconstruct.library.modifiers.hooks.IHarvestModifier;
 import slimeknights.tconstruct.library.modifiers.hooks.IShearModifier;
-import slimeknights.tconstruct.library.modifiers.impl.NoLevelsModifier;
 import slimeknights.tconstruct.library.tools.SlotType;
+import slimeknights.tconstruct.library.tools.ToolDefinition;
 import slimeknights.tconstruct.library.tools.context.EquipmentContext;
 import slimeknights.tconstruct.library.tools.context.ToolAttackContext;
 import slimeknights.tconstruct.library.tools.context.ToolHarvestContext;
 import slimeknights.tconstruct.library.tools.context.ToolRebuildContext;
-import slimeknights.tconstruct.library.tools.definition.ToolDefinition;
-import slimeknights.tconstruct.library.tools.nbt.IToolStackView;
+import slimeknights.tconstruct.library.tools.nbt.IModifierToolStack;
 import slimeknights.tconstruct.library.tools.nbt.ModDataNBT;
 import slimeknights.tconstruct.library.tools.nbt.ToolStack;
 import slimeknights.tconstruct.library.tools.stat.FloatToolStat;
@@ -37,25 +37,28 @@ import slimeknights.tconstruct.tools.TinkerModifiers;
 import slimeknights.tconstruct.tools.ToolDefinitions;
 
 import javax.annotation.Nullable;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import static pyre.tinkerslevellingaddon.util.SlotAndStatUtil.parseSlotsHistory;
 import static pyre.tinkerslevellingaddon.util.SlotAndStatUtil.parseStatsHistory;
 
-public class ImprovableModifier extends NoLevelsModifier implements IHarvestModifier, IShearModifier {
+public class ImprovableModifier extends SingleUseModifier implements IHarvestModifier, IShearModifier {
 
     public static final ResourceLocation EXPERIENCE_KEY = new ResourceLocation(TinkersLevellingAddon.MOD_ID, "experience");
     public static final ResourceLocation LEVEL_KEY = new ResourceLocation(TinkersLevellingAddon.MOD_ID, "level");
     public static final ResourceLocation MODIFIER_HISTORY_KEY = new ResourceLocation(TinkersLevellingAddon.MOD_ID, "modifier_history");
     public static final ResourceLocation STAT_HISTORY_KEY = new ResourceLocation(TinkersLevellingAddon.MOD_ID, "stat_history");
 
-    private static final Set<ToolDefinition> BROAD_TOOLS = Set.of(ToolDefinitions.SLEDGE_HAMMER,
+    private static final Set<ToolDefinition> BROAD_TOOLS = new HashSet<>(Arrays.asList(ToolDefinitions.SLEDGE_HAMMER,
             ToolDefinitions.VEIN_HAMMER, ToolDefinitions.EXCAVATOR, ToolDefinitions.BROAD_AXE, ToolDefinitions.SCYTHE,
-            ToolDefinitions.CLEAVER);
+            ToolDefinitions.CLEAVER));
+
+    public ImprovableModifier() {
+        super(9337340);
+    }
 
     @Override
-    public void beforeRemoved(IToolStackView tool, RestrictedCompoundTag tag) {
+    public void beforeRemoved(IModifierToolStack tool, RestrictedCompoundTag tag) {
         tool.getPersistentData().remove(EXPERIENCE_KEY);
         tool.getPersistentData().remove(LEVEL_KEY);
         tool.getPersistentData().remove(MODIFIER_HISTORY_KEY);
@@ -84,68 +87,73 @@ public class ImprovableModifier extends NoLevelsModifier implements IHarvestModi
     }
 
     @Override
-    public void afterBlockBreak(IToolStackView tool, int level, ToolHarvestContext context) {
-        ServerPlayer player = context.getPlayer();
+    public void afterBlockBreak(IModifierToolStack tool, int level, ToolHarvestContext context) {
+        ServerPlayerEntity player = context.getPlayer();
         if (!Config.enableMiningXp.get() || !context.isEffective() || player == null) {
             return;
         }
-        ToolStack toolStack = getHeldTool(player, InteractionHand.MAIN_HAND);
-        Component toolName = player.getMainHandItem().getDisplayName();
+        ToolStack toolStack = getHeldTool(player, Hand.MAIN_HAND);
+        ITextComponent toolName = player.getMainHandItem().getDisplayName();
         if (!isEqualTinkersItem(tool, toolStack)) {
-            toolStack = getHeldTool(player, InteractionHand.OFF_HAND);
+            toolStack = getHeldTool(player, Hand.OFF_HAND);
             toolName = player.getOffhandItem().getDisplayName();
         }
         addExperience(toolStack, 1 + Config.bonusMiningXp.get(), player, toolName);
     }
 
     @Override
-    public void afterHarvest(IToolStackView tool, int level, UseOnContext context, ServerLevel world,
+    public void afterHarvest(IModifierToolStack tool, int level, ItemUseContext context, ServerWorld world,
                              BlockState state, BlockPos pos) {
-        if (!Config.enableHarvestingXp.get() || !(context.getPlayer() instanceof ServerPlayer player)) {
+        if (!Config.enableHarvestingXp.get() || !(context.getPlayer() instanceof ServerPlayerEntity)) {
             return;
         }
+        ServerPlayerEntity player = (ServerPlayerEntity) context.getPlayer();
         ToolStack toolStack = getHeldTool(player, context.getHand());
-        Component toolName = player.getItemInHand(context.getHand()).getDisplayName();
+        ITextComponent toolName = player.getItemInHand(context.getHand()).getDisplayName();
         addExperience(toolStack, 1 + Config.bonusHarvestingXp.get(), player, toolName);
     }
 
     @Override
-    public void afterShearEntity(IToolStackView tool, int level, Player player, Entity entity, boolean isTarget) {
-        if (!Config.enableShearingXp.get() || !(player instanceof ServerPlayer)) {
+    public void afterShearEntity(IModifierToolStack tool, int level, PlayerEntity player, Entity entity, boolean isTarget) {
+        if (!Config.enableShearingXp.get() || !(player instanceof ServerPlayerEntity)) {
             return;
         }
-        ToolStack toolStack = getHeldTool(player, InteractionHand.MAIN_HAND);
-        Component toolName = player.getMainHandItem().getDisplayName();
+        ToolStack toolStack = getHeldTool(player, Hand.MAIN_HAND);
+        ITextComponent toolName = player.getMainHandItem().getDisplayName();
         if (!isEqualTinkersItem(tool, toolStack)) {
-            toolStack = getHeldTool(player, InteractionHand.OFF_HAND);
+            toolStack = getHeldTool(player, Hand.OFF_HAND);
             toolName = player.getOffhandItem().getDisplayName();
         }
-        addExperience(toolStack, 1 + Config.bonusShearingXp.get(), (ServerPlayer) player, toolName);
+        addExperience(toolStack, 1 + Config.bonusShearingXp.get(), (ServerPlayerEntity) player, toolName);
     }
 
     @Override
-    public int afterEntityHit(IToolStackView tool, int level, ToolAttackContext context, float damageDealt) {
-        if (!Config.enableAttackingXp.get() || !(context.getPlayerAttacker() instanceof ServerPlayer player) ||
-                (!Config.enablePvp.get() && context.getLivingTarget() instanceof Player) || context.getLivingTarget() == null) {
+    public int afterEntityHit(IModifierToolStack tool, int level, ToolAttackContext context, float damageDealt) {
+        if (!Config.enableAttackingXp.get() || !(context.getPlayerAttacker() instanceof ServerPlayerEntity) ||
+                (!Config.enablePvp.get() && context.getLivingTarget() instanceof PlayerEntity) || context.getLivingTarget() == null) {
             return 0;
         }
+        ServerPlayerEntity player = (ServerPlayerEntity) context.getPlayerAttacker();
         int xp = (Config.damageDealt.get() ? Math.round(damageDealt) : 1) + Config.bonusAttackingXp.get();
         ToolStack toolStack = getHeldTool(context.getPlayerAttacker(), context.getSlotType());
-        Component toolName = context.getPlayerAttacker().getItemBySlot(context.getSlotType()).getDisplayName();
+        ITextComponent toolName = context.getPlayerAttacker().getItemBySlot(context.getSlotType()).getDisplayName();
         addExperience(toolStack, xp, player, toolName);
         return 0;
     }
 
     @Override
-    public void onAttacked(IToolStackView tool, int level, EquipmentContext context, EquipmentSlot slotType,
+    public void onAttacked(IModifierToolStack tool, int level, EquipmentContext context, EquipmentSlotType slotType,
                            DamageSource source, float amount, boolean isDirectDamage) {
-        if (!Config.enableTakingDamageXp.get() || slotType.getType() != EquipmentSlot.Type.ARMOR || !isDirectDamage ||
-                !(context.getEntity() instanceof ServerPlayer player) || player.invulnerableTime > 10 ||
-                !isValidDamageSource(source, player)) {
+        if (!Config.enableTakingDamageXp.get() || slotType.getType() != EquipmentSlotType.Group.ARMOR || !isDirectDamage ||
+                !(context.getEntity() instanceof ServerPlayerEntity)) {
+            return;
+        }
+        ServerPlayerEntity player = (ServerPlayerEntity) context.getEntity();
+        if (player.invulnerableTime > 10 || !isValidDamageSource(source, player)) {
             return;
         }
         int xp = (Config.damageTaken.get() ? Math.round(amount) : 1) + Config.bonusTakingDamageXp.get() + getThornsBonus(tool);
-        Component toolName = player.getItemBySlot(slotType).getDisplayName();
+        ITextComponent toolName = player.getItemBySlot(slotType).getDisplayName();
         addExperience(getHeldTool(player, slotType), xp, player, toolName);
     }
 
@@ -161,7 +169,7 @@ public class ImprovableModifier extends NoLevelsModifier implements IHarvestModi
         return null;
     }
 
-    private void addExperience(ToolStack tool, int amount, ServerPlayer player, Component toolName) {
+    private void addExperience(ToolStack tool, int amount, ServerPlayerEntity player, ITextComponent toolName) {
         if (tool == null) {
             return;
         }
@@ -226,20 +234,23 @@ public class ImprovableModifier extends NoLevelsModifier implements IHarvestModi
         data.putString(historyKey, modifierHistory);
     }
 
-    private boolean isEqualTinkersItem(IToolStackView item1, IToolStackView item2) {
+    private boolean isEqualTinkersItem(IModifierToolStack item1, IModifierToolStack item2) {
         if(item1 == null || item2 == null || item1.getItem() != item2.getItem()) {
             return false;
         }
         return item1.getModifiers().equals(item2.getModifiers()) && item1.getMaterials().equals(item2.getMaterials());
     }
 
-    private boolean isValidDamageSource(DamageSource source, Player player) {
-        return !source.isBypassArmor() && source.getEntity() instanceof LivingEntity attacker &&
-                !attacker.equals(player) && (Config.enablePvp.get() || !(attacker instanceof Player));
+    private boolean isValidDamageSource(DamageSource source, PlayerEntity player) {
+        if (!source.isBypassArmor() && source.getEntity() instanceof LivingEntity) {
+            LivingEntity attacker = (LivingEntity) source.getEntity();
+            return !attacker.equals(player) && (Config.enablePvp.get() || !(attacker instanceof PlayerEntity));
+        }
+        return false;
     }
 
-    private int getThornsBonus(IToolStackView tool) {
-        int thornsLevel = tool.getModifierLevel(TinkerModifiers.thorns.getId());
+    private int getThornsBonus(IModifierToolStack tool) {
+        int thornsLevel = tool.getModifierLevel(TinkerModifiers.thorns.get());
         if (!Config.enableThornsXp.get() || thornsLevel == 0) {
             return 0;
         }
@@ -261,7 +272,7 @@ public class ImprovableModifier extends NoLevelsModifier implements IHarvestModi
         return Config.maxLevel.get() == 0 || Config.maxLevel.get() > level;
     }
 
-    public static boolean isBroadTool(IToolStackView tool) {
+    public static boolean isBroadTool(IModifierToolStack tool) {
         return BROAD_TOOLS.contains(tool.getDefinition());
     }
 }

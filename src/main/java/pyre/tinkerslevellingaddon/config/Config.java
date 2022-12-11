@@ -1,30 +1,31 @@
 package pyre.tinkerslevellingaddon.config;
 
 import com.electronwill.nightconfig.core.EnumGetMethod;
-import net.minecraft.sounds.SoundEvent;
+import net.minecraft.util.SoundEvent;
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.fml.ModLoadingContext;
+import net.minecraftforge.fml.RegistryObject;
 import net.minecraftforge.fml.config.ModConfig;
-import net.minecraftforge.registries.RegistryObject;
 import pyre.tinkerslevellingaddon.setup.Registration;
 import slimeknights.tconstruct.library.tools.stat.FloatToolStat;
 import slimeknights.tconstruct.library.tools.stat.ToolStats;
 
+import java.util.Arrays;
 import java.util.List;
 
 import static pyre.tinkerslevellingaddon.util.SlotAndStatUtil.*;
 
 public class Config {
 
-    private static final List<String> DEFAULT_TOOLS_SLOTS_ROTATION = List.of(UPGRADE, UPGRADE, UPGRADE, ABILITY, UPGRADE);
-    private static final List<String> DEFAULT_TOOLS_SLOTS_RANDOM_POOL = List.of(UPGRADE, UPGRADE, UPGRADE, UPGRADE, ABILITY);
-    private static final List<String> DEFAULT_ARMOR_SLOTS_ROTATION = List.of(UPGRADE, DEFENSE, UPGRADE, ABILITY, DEFENSE);
-    private static final List<String> DEFAULT_ARMOR_SLOTS_RANDOM_POOL = List.of(UPGRADE, UPGRADE, DEFENSE, DEFENSE, ABILITY);
+    private static final List<String> DEFAULT_TOOLS_SLOTS_ROTATION = Arrays.asList(UPGRADE, UPGRADE, UPGRADE, ABILITY, UPGRADE);
+    private static final List<String> DEFAULT_TOOLS_SLOTS_RANDOM_POOL = Arrays.asList(UPGRADE, UPGRADE, UPGRADE, UPGRADE, ABILITY);
+    private static final List<String> DEFAULT_ARMOR_SLOTS_ROTATION = Arrays.asList(UPGRADE, DEFENSE, UPGRADE, ABILITY, DEFENSE);
+    private static final List<String> DEFAULT_ARMOR_SLOTS_RANDOM_POOL = Arrays.asList(UPGRADE, UPGRADE, DEFENSE, DEFENSE, ABILITY);
 
-    private static final List<String> DEFAULT_TOOLS_STATS_ROTATION = List.of(DURABILITY, ATTACK_DAMAGE, ATTACK_SPEED, MINING_SPEED);
-    private static final List<String> DEFAULT_TOOLS_STATS_RANDOM_POOL = List.of(DURABILITY, ATTACK_DAMAGE, ATTACK_SPEED, MINING_SPEED);
-    private static final List<String> DEFAULT_ARMOR_STATS_ROTATION = List.of(DURABILITY, ARMOR, ARMOR_TOUGHNESS, KNOCKBACK_RESISTANCE);
-    private static final List<String> DEFAULT_ARMOR_STATS_RANDOM_POOL = List.of(DURABILITY, ARMOR, ARMOR_TOUGHNESS, KNOCKBACK_RESISTANCE);
+    private static final List<String> DEFAULT_TOOLS_STATS_ROTATION = Arrays.asList(DURABILITY, ATTACK_DAMAGE, ATTACK_SPEED, MINING_SPEED);
+    private static final List<String> DEFAULT_TOOLS_STATS_RANDOM_POOL = Arrays.asList(DURABILITY, ATTACK_DAMAGE, ATTACK_SPEED, MINING_SPEED);
+    private static final List<String> DEFAULT_ARMOR_STATS_ROTATION = Arrays.asList(DURABILITY, ARMOR, ARMOR_TOUGHNESS, KNOCKBACK_RESISTANCE);
+    private static final List<String> DEFAULT_ARMOR_STATS_RANDOM_POOL = Arrays.asList(DURABILITY, ARMOR, ARMOR_TOUGHNESS, KNOCKBACK_RESISTANCE);
 
     public static final ForgeConfigSpec SERVER_CONFIG;
     public static final ForgeConfigSpec CLIENT_CONFIG;
