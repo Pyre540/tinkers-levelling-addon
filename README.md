@@ -22,15 +22,15 @@ This is an **unofficial** addon. Please do **not** reach out to the Tinkers' Con
 
 To get started simply apply _Improvable_ modifier to your tool/armor piece. As it's designed to be an endgame modifier, the default recipe is pricey (1x Nether Star, 4x Bottle o' Enchanting) and requires Tinker's Anvil and 1 ability slot (This recipe can be easily changed by simple datapack - [example](https://github.com/Pyre540/tinkers-levelling-addon/tree/master/examples/datapacks/override_improvable_recipe_1.18.2)).
 
-<img src="https://raw.githubusercontent.com/Pyre540/tinkers-levelling-addon/master/examples/image/default-modifier-recipe.png" alt="Default modifier recipe" width="400px"/>
+<img src="https://raw.githubusercontent.com/Pyre540/tinkers-levelling-addon/1.18/examples/image/default-modifier-recipe.png" alt="Default modifier recipe" width="400px"/>
 
 After that your tool is ready to earn some XP, so go and mine some stuff, cut some trees and kill some mobs!
 
-<img src="https://raw.githubusercontent.com/Pyre540/tinkers-levelling-addon/master/examples/image/example-tool.png" alt="Example tool" height="300px"/>
+<img src="https://raw.githubusercontent.com/Pyre540/tinkers-levelling-addon/1.18/examples/image/example-tool.png" alt="Example tool" height="300px"/>
 
 Hold _Alt_ key to display summary of perks gained so far.
 
-<img src="https://raw.githubusercontent.com/Pyre540/tinkers-levelling-addon/master/examples/image/example-level-info.png" alt="Example level info" height="300px"/>
+<img src="https://raw.githubusercontent.com/Pyre540/tinkers-levelling-addon/1.18/examples/image/example-level-info.png" alt="Example level info" height="300px"/>
 
 
 ## License
