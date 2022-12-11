@@ -1,0 +1,16 @@
+{
+  "type": "tconstruct:modifier",
+  "inputs": [
+    {
+      "item": "minecraft:cobblestone"
+    }
+  ],
+  "tools": {
+    "tag": "tconstruct:modifiable"
+  },
+  "result": {
+    "name": "tinkerslevellingaddon:improvable",
+    "level": 1
+  },
+  "max_level": 1
+}
