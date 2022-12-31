@@ -98,12 +98,10 @@ public class ImprovableModifier extends NoLevelsModifier implements PlantHarvest
             return;
         }
         ToolStack toolStack = getHeldTool(player, InteractionHand.MAIN_HAND);
-        Component toolName = player.getMainHandItem().getDisplayName();
         if (!isEqualTinkersItem(tool, toolStack)) {
             toolStack = getHeldTool(player, InteractionHand.OFF_HAND);
-            toolName = player.getOffhandItem().getDisplayName();
         }
-        addExperience(toolStack, 1 + Config.bonusMiningXp.get(), player, toolName);
+        addExperience(toolStack, 1 + Config.bonusMiningXp.get(), player);
     }
 
     @Override
@@ -113,8 +111,7 @@ public class ImprovableModifier extends NoLevelsModifier implements PlantHarvest
             return;
         }
         ToolStack toolStack = getHeldTool(player, context.getHand());
-        Component toolName = player.getItemInHand(context.getHand()).getDisplayName();
-        addExperience(toolStack, 1 + Config.bonusHarvestingXp.get(), player, toolName);
+        addExperience(toolStack, 1 + Config.bonusHarvestingXp.get(), player);
     }
 
     @Override
@@ -124,12 +121,10 @@ public class ImprovableModifier extends NoLevelsModifier implements PlantHarvest
             return;
         }
         ToolStack toolStack = getHeldTool(player, InteractionHand.MAIN_HAND);
-        Component toolName = player.getMainHandItem().getDisplayName();
         if (!isEqualTinkersItem(tool, toolStack)) {
             toolStack = getHeldTool(player, InteractionHand.OFF_HAND);
-            toolName = player.getOffhandItem().getDisplayName();
         }
-        addExperience(toolStack, 1 + Config.bonusShearingXp.get(), (ServerPlayer) player, toolName);
+        addExperience(toolStack, 1 + Config.bonusShearingXp.get(), (ServerPlayer) player);
     }
 
     @Override
@@ -140,8 +135,7 @@ public class ImprovableModifier extends NoLevelsModifier implements PlantHarvest
         }
         int xp = (Config.damageDealt.get() ? Math.round(damageDealt) : 1) + Config.bonusAttackingXp.get();
         ToolStack toolStack = getHeldTool(context.getPlayerAttacker(), context.getSlotType());
-        Component toolName = context.getPlayerAttacker().getItemBySlot(context.getSlotType()).getDisplayName();
-        addExperience(toolStack, xp, player, toolName);
+        addExperience(toolStack, xp, player);
         return 0;
     }
 
@@ -154,13 +148,12 @@ public class ImprovableModifier extends NoLevelsModifier implements PlantHarvest
             return;
         }
         int xp = (Config.damageTaken.get() ? Math.round(amount) : 1) + Config.bonusTakingDamageXp.get() + getThornsBonus(tool);
-        Component toolName = player.getItemBySlot(slotType).getDisplayName();
-        addExperience(getHeldTool(player, slotType), xp, player, toolName);
+        addExperience(getHeldTool(player, slotType), xp, player);
     }
 
     //currently no hooks for tilling, striping wood, making paths...
 
-    private void addExperience(ToolStack tool, int amount, ServerPlayer player, Component toolName) {
+    private void addExperience(ToolStack tool, int amount, ServerPlayer player) {
         if (tool == null) {
             return;
         }
@@ -189,8 +182,11 @@ public class ImprovableModifier extends NoLevelsModifier implements PlantHarvest
                 appendHistory(STAT_HISTORY_KEY, statName, data);
             }
 
-            Messages.sendToPlayer(new LevelUpPacket(currentLevel, toolName), player);
+            //temporarily set xp to 0, so it displays nicely in chat message
+            data.putInt(EXPERIENCE_KEY, 0);
             tool.rebuildStats();
+            Component toolName = tool.createStack().getDisplayName();
+            Messages.sendToPlayer(new LevelUpPacket(currentLevel, toolName), player);
         }
         data.putInt(EXPERIENCE_KEY, currentExperience);
     }
