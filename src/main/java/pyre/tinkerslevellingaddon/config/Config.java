@@ -99,6 +99,7 @@ public class Config {
 
     //CLIENT
     public static ForgeConfigSpec.BooleanValue enableLevelUpMessage;
+    public static ForgeConfigSpec.BooleanValue squashLevelPluses;
     public static ForgeConfigSpec.EnumValue<LevelUpSound> levelUpSound;
 
     private static void generalConfig(ForgeConfigSpec.Builder builder) {
@@ -328,6 +329,11 @@ public class Config {
         enableLevelUpMessage = builder.comment("If true, shows chat message on tool level ups.")
                 .translation("config.tinkerslevellingaddon.client.messages")
                 .define("message", true);
+
+        squashLevelPluses = builder.comment("If true, uses alternative level name suffix for high level tools.",
+                "Instead of appending '+' signs for each consecutive level appearance, +1, +2, +3, etc. notation will be used.")
+                .translation("config.tinkerslevellingaddon.client.squashPluses")
+                .define("squashPluses", false);
 
         levelUpSound = builder.comment("")
                 .translation("config.tinkerslevellingaddon.client.sound")

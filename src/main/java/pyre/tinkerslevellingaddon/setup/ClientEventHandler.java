@@ -211,7 +211,9 @@ public class ClientEventHandler {
         while(I18n.exists(TOOLTIP_LEVEL_NAME_KEY + i)) {
             i++;
         }
-        return I18n.get(TOOLTIP_LEVEL_NAME_KEY + (level % i)) + "+".repeat(level / i);
+        int tier = level / i;
+        String suffix = Config.squashLevelPluses.get() && level > 0 ? "+" + tier : "+".repeat(tier);
+        return I18n.get(TOOLTIP_LEVEL_NAME_KEY + (level % i)) + suffix;
     }
 
     private static int getLevelColor(int level) {

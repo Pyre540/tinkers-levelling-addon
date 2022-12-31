@@ -131,6 +131,7 @@
   "config.tinkerslevellingaddon.levelling.bonuses.thorns": "Ciernie",
 
   "config.tinkerslevellingaddon.client.messages": "Wiadomości",
+  "config.tinkerslevellingaddon.client.squashPluses": "Alternatywny przyrostek dla nazw poziomów",
   "config.tinkerslevellingaddon.client.sound": "Dźwięk",
 
   "sounds.tinkerslevellingaddon.tool_level_up": "Narzędzie zdobywa poziom"

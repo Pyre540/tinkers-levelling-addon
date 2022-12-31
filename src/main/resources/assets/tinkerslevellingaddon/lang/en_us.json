@@ -131,6 +131,7 @@
   "config.tinkerslevellingaddon.levelling.bonuses.thorns": "Thorns",
 
   "config.tinkerslevellingaddon.client.messages": "Messages",
+  "config.tinkerslevellingaddon.client.squashPluses": "Alternative suffix for level names",
   "config.tinkerslevellingaddon.client.sound": "Sound",
 
   "sounds.tinkerslevellingaddon.tool_level_up": "Tool levels up"
