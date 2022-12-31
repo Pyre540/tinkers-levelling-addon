@@ -93,12 +93,10 @@ public class ImprovableModifier extends SingleUseModifier implements IHarvestMod
             return;
         }
         ToolStack toolStack = getHeldTool(player, Hand.MAIN_HAND);
-        ITextComponent toolName = player.getMainHandItem().getDisplayName();
         if (!isEqualTinkersItem(tool, toolStack)) {
             toolStack = getHeldTool(player, Hand.OFF_HAND);
-            toolName = player.getOffhandItem().getDisplayName();
         }
-        addExperience(toolStack, 1 + Config.bonusMiningXp.get(), player, toolName);
+        addExperience(toolStack, 1 + Config.bonusMiningXp.get(), player);
     }
 
     @Override
@@ -109,8 +107,7 @@ public class ImprovableModifier extends SingleUseModifier implements IHarvestMod
         }
         ServerPlayerEntity player = (ServerPlayerEntity) context.getPlayer();
         ToolStack toolStack = getHeldTool(player, context.getHand());
-        ITextComponent toolName = player.getItemInHand(context.getHand()).getDisplayName();
-        addExperience(toolStack, 1 + Config.bonusHarvestingXp.get(), player, toolName);
+        addExperience(toolStack, 1 + Config.bonusHarvestingXp.get(), player);
     }
 
     @Override
@@ -119,12 +116,10 @@ public class ImprovableModifier extends SingleUseModifier implements IHarvestMod
             return;
         }
         ToolStack toolStack = getHeldTool(player, Hand.MAIN_HAND);
-        ITextComponent toolName = player.getMainHandItem().getDisplayName();
         if (!isEqualTinkersItem(tool, toolStack)) {
             toolStack = getHeldTool(player, Hand.OFF_HAND);
-            toolName = player.getOffhandItem().getDisplayName();
         }
-        addExperience(toolStack, 1 + Config.bonusShearingXp.get(), (ServerPlayerEntity) player, toolName);
+        addExperience(toolStack, 1 + Config.bonusShearingXp.get(), (ServerPlayerEntity) player);
     }
 
     @Override
@@ -136,8 +131,7 @@ public class ImprovableModifier extends SingleUseModifier implements IHarvestMod
         ServerPlayerEntity player = (ServerPlayerEntity) context.getPlayerAttacker();
         int xp = (Config.damageDealt.get() ? Math.round(damageDealt) : 1) + Config.bonusAttackingXp.get();
         ToolStack toolStack = getHeldTool(context.getPlayerAttacker(), context.getSlotType());
-        ITextComponent toolName = context.getPlayerAttacker().getItemBySlot(context.getSlotType()).getDisplayName();
-        addExperience(toolStack, xp, player, toolName);
+        addExperience(toolStack, xp, player);
         return 0;
     }
 
@@ -153,8 +147,7 @@ public class ImprovableModifier extends SingleUseModifier implements IHarvestMod
             return;
         }
         int xp = (Config.damageTaken.get() ? Math.round(amount) : 1) + Config.bonusTakingDamageXp.get() + getThornsBonus(tool);
-        ITextComponent toolName = player.getItemBySlot(slotType).getDisplayName();
-        addExperience(getHeldTool(player, slotType), xp, player, toolName);
+        addExperience(getHeldTool(player, slotType), xp, player);
     }
 
     //currently no hooks for tilling, striping wood, making paths...
@@ -169,7 +162,7 @@ public class ImprovableModifier extends SingleUseModifier implements IHarvestMod
         return null;
     }
 
-    private void addExperience(ToolStack tool, int amount, ServerPlayerEntity player, ITextComponent toolName) {
+    private void addExperience(ToolStack tool, int amount, ServerPlayerEntity player) {
         if (tool == null) {
             return;
         }
@@ -198,8 +191,11 @@ public class ImprovableModifier extends SingleUseModifier implements IHarvestMod
                 appendHistory(STAT_HISTORY_KEY, statName, data);
             }
 
-            Messages.sendToPlayer(new LevelUpPacket(currentLevel, toolName), player);
+            //temporarily set xp to 0, so it displays nicely in chat message
+            data.putInt(EXPERIENCE_KEY, 0);
             tool.rebuildStats();
+            ITextComponent toolName = tool.createStack().getDisplayName();
+            Messages.sendToPlayer(new LevelUpPacket(currentLevel, toolName), player);
         }
         data.putInt(EXPERIENCE_KEY, currentExperience);
     }
