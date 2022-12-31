@@ -18,9 +18,12 @@ import pyre.tinkerslevellingaddon.network.LevelUpPacket;
 import pyre.tinkerslevellingaddon.network.Messages;
 import pyre.tinkerslevellingaddon.util.SlotAndStatUtil;
 import slimeknights.tconstruct.common.TinkerTags;
-import slimeknights.tconstruct.library.modifiers.hooks.IHarvestModifier;
-import slimeknights.tconstruct.library.modifiers.hooks.IShearModifier;
+import slimeknights.tconstruct.library.modifiers.ModifierEntry;
+import slimeknights.tconstruct.library.modifiers.TinkerHooks;
+import slimeknights.tconstruct.library.modifiers.hook.PlantHarvestModifierHook;
+import slimeknights.tconstruct.library.modifiers.hook.ShearsModifierHook;
 import slimeknights.tconstruct.library.modifiers.impl.NoLevelsModifier;
+import slimeknights.tconstruct.library.modifiers.util.ModifierHookMap;
 import slimeknights.tconstruct.library.tools.SlotType;
 import slimeknights.tconstruct.library.tools.context.EquipmentContext;
 import slimeknights.tconstruct.library.tools.context.ToolAttackContext;
@@ -36,14 +39,13 @@ import slimeknights.tconstruct.library.utils.RestrictedCompoundTag;
 import slimeknights.tconstruct.tools.TinkerModifiers;
 import slimeknights.tconstruct.tools.ToolDefinitions;
 
-import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Set;
 
 import static pyre.tinkerslevellingaddon.util.SlotAndStatUtil.parseSlotsHistory;
 import static pyre.tinkerslevellingaddon.util.SlotAndStatUtil.parseStatsHistory;
 
-public class ImprovableModifier extends NoLevelsModifier implements IHarvestModifier, IShearModifier {
+public class ImprovableModifier extends NoLevelsModifier implements PlantHarvestModifierHook, ShearsModifierHook {
 
     public static final ResourceLocation EXPERIENCE_KEY = new ResourceLocation(TinkersLevellingAddon.MOD_ID, "experience");
     public static final ResourceLocation LEVEL_KEY = new ResourceLocation(TinkersLevellingAddon.MOD_ID, "level");
@@ -53,6 +55,12 @@ public class ImprovableModifier extends NoLevelsModifier implements IHarvestModi
     private static final Set<ToolDefinition> BROAD_TOOLS = Set.of(ToolDefinitions.SLEDGE_HAMMER,
             ToolDefinitions.VEIN_HAMMER, ToolDefinitions.EXCAVATOR, ToolDefinitions.BROAD_AXE, ToolDefinitions.SCYTHE,
             ToolDefinitions.CLEAVER);
+
+    @Override
+    protected void registerHooks(ModifierHookMap.Builder hookBuilder) {
+        super.registerHooks(hookBuilder);
+        hookBuilder.addHook(this, TinkerHooks.PLANT_HARVEST, TinkerHooks.SHEAR_ENTITY);
+    }
 
     @Override
     public void beforeRemoved(IToolStackView tool, RestrictedCompoundTag tag) {
@@ -99,7 +107,7 @@ public class ImprovableModifier extends NoLevelsModifier implements IHarvestModi
     }
 
     @Override
-    public void afterHarvest(IToolStackView tool, int level, UseOnContext context, ServerLevel world,
+    public void afterHarvest(IToolStackView tool, ModifierEntry modifier, UseOnContext context, ServerLevel world,
                              BlockState state, BlockPos pos) {
         if (!Config.enableHarvestingXp.get() || !(context.getPlayer() instanceof ServerPlayer player)) {
             return;
@@ -110,7 +118,8 @@ public class ImprovableModifier extends NoLevelsModifier implements IHarvestModi
     }
 
     @Override
-    public void afterShearEntity(IToolStackView tool, int level, Player player, Entity entity, boolean isTarget) {
+    public void afterShearEntity(IToolStackView tool, ModifierEntry modifier, Player player, Entity entity,
+                                 boolean isTarget) {
         if (!Config.enableShearingXp.get() || !(player instanceof ServerPlayer)) {
             return;
         }
@@ -150,16 +159,6 @@ public class ImprovableModifier extends NoLevelsModifier implements IHarvestModi
     }
 
     //currently no hooks for tilling, striping wood, making paths...
-
-    @SuppressWarnings("unchecked")
-    @Nullable
-    @Override
-    public <T> T getModule(Class<T> type) {
-        if (type == IHarvestModifier.class || type == IShearModifier.class) {
-            return (T) this;
-        }
-        return null;
-    }
 
     private void addExperience(ToolStack tool, int amount, ServerPlayer player, Component toolName) {
         if (tool == null) {
