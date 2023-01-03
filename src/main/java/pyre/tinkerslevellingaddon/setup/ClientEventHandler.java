@@ -58,7 +58,7 @@ public class ClientEventHandler {
     @SubscribeEvent
     static void onTooltipEvent(ItemTooltipEvent event) {
         KeyModifier activeModifierKey = KeyModifier.getActiveModifier();
-        if (activeModifierKey == KeyModifier.CONTROL || activeModifierKey == KeyModifier.SHIFT) {
+        if (event.getPlayer() == null || activeModifierKey == KeyModifier.CONTROL || activeModifierKey == KeyModifier.SHIFT) {
             return;
         }
 
