@@ -13,6 +13,8 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraftforge.common.ToolAction;
+import net.minecraftforge.common.ToolActions;
 import pyre.tinkerslevellingaddon.config.Config;
 import pyre.tinkerslevellingaddon.network.LevelUpPacket;
 import pyre.tinkerslevellingaddon.network.Messages;
@@ -20,6 +22,7 @@ import pyre.tinkerslevellingaddon.util.SlotAndStatUtil;
 import slimeknights.tconstruct.common.TinkerTags;
 import slimeknights.tconstruct.library.modifiers.ModifierEntry;
 import slimeknights.tconstruct.library.modifiers.TinkerHooks;
+import slimeknights.tconstruct.library.modifiers.hook.BlockTransformModifierHook;
 import slimeknights.tconstruct.library.modifiers.hook.PlantHarvestModifierHook;
 import slimeknights.tconstruct.library.modifiers.hook.ShearsModifierHook;
 import slimeknights.tconstruct.library.modifiers.impl.NoLevelsModifier;
@@ -45,7 +48,8 @@ import java.util.Set;
 import static pyre.tinkerslevellingaddon.util.SlotAndStatUtil.parseSlotsHistory;
 import static pyre.tinkerslevellingaddon.util.SlotAndStatUtil.parseStatsHistory;
 
-public class ImprovableModifier extends NoLevelsModifier implements PlantHarvestModifierHook, ShearsModifierHook {
+public class ImprovableModifier extends NoLevelsModifier implements PlantHarvestModifierHook, ShearsModifierHook,
+        BlockTransformModifierHook {
 
     public static final ResourceLocation EXPERIENCE_KEY = new ResourceLocation(TinkersLevellingAddon.MOD_ID, "experience");
     public static final ResourceLocation LEVEL_KEY = new ResourceLocation(TinkersLevellingAddon.MOD_ID, "level");
@@ -59,7 +63,7 @@ public class ImprovableModifier extends NoLevelsModifier implements PlantHarvest
     @Override
     protected void registerHooks(ModifierHookMap.Builder hookBuilder) {
         super.registerHooks(hookBuilder);
-        hookBuilder.addHook(this, TinkerHooks.PLANT_HARVEST, TinkerHooks.SHEAR_ENTITY);
+        hookBuilder.addHook(this, TinkerHooks.PLANT_HARVEST, TinkerHooks.SHEAR_ENTITY, TinkerHooks.BLOCK_TRANSFORM);
     }
 
     @Override
@@ -151,7 +155,27 @@ public class ImprovableModifier extends NoLevelsModifier implements PlantHarvest
         addExperience(getHeldTool(player, slotType), xp, player);
     }
 
-    //currently no hooks for tilling, striping wood, making paths...
+    //todo currently flint and brick and boots modifiers do not use blockTransform hook
+    @Override
+    public void afterTransformBlock(IToolStackView tool, ModifierEntry modifier, UseOnContext context,
+                                    BlockState state, BlockPos pos, ToolAction action) {
+        if (!(context.getPlayer() instanceof ServerPlayer player)) {
+            return;
+        }
+
+        ToolStack toolStack = getHeldTool(player, context.getHand());
+        if (Config.enableStrippingXp.get() && action.equals(ToolActions.AXE_STRIP)) {
+            addExperience(toolStack, 1 + Config.bonusStrippingXp.get(), player);
+        } else if(Config.enableScrappingXp.get() && action.equals(ToolActions.AXE_SCRAPE)) {
+            addExperience(toolStack, 1 + Config.bonusScrappingXp.get(), player);
+        } else if(Config.enableWaxingOffXp.get() && action.equals(ToolActions.AXE_WAX_OFF)) {
+            addExperience(toolStack, 1 + Config.bonusWaxingOffXp.get(), player);
+        } else if(Config.enableTillingXp.get() && action.equals(ToolActions.HOE_TILL)) {
+            addExperience(toolStack, 1 + Config.bonusTillingXp.get(), player);
+        } else if(Config.enablePathMakingXp.get() && action.equals(ToolActions.SHOVEL_FLATTEN)) {
+            addExperience(toolStack, 1 + Config.bonusPathMakingXp.get(), player);
+        }
+    }
 
     private void addExperience(ToolStack tool, int amount, ServerPlayer player) {
         if (tool == null) {

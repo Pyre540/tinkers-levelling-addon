@@ -85,6 +85,11 @@ public class Config {
     public static ForgeConfigSpec.BooleanValue enableMiningXp;
     public static ForgeConfigSpec.BooleanValue enableHarvestingXp;
     public static ForgeConfigSpec.BooleanValue enableShearingXp;
+    public static ForgeConfigSpec.BooleanValue enableStrippingXp;
+    public static ForgeConfigSpec.BooleanValue enableScrappingXp;
+    public static ForgeConfigSpec.BooleanValue enableWaxingOffXp;
+    public static ForgeConfigSpec.BooleanValue enableTillingXp;
+    public static ForgeConfigSpec.BooleanValue enablePathMakingXp;
     public static ForgeConfigSpec.BooleanValue enableAttackingXp;
     public static ForgeConfigSpec.BooleanValue enableTakingDamageXp;
     public static ForgeConfigSpec.BooleanValue enableThornsXp;
@@ -93,6 +98,11 @@ public class Config {
     public static ForgeConfigSpec.IntValue bonusMiningXp;
     public static ForgeConfigSpec.IntValue bonusHarvestingXp;
     public static ForgeConfigSpec.IntValue bonusShearingXp;
+    public static ForgeConfigSpec.IntValue bonusStrippingXp;
+    public static ForgeConfigSpec.IntValue bonusScrappingXp;
+    public static ForgeConfigSpec.IntValue bonusWaxingOffXp;
+    public static ForgeConfigSpec.IntValue bonusTillingXp;
+    public static ForgeConfigSpec.IntValue bonusPathMakingXp;
     public static ForgeConfigSpec.IntValue bonusAttackingXp;
     public static ForgeConfigSpec.IntValue bonusTakingDamageXp;
     public static ForgeConfigSpec.IntValue bonusThornsXp;
@@ -283,6 +293,21 @@ public class Config {
         enableShearingXp = builder.translation("config.tinkerslevellingaddon.levelling.actions.shearing")
                 .define("shearing", true);
 
+        enableStrippingXp = builder.translation("config.tinkerslevellingaddon.levelling.actions.stripping")
+                .define("stripping", true);
+
+        enableScrappingXp = builder.translation("config.tinkerslevellingaddon.levelling.actions.scrapping")
+                .define("scrapping", true);
+
+        enableWaxingOffXp = builder.translation("config.tinkerslevellingaddon.levelling.actions.waxingOff")
+                .define("waxingOff", true);
+
+        enableTillingXp = builder.translation("config.tinkerslevellingaddon.levelling.actions.tilling")
+                .define("tilling", true);
+
+        enablePathMakingXp = builder.translation("config.tinkerslevellingaddon.levelling.actions.pathMaking")
+                .define("pathMaking", true);
+
         enableAttackingXp = builder.translation("config.tinkerslevellingaddon.levelling.actions.attacking")
                 .define("attacking", true);
 
@@ -308,6 +333,21 @@ public class Config {
 
         bonusShearingXp = builder.translation("config.tinkerslevellingaddon.levelling.bonuses.shearing")
                 .defineInRange("shearing", 0, 0, Integer.MAX_VALUE);
+
+        bonusStrippingXp = builder.translation("config.tinkerslevellingaddon.levelling.bonuses.stripping")
+                .defineInRange("stripping", 0, 0, Integer.MAX_VALUE);
+
+        bonusScrappingXp = builder.translation("config.tinkerslevellingaddon.levelling.bonuses.scrapping")
+                .defineInRange("scrapping", 0, 0, Integer.MAX_VALUE);
+
+        bonusWaxingOffXp = builder.translation("config.tinkerslevellingaddon.levelling.bonuses.waxingOff")
+                .defineInRange("waxingOff", 0, 0, Integer.MAX_VALUE);
+
+        bonusTillingXp = builder.translation("config.tinkerslevellingaddon.levelling.bonuses.tilling")
+                .defineInRange("tilling", 0, 0, Integer.MAX_VALUE);
+
+        bonusPathMakingXp = builder.translation("config.tinkerslevellingaddon.levelling.bonuses.pathMaking")
+                .defineInRange("pathMaking", 0, 0, Integer.MAX_VALUE);
 
         bonusAttackingXp = builder.translation("config.tinkerslevellingaddon.levelling.bonuses.attacking")
                 .defineInRange("attacking", 0, 0, Integer.MAX_VALUE);
