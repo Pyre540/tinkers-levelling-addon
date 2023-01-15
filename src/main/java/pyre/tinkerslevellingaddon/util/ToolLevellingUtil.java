@@ -5,12 +5,10 @@ import pyre.tinkerslevellingaddon.config.Config;
 import slimeknights.tconstruct.common.TinkerTags;
 import slimeknights.tconstruct.library.tools.SlotType;
 import slimeknights.tconstruct.library.tools.context.ToolRebuildContext;
-import slimeknights.tconstruct.library.tools.definition.ToolDefinition;
 import slimeknights.tconstruct.library.tools.nbt.IToolStackView;
 import slimeknights.tconstruct.library.tools.nbt.ToolStack;
 import slimeknights.tconstruct.library.tools.stat.FloatToolStat;
 import slimeknights.tconstruct.library.tools.stat.ToolStats;
-import slimeknights.tconstruct.tools.ToolDefinitions;
 
 import java.util.*;
 
@@ -39,9 +37,6 @@ public class ToolLevellingUtil {
     private static final Map<String, FloatToolStat> ALL_STAT_TYPES;
     
     private static final Random RANDOM = new Random();
-    private static final Set<ToolDefinition> BROAD_TOOLS = Set.of(ToolDefinitions.SLEDGE_HAMMER,
-            ToolDefinitions.VEIN_HAMMER, ToolDefinitions.EXCAVATOR, ToolDefinitions.BROAD_AXE, ToolDefinitions.SCYTHE,
-            ToolDefinitions.CLEAVER);
     
     static {
         TOOL_SLOT_TYPES = new LinkedHashMap<>();
@@ -205,7 +200,7 @@ public class ToolLevellingUtil {
     }
     
     public static boolean isBroadTool(IToolStackView tool) {
-        return BROAD_TOOLS.contains(tool.getDefinition());
+        return tool.getMaterials().size() > 3;
     }
     
     public static TextColor getSlotColor(String slotName) {
