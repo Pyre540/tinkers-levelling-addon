@@ -20,6 +20,10 @@
   "tooltip.tinkerslevellingaddon.info.stats.durability": "Wytrzymałość: %s",
   "tooltip.tinkerslevellingaddon.info.stats.knockback_resistance": "Odporność na Odrzut: %s",
   "tooltip.tinkerslevellingaddon.info.stats.mining_speed": "Szybkość kopania: %s",
+  "tooltip.tinkerslevellingaddon.info.stats.draw_speed": "Szybkość naciągania: %s",
+  "tooltip.tinkerslevellingaddon.info.stats.velocity": "Prędkość: %s",
+  "tooltip.tinkerslevellingaddon.info.stats.accuracy": "Celność: %s",
+  "tooltip.tinkerslevellingaddon.info.stats.projectile_damage": "Obrażenia pocisku: %s",
   "tooltip.tinkerslevellingaddon.info.next_level": "Następny poziom",
   "tooltip.tinkerslevellingaddon.info.next_level.slot": "+1 slot %s",
   "tooltip.tinkerslevellingaddon.info.next_level.stat": "+%s %s",
@@ -36,6 +40,10 @@
   "tooltip.tinkerslevellingaddon.stat.durability": "Wytrzymałość",
   "tooltip.tinkerslevellingaddon.stat.knockback_resistance": "Odporność na Odrzut",
   "tooltip.tinkerslevellingaddon.stat.mining_speed": "Szybkość kopania",
+  "tooltip.tinkerslevellingaddon.stat.draw_speed": "Szybkość naciągania",
+  "tooltip.tinkerslevellingaddon.stat.velocity": "Prędkość",
+  "tooltip.tinkerslevellingaddon.stat.accuracy": "Celność",
+  "tooltip.tinkerslevellingaddon.stat.projectile_damage": "Obrażenia pocisku",
 
   "tooltip.tinkerslevellingaddon.xp": "PD: %s",
   "tooltip.tinkerslevellingaddon.xp.value": "%s / %s",
@@ -84,8 +92,10 @@
   "message.tinkerslevellingaddon.level_up.generic": "Twój %s osiągnął poziom %s!",
 
   "config.tinkerslevellingaddon.general.tools_slot_gaining_method": "Metoda zdobywania gniazd modyfikatorów dla narzędzi",
+  "config.tinkerslevellingaddon.general.ranged_slot_gaining_method": "Metoda zdobywania gniazd modyfikatorów dla broni dystansowych",
   "config.tinkerslevellingaddon.general.armor_slot_gaining_method": "Metoda zdobywania gniazd modyfikatorów dla zbroi",
   "config.tinkerslevellingaddon.general.tools_stat_gaining_method": "Metoda zdobywania statystyk dla narzędzi",
+  "config.tinkerslevellingaddon.general.ranged_stat_gaining_method": "Metoda zdobywania statystyk dla broni dystansowych",
   "config.tinkerslevellingaddon.general.armor_stat_gaining_method": "Metoda zdobywania statystyk dla zbroi",
   "config.tinkerslevellingaddon.general.max_level": "Maksymalny poziom narzędzia",
   "config.tinkerslevellingaddon.general.base_experience": "Podstawowa ilość doświadczenia",
@@ -94,11 +104,15 @@
 
   "config.tinkerslevellingaddon.general.slots.tools_slot_type_random_pool": "Pula losowych typów gniazd modyfikatorów dla narzędzi",
   "config.tinkerslevellingaddon.general.slots.tools_slot_type_order": "Kolejność typów gniazd modyfikatorów dla narzędzi",
+  "config.tinkerslevellingaddon.general.slots.ranged_slot_type_random_pool": "Pula losowych typów gniazd modyfikatorów dla broni dystansowych",
+  "config.tinkerslevellingaddon.general.slots.ranged_slot_type_order": "Kolejność typów gniazd modyfikatorów dla broni dystansowych",
   "config.tinkerslevellingaddon.general.slots.armor_slot_type_random_pool": "Pula losowych typów gniazd modyfikatorów dla zbroi",
   "config.tinkerslevellingaddon.general.slots.armor_slot_type_order": "Kolejność typów gniazd modyfikatorów dla zbroi",
 
   "config.tinkerslevellingaddon.general.stats.tools_stat_type_random_pool": "Pula losowych typów statystyk dla narzędzi",
   "config.tinkerslevellingaddon.general.stats.tools_stat_type_order": "Kolejność typów statystyk dla narzędzi",
+  "config.tinkerslevellingaddon.general.stats.ranged_stat_type_random_pool": "Pula losowych typów statystyk dla broni dystansowych",
+  "config.tinkerslevellingaddon.general.stats.ranged_stat_type_order": "Kolejność typów statystyk dla broni dystansowych",
   "config.tinkerslevellingaddon.general.stats.armor_stat_type_random_pool": "Pula losowych typów statystyk dla zbroi",
   "config.tinkerslevellingaddon.general.stats.armor_stat_type_order": "Kolejność typów statystyk dla zbroi",
 
@@ -125,6 +139,7 @@
   "config.tinkerslevellingaddon.levelling.actions.tilling": "Oranie",
   "config.tinkerslevellingaddon.levelling.actions.path_making": "Tworzenie ścieżki",
   "config.tinkerslevellingaddon.levelling.actions.attacking": "Zadawanie obrażeń",
+  "config.tinkerslevellingaddon.levelling.actions.shooting": "Strzelanie",
   "config.tinkerslevellingaddon.levelling.actions.taking_damage": "Otrzymywanie obrażeń",
   "config.tinkerslevellingaddon.levelling.actions.thorns": "Ciernie",
 
@@ -137,6 +152,7 @@
   "config.tinkerslevellingaddon.levelling.bonuses.tilling": "Oranie",
   "config.tinkerslevellingaddon.levelling.bonuses.path_making": "Tworzenie ścieżki",
   "config.tinkerslevellingaddon.levelling.bonuses.attacking": "Zadawanie obrażeń",
+  "config.tinkerslevellingaddon.levelling.bonuses.shooting": "Strzelanie",
   "config.tinkerslevellingaddon.levelling.bonuses.taking_damage": "Otrzymywanie obrażeń",
   "config.tinkerslevellingaddon.levelling.bonuses.thorns": "Ciernie",
 

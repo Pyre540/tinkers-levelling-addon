@@ -20,6 +20,10 @@
   "tooltip.tinkerslevellingaddon.info.stats.durability": "Durability: %s",
   "tooltip.tinkerslevellingaddon.info.stats.knockback_resistance": "Knockback Resistance: %s",
   "tooltip.tinkerslevellingaddon.info.stats.mining_speed": "Mining Speed: %s",
+  "tooltip.tinkerslevellingaddon.info.stats.draw_speed": "Draw Speed: %s",
+  "tooltip.tinkerslevellingaddon.info.stats.velocity": "Velocity: %s",
+  "tooltip.tinkerslevellingaddon.info.stats.accuracy": "Accuracy: %s",
+  "tooltip.tinkerslevellingaddon.info.stats.projectile_damage": "Projectile Damage: %s",
   "tooltip.tinkerslevellingaddon.info.next_level": "Next level",
   "tooltip.tinkerslevellingaddon.info.next_level.slot": "+1 %s slot",
   "tooltip.tinkerslevellingaddon.info.next_level.stat": "+%s %s",
@@ -36,6 +40,10 @@
   "tooltip.tinkerslevellingaddon.stat.durability": "Durability",
   "tooltip.tinkerslevellingaddon.stat.knockback_resistance": "Knockback Resistance",
   "tooltip.tinkerslevellingaddon.stat.mining_speed": "Mining Speed",
+  "tooltip.tinkerslevellingaddon.stat.draw_speed": "Draw Speed",
+  "tooltip.tinkerslevellingaddon.stat.velocity": "Velocity",
+  "tooltip.tinkerslevellingaddon.stat.accuracy": "Accuracy",
+  "tooltip.tinkerslevellingaddon.stat.projectile_damage": "Projectile Damage",
 
   "tooltip.tinkerslevellingaddon.xp": "XP: %s",
   "tooltip.tinkerslevellingaddon.xp.value": "%s / %s",
@@ -84,8 +92,10 @@
   "message.tinkerslevellingaddon.level_up.generic": "Your %s has reached level %s!",
 
   "config.tinkerslevellingaddon.general.tools_slot_gaining_method": "Tool modifier slots gaining method",
+  "config.tinkerslevellingaddon.general.ranged_slot_gaining_method": "Ranged weapons modifier slots gaining method",
   "config.tinkerslevellingaddon.general.armor_slot_gaining_method": "Armor modifier slots gaining method",
   "config.tinkerslevellingaddon.general.tools_stat_gaining_method": "Tool stats gaining method",
+  "config.tinkerslevellingaddon.general.ranged_stat_gaining_method": "Ranged weapons stats gaining method",
   "config.tinkerslevellingaddon.general.armor_stat_gaining_method": "Armor stats gaining method",
   "config.tinkerslevellingaddon.general.max_level": "Maximum tool level",
   "config.tinkerslevellingaddon.general.base_experience": "Base experience",
@@ -94,11 +104,15 @@
 
   "config.tinkerslevellingaddon.general.slots.tools_slot_type_random_pool": "Random tool modifier slot types pool",
   "config.tinkerslevellingaddon.general.slots.tools_slot_type_order": "Tool modifier slot types order",
+  "config.tinkerslevellingaddon.general.slots.ranged_slot_type_random_pool": "Random ranged weapons modifier slot types pool",
+  "config.tinkerslevellingaddon.general.slots.ranged_slot_type_order": "Ranged weapons modifier slot types order",
   "config.tinkerslevellingaddon.general.slots.armor_slot_type_random_pool": "Random Armor modifier slot types pool",
   "config.tinkerslevellingaddon.general.slots.armor_slot_type_order": "Armor modifier slot types order",
 
   "config.tinkerslevellingaddon.general.stats.tools_stat_type_random_pool": "Random tool stat types pool",
   "config.tinkerslevellingaddon.general.stats.tools_stat_type_order": "Tool stat types order",
+  "config.tinkerslevellingaddon.general.stats.ranged_stat_type_random_pool": "Random ranged weapons stat types pool",
+  "config.tinkerslevellingaddon.general.stats.ranged_stat_type_order": "Ranged weapons stat types order",
   "config.tinkerslevellingaddon.general.stats.armor_stat_type_random_pool": "Random armor stat types pool",
   "config.tinkerslevellingaddon.general.stats.armor_stat_type_order": "Armor stat types order",
 
@@ -125,6 +139,7 @@
   "config.tinkerslevellingaddon.levelling.actions.tilling": "Tilling",
   "config.tinkerslevellingaddon.levelling.actions.path_making": "Making paths",
   "config.tinkerslevellingaddon.levelling.actions.attacking": "Attacking",
+  "config.tinkerslevellingaddon.levelling.actions.shooting": "Shooting",
   "config.tinkerslevellingaddon.levelling.actions.taking_damage": "Taking damage",
   "config.tinkerslevellingaddon.levelling.actions.thorns": "Thorns",
 
@@ -137,6 +152,7 @@
   "config.tinkerslevellingaddon.levelling.bonuses.tilling": "Tilling",
   "config.tinkerslevellingaddon.levelling.bonuses.path_making": "Making paths",
   "config.tinkerslevellingaddon.levelling.bonuses.attacking": "Attacking",
+  "config.tinkerslevellingaddon.levelling.bonuses.shooting": "Shooting",
   "config.tinkerslevellingaddon.levelling.bonuses.taking_damage": "Taking damage",
   "config.tinkerslevellingaddon.levelling.bonuses.thorns": "Thorns",
 

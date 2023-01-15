@@ -5,6 +5,7 @@ import pyre.tinkerslevellingaddon.config.Config;
 import slimeknights.tconstruct.common.TinkerTags;
 import slimeknights.tconstruct.library.tools.SlotType;
 import slimeknights.tconstruct.library.tools.context.ToolRebuildContext;
+import slimeknights.tconstruct.library.tools.nbt.IToolContext;
 import slimeknights.tconstruct.library.tools.nbt.IToolStackView;
 import slimeknights.tconstruct.library.tools.nbt.ToolStack;
 import slimeknights.tconstruct.library.tools.stat.FloatToolStat;
@@ -27,12 +28,18 @@ public class ToolLevellingUtil {
     public static final String ARMOR = "armor";
     public static final String ARMOR_TOUGHNESS = "armorToughness";
     public static final String KNOCKBACK_RESISTANCE = "knockbackResistance";
+    //ranged
+    public static final String DRAW_SPEED = "drawSpeed";
+    public static final String VELOCITY = "velocity";
+    public static final String ACCURACY = "accuracy";
+    public static final String PROJECTILE_DAMAGE = "projectileDamage";
     
     private static final Map<String, SlotType> TOOL_SLOT_TYPES;
     private static final Map<String, SlotType> ARMOR_SLOT_TYPES;
     private static final Map<String, SlotType> ALL_SLOT_TYPES;
     
     private static final Map<String, FloatToolStat> TOOL_STAT_TYPES;
+    private static final Map<String, FloatToolStat> RANGED_STAT_TYPES;
     private static final Map<String, FloatToolStat> ARMOR_STAT_TYPES;
     private static final Map<String, FloatToolStat> ALL_STAT_TYPES;
     
@@ -55,6 +62,15 @@ public class ToolLevellingUtil {
         TOOL_STAT_TYPES.put(ATTACK_DAMAGE, ToolStats.ATTACK_DAMAGE);
         TOOL_STAT_TYPES.put(ATTACK_SPEED, ToolStats.ATTACK_SPEED);
         TOOL_STAT_TYPES.put(MINING_SPEED, ToolStats.MINING_SPEED);
+    
+        RANGED_STAT_TYPES = new LinkedHashMap<>();
+        RANGED_STAT_TYPES.put(DRAW_SPEED, ToolStats.DRAW_SPEED);
+        RANGED_STAT_TYPES.put(VELOCITY, ToolStats.VELOCITY);
+        RANGED_STAT_TYPES.put(ACCURACY, ToolStats.ACCURACY);
+        RANGED_STAT_TYPES.put(PROJECTILE_DAMAGE, ToolStats.PROJECTILE_DAMAGE);
+        RANGED_STAT_TYPES.put(DURABILITY, ToolStats.DURABILITY);
+        RANGED_STAT_TYPES.put(ATTACK_DAMAGE, ToolStats.ATTACK_DAMAGE);
+        RANGED_STAT_TYPES.put(ATTACK_SPEED, ToolStats.ATTACK_SPEED);
         
         ARMOR_STAT_TYPES = new LinkedHashMap<>();
         ARMOR_STAT_TYPES.put(DURABILITY, ToolStats.DURABILITY);
@@ -63,10 +79,16 @@ public class ToolLevellingUtil {
         ARMOR_STAT_TYPES.put(KNOCKBACK_RESISTANCE, ToolStats.KNOCKBACK_RESISTANCE);
         
         ALL_STAT_TYPES = new HashMap<>(TOOL_STAT_TYPES);
+        ALL_STAT_TYPES.putAll(RANGED_STAT_TYPES);
         ALL_STAT_TYPES.putAll(ARMOR_STAT_TYPES);
     }
     
     public static Set<String> getToolSlotTypes() {
+        return TOOL_SLOT_TYPES.keySet();
+    }
+    
+    public static Set<String> getRangedSlotTypes() {
+        //this probably always be the same as tools
         return TOOL_SLOT_TYPES.keySet();
     }
     
@@ -78,6 +100,10 @@ public class ToolLevellingUtil {
         return TOOL_STAT_TYPES.keySet();
     }
     
+    public static Set<String> getRangedStatTypes() {
+        return RANGED_STAT_TYPES.keySet();
+    }
+    
     public static Set<String> getArmorStatTypes() {
         return ARMOR_STAT_TYPES.keySet();
     }
@@ -86,6 +112,9 @@ public class ToolLevellingUtil {
         if (isArmor(context)) {
             return Config.armorSlotGainingMethod.get() != Config.GainingMethod.NONE;
         }
+        if (isRanged(context)) {
+            return Config.rangedSlotGainingMethod.get() != Config.GainingMethod.NONE;
+        }
         return Config.toolsSlotGainingMethod.get() != Config.GainingMethod.NONE;
     }
     
@@ -93,19 +122,30 @@ public class ToolLevellingUtil {
         if (isArmor(context)) {
             return Config.armorStatGainingMethod.get() != Config.GainingMethod.NONE;
         }
+        if (isRanged(context)) {
+            return Config.rangedStatGainingMethod.get() != Config.GainingMethod.NONE;
+        }
         return Config.toolsStatGainingMethod.get() != Config.GainingMethod.NONE;
     }
     
     public static boolean canPredictNextSlot(ToolStack tool) {
-        return isArmor(tool) ?
-                Config.armorSlotGainingMethod.get() == Config.GainingMethod.PREDEFINED_ORDER :
-                Config.toolsSlotGainingMethod.get() == Config.GainingMethod.PREDEFINED_ORDER;
+        if (isArmor(tool)) {
+            return Config.armorSlotGainingMethod.get() == Config.GainingMethod.PREDEFINED_ORDER;
+        }
+        if (isRanged(tool)) {
+            return Config.rangedSlotGainingMethod.get() == Config.GainingMethod.PREDEFINED_ORDER;
+        }
+        return Config.toolsSlotGainingMethod.get() == Config.GainingMethod.PREDEFINED_ORDER;
     }
     
     public static boolean canPredictNextStat(ToolStack tool) {
-        return isArmor(tool) ?
-                Config.armorStatGainingMethod.get() == Config.GainingMethod.PREDEFINED_ORDER :
-                Config.toolsStatGainingMethod.get() == Config.GainingMethod.PREDEFINED_ORDER;
+        if (isArmor(tool)) {
+            return Config.armorStatGainingMethod.get() == Config.GainingMethod.PREDEFINED_ORDER;
+        }
+        if (isRanged(tool)) {
+            return Config.rangedStatGainingMethod.get() == Config.GainingMethod.PREDEFINED_ORDER;
+        }
+        return Config.toolsStatGainingMethod.get() == Config.GainingMethod.PREDEFINED_ORDER;
     }
     
     public static String getSlot(ToolStack tool, int level) {
@@ -114,6 +154,14 @@ public class ToolLevellingUtil {
                 case NONE -> null;
                 case PREDEFINED_ORDER -> getArmorSlotForLevel(level);
                 case RANDOM -> getRandomArmorSlot();
+            };
+        }
+    
+        if (isRanged(tool)) {
+            return switch (Config.rangedSlotGainingMethod.get()) {
+                case NONE -> null;
+                case PREDEFINED_ORDER -> getRangedSlotForLevel(level);
+                case RANDOM -> getRandomRangedSlot();
             };
         }
         
@@ -132,6 +180,14 @@ public class ToolLevellingUtil {
                 case RANDOM -> getRandomArmorStat();
             };
         }
+    
+        if (isRanged(tool)) {
+            return switch (Config.rangedStatGainingMethod.get()) {
+                case NONE -> null;
+                case PREDEFINED_ORDER -> getRangedStatForLevel(level);
+                case RANDOM -> getRandomRangedStat();
+            };
+        }
         
         return switch (Config.toolsStatGainingMethod.get()) {
             case NONE -> null;
@@ -140,10 +196,18 @@ public class ToolLevellingUtil {
         };
     }
     
-    public static double getStatValue(ToolStack tool, String stat) {
-        return isArmor(tool) ?
-                Config.getArmorStatValue(ALL_STAT_TYPES.get(stat)) :
-                Config.getToolStatValue(ALL_STAT_TYPES.get(stat));
+    public static double getStatValue(IToolContext tool, String stat) {
+        return getStatValue(tool, ALL_STAT_TYPES.get(stat));
+    }
+    
+    public static double getStatValue(IToolContext tool, FloatToolStat stat) {
+        if (isArmor(tool)) {
+            return Config.getArmorStatValue(stat);
+        }
+        if (isRanged(tool)){
+            return Config.getRangedStatValue(stat);
+        }
+        return Config.getToolStatValue(stat);
     }
     
     public static List<SlotType> parseSlotsHistory(String historyString) {
@@ -191,12 +255,12 @@ public class ToolLevellingUtil {
         return experienceNeeded;
     }
     
-    public static boolean isArmor(ToolStack tool) {
+    public static boolean isArmor(IToolContext tool) {
         return tool.hasTag(TinkerTags.Items.ARMOR);
     }
     
-    public static boolean isArmor(ToolRebuildContext context) {
-        return context.hasTag(TinkerTags.Items.ARMOR);
+    public static boolean isRanged(IToolContext tool) {
+        return tool.hasTag(TinkerTags.Items.RANGED);
     }
     
     public static boolean isBroadTool(IToolStackView tool) {
@@ -221,6 +285,16 @@ public class ToolLevellingUtil {
         return toolsSlotsRandomPool.get(RANDOM.nextInt(toolsSlotsRandomPool.size()));
     }
     
+    private static String getRangedSlotForLevel(int level) {
+        List<String> toolsSlotsOrder = Config.getToolsSlotsOrder();
+        return toolsSlotsOrder.get((level - 1) % toolsSlotsOrder.size());
+    }
+    
+    private static String getRandomRangedSlot() {
+        List<String> toolsSlotsRandomPool = Config.getToolsSlotsRandomPool();
+        return toolsSlotsRandomPool.get(RANDOM.nextInt(toolsSlotsRandomPool.size()));
+    }
+    
     private static String getArmorSlotForLevel(int level) {
         List<String> armorSlotsOrder = Config.getArmorSlotsOrder();
         return armorSlotsOrder.get((level - 1) % armorSlotsOrder.size());
@@ -239,6 +313,16 @@ public class ToolLevellingUtil {
     private static String getRandomToolStat() {
         List<String> toolsStatsRandomPool = Config.getToolsStatsRandomPool();
         return toolsStatsRandomPool.get(RANDOM.nextInt(toolsStatsRandomPool.size()));
+    }
+    
+    private static String getRangedStatForLevel(int level) {
+        List<String> rangedStatsRotation = Config.getRangedStatsOrder();
+        return rangedStatsRotation.get((level - 1) % rangedStatsRotation.size());
+    }
+    
+    private static String getRandomRangedStat() {
+        List<String> rangedStatsRandomPool = Config.getRangedStatsRandomPool();
+        return rangedStatsRandomPool.get(RANDOM.nextInt(rangedStatsRandomPool.size()));
     }
     
     private static String getArmorStatForLevel(int level) {

@@ -11,10 +11,13 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.projectile.AbstractArrow;
+import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.common.ToolAction;
 import net.minecraftforge.common.ToolActions;
+import org.jetbrains.annotations.Nullable;
 import pyre.tinkerslevellingaddon.config.Config;
 import pyre.tinkerslevellingaddon.network.LevelUpPacket;
 import pyre.tinkerslevellingaddon.network.Messages;
@@ -23,6 +26,7 @@ import slimeknights.tconstruct.library.modifiers.ModifierEntry;
 import slimeknights.tconstruct.library.modifiers.TinkerHooks;
 import slimeknights.tconstruct.library.modifiers.hook.BlockTransformModifierHook;
 import slimeknights.tconstruct.library.modifiers.hook.PlantHarvestModifierHook;
+import slimeknights.tconstruct.library.modifiers.hook.ProjectileLaunchModifierHook;
 import slimeknights.tconstruct.library.modifiers.hook.ShearsModifierHook;
 import slimeknights.tconstruct.library.modifiers.impl.NoLevelsModifier;
 import slimeknights.tconstruct.library.modifiers.util.ModifierHookMap;
@@ -33,6 +37,7 @@ import slimeknights.tconstruct.library.tools.context.ToolHarvestContext;
 import slimeknights.tconstruct.library.tools.context.ToolRebuildContext;
 import slimeknights.tconstruct.library.tools.nbt.IToolStackView;
 import slimeknights.tconstruct.library.tools.nbt.ModDataNBT;
+import slimeknights.tconstruct.library.tools.nbt.NamespacedNBT;
 import slimeknights.tconstruct.library.tools.nbt.ToolStack;
 import slimeknights.tconstruct.library.tools.stat.FloatToolStat;
 import slimeknights.tconstruct.library.tools.stat.ModifierStatsBuilder;
@@ -42,7 +47,7 @@ import slimeknights.tconstruct.tools.TinkerModifiers;
 import java.util.List;
 
 public class ImprovableModifier extends NoLevelsModifier implements PlantHarvestModifierHook, ShearsModifierHook,
-        BlockTransformModifierHook {
+        BlockTransformModifierHook, ProjectileLaunchModifierHook {
 
     public static final ResourceLocation EXPERIENCE_KEY = new ResourceLocation(TinkersLevellingAddon.MOD_ID, "experience");
     public static final ResourceLocation LEVEL_KEY = new ResourceLocation(TinkersLevellingAddon.MOD_ID, "level");
@@ -52,7 +57,8 @@ public class ImprovableModifier extends NoLevelsModifier implements PlantHarvest
     @Override
     protected void registerHooks(ModifierHookMap.Builder hookBuilder) {
         super.registerHooks(hookBuilder);
-        hookBuilder.addHook(this, TinkerHooks.PLANT_HARVEST, TinkerHooks.SHEAR_ENTITY, TinkerHooks.BLOCK_TRANSFORM);
+        hookBuilder.addHook(this, TinkerHooks.PLANT_HARVEST, TinkerHooks.SHEAR_ENTITY, TinkerHooks.BLOCK_TRANSFORM,
+                TinkerHooks.PROJECTILE_LAUNCH);
     }
 
     @Override
@@ -79,9 +85,8 @@ public class ImprovableModifier extends NoLevelsModifier implements PlantHarvest
         if (ToolLevellingUtil.isStatsLevellingEnabled(context)) {
             List<FloatToolStat> stats =
                     ToolLevellingUtil.parseStatsHistory(context.getPersistentData().getString(STAT_HISTORY_KEY));
-            boolean isArmor = ToolLevellingUtil.isArmor(context);
             for (FloatToolStat stat : stats) {
-                stat.add(builder, isArmor ? Config.getArmorStatValue(stat) : Config.getToolStatValue(stat));
+                stat.add(builder, ToolLevellingUtil.getStatValue(context, stat));
             }
         }
     }
@@ -144,6 +149,21 @@ public class ImprovableModifier extends NoLevelsModifier implements PlantHarvest
         }
         int xp = (Config.damageTaken.get() ? Math.round(amount) : 1) + Config.bonusTakingDamageXp.get() + getThornsBonus(tool);
         addExperience(getHeldTool(player, slotType), xp, player);
+    }
+
+    @Override
+    public void onProjectileLaunch(IToolStackView tool, ModifierEntry modifier, LivingEntity shooter,
+                                   Projectile projectile, @Nullable AbstractArrow arrow, NamespacedNBT persistentData,
+                                   boolean primary) {
+        //no way to get tool context when the arrow lands, so reward xp on launch instead
+        if (!Config.enableShootingXp.get() || !(shooter instanceof ServerPlayer player)) {
+            return;
+        }
+        ToolStack toolStack = getHeldTool(player, InteractionHand.MAIN_HAND);
+        if (!isEqualTinkersItem(tool, toolStack)) {
+            toolStack = getHeldTool(player, InteractionHand.OFF_HAND);
+        }
+        addExperience(toolStack, 1 + Config.bonusShootingXp.get(), player);
     }
 
     //todo currently flint and brick and boots modifiers do not use blockTransform hook

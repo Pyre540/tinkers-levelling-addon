@@ -18,11 +18,15 @@ public class Config {
 
     private static final List<String> DEFAULT_TOOLS_SLOTS_ORDER = List.of(UPGRADE, UPGRADE, UPGRADE, ABILITY, UPGRADE);
     private static final List<String> DEFAULT_TOOLS_SLOTS_RANDOM_POOL = List.of(UPGRADE, UPGRADE, UPGRADE, UPGRADE, ABILITY);
+    private static final List<String> DEFAULT_RANGED_SLOTS_ORDER = List.of(UPGRADE, UPGRADE, UPGRADE, ABILITY, UPGRADE);
+    private static final List<String> DEFAULT_RANGED_SLOTS_RANDOM_POOL = List.of(UPGRADE, UPGRADE, UPGRADE, UPGRADE, ABILITY);
     private static final List<String> DEFAULT_ARMOR_SLOTS_ORDER = List.of(UPGRADE, DEFENSE, UPGRADE, ABILITY, DEFENSE);
     private static final List<String> DEFAULT_ARMOR_SLOTS_RANDOM_POOL = List.of(UPGRADE, UPGRADE, DEFENSE, DEFENSE, ABILITY);
 
     private static final List<String> DEFAULT_TOOLS_STATS_ORDER = List.of(DURABILITY, ATTACK_DAMAGE, ATTACK_SPEED, MINING_SPEED);
     private static final List<String> DEFAULT_TOOLS_STATS_RANDOM_POOL = List.of(DURABILITY, ATTACK_DAMAGE, ATTACK_SPEED, MINING_SPEED);
+    private static final List<String> DEFAULT_RANGED_STATS_ORDER = List.of(DURABILITY, DRAW_SPEED, VELOCITY, ACCURACY, PROJECTILE_DAMAGE);
+    private static final List<String> DEFAULT_RANGED_STATS_RANDOM_POOL = List.of(DURABILITY, DRAW_SPEED, VELOCITY, ACCURACY, PROJECTILE_DAMAGE);
     private static final List<String> DEFAULT_ARMOR_STATS_ORDER = List.of(DURABILITY, ARMOR, ARMOR_TOUGHNESS, KNOCKBACK_RESISTANCE);
     private static final List<String> DEFAULT_ARMOR_STATS_RANDOM_POOL = List.of(DURABILITY, ARMOR, ARMOR_TOUGHNESS, KNOCKBACK_RESISTANCE);
 
@@ -43,6 +47,8 @@ public class Config {
     //General
     public static ForgeConfigSpec.EnumValue<GainingMethod> toolsSlotGainingMethod;
     public static ForgeConfigSpec.EnumValue<GainingMethod> toolsStatGainingMethod;
+    public static ForgeConfigSpec.EnumValue<GainingMethod> rangedSlotGainingMethod;
+    public static ForgeConfigSpec.EnumValue<GainingMethod> rangedStatGainingMethod;
     public static ForgeConfigSpec.EnumValue<GainingMethod> armorSlotGainingMethod;
     public static ForgeConfigSpec.EnumValue<GainingMethod> armorStatGainingMethod;
     public static ForgeConfigSpec.IntValue maxLevel;
@@ -53,12 +59,16 @@ public class Config {
     //general.slots
     private static ForgeConfigSpec.ConfigValue<List<? extends String>> toolsSlotTypeRandomPool;
     private static ForgeConfigSpec.ConfigValue<List<? extends String>> toolsSlotTypeOrder;
+    private static ForgeConfigSpec.ConfigValue<List<? extends String>> rangedSlotTypeRandomPool;
+    private static ForgeConfigSpec.ConfigValue<List<? extends String>> rangedSlotTypeOrder;
     private static ForgeConfigSpec.ConfigValue<List<? extends String>> armorSlotTypeRandomPool;
     private static ForgeConfigSpec.ConfigValue<List<? extends String>> armorSlotTypeOrder;
 
     //general.stats
     private static ForgeConfigSpec.ConfigValue<List<? extends String>> toolsStatTypeRandomPool;
     private static ForgeConfigSpec.ConfigValue<List<? extends String>> toolsStatTypeOrder;
+    private static ForgeConfigSpec.ConfigValue<List<? extends String>> rangedStatTypeRandomPool;
+    private static ForgeConfigSpec.ConfigValue<List<? extends String>> rangedStatTypeOrder;
     private static ForgeConfigSpec.ConfigValue<List<? extends String>> armorStatTypeRandomPool;
     private static ForgeConfigSpec.ConfigValue<List<? extends String>> armorStatTypeOrder;
 
@@ -67,6 +77,15 @@ public class Config {
     public static ForgeConfigSpec.DoubleValue toolAttackDamageValue;
     public static ForgeConfigSpec.DoubleValue toolAttackSpeedValue;
     public static ForgeConfigSpec.DoubleValue toolMiningSpeedValue;
+    
+    //general.stats.rangedValues
+    public static ForgeConfigSpec.IntValue rangedDurabilityValue;
+    public static ForgeConfigSpec.DoubleValue rangedDrawSpeedValue;
+    public static ForgeConfigSpec.DoubleValue rangedVelocityValue;
+    public static ForgeConfigSpec.DoubleValue rangedAccuracyValue;
+    public static ForgeConfigSpec.DoubleValue rangedProjectileDamageValue;
+    public static ForgeConfigSpec.DoubleValue rangedAttackDamageValue;
+    public static ForgeConfigSpec.DoubleValue rangedAttackSpeedValue;
 
     //general.stats.armorValues
     public static ForgeConfigSpec.IntValue armorDurabilityValue;
@@ -89,6 +108,7 @@ public class Config {
     public static ForgeConfigSpec.BooleanValue enableTillingXp;
     public static ForgeConfigSpec.BooleanValue enablePathMakingXp;
     public static ForgeConfigSpec.BooleanValue enableAttackingXp;
+    public static ForgeConfigSpec.BooleanValue enableShootingXp;
     public static ForgeConfigSpec.BooleanValue enableTakingDamageXp;
     public static ForgeConfigSpec.BooleanValue enableThornsXp;
 
@@ -102,6 +122,7 @@ public class Config {
     public static ForgeConfigSpec.IntValue bonusTillingXp;
     public static ForgeConfigSpec.IntValue bonusPathMakingXp;
     public static ForgeConfigSpec.IntValue bonusAttackingXp;
+    public static ForgeConfigSpec.IntValue bonusShootingXp;
     public static ForgeConfigSpec.IntValue bonusTakingDamageXp;
     public static ForgeConfigSpec.IntValue bonusThornsXp;
 
@@ -116,6 +137,10 @@ public class Config {
         toolsSlotGainingMethod = builder.comment("Method of gaining modifier slots for tools.")
                 .translation("config.tinkerslevellingaddon.general.toolsSlotGainingMethod")
                 .defineEnum("toolsSlotGainingMethod", GainingMethod.PREDEFINED_ORDER, EnumGetMethod.NAME_IGNORECASE, GainingMethod.values());
+    
+        rangedSlotGainingMethod = builder.comment("Method of gaining modifier slots for ranged weapons.")
+                .translation("config.tinkerslevellingaddon.general.ranged_slot_gaining_method")
+                .defineEnum("rangedSlotGainingMethod", GainingMethod.PREDEFINED_ORDER, EnumGetMethod.NAME_IGNORECASE, GainingMethod.values());
 
         armorSlotGainingMethod = builder.comment("Method of gaining modifier slots for armor.")
                 .translation("config.tinkerslevellingaddon.general.armorSlotGainingMethod")
@@ -126,6 +151,10 @@ public class Config {
         toolsStatGainingMethod = builder.comment("Method of gaining stats for tools.")
                 .translation("config.tinkerslevellingaddon.general.toolsStatGainingMethod")
                 .defineEnum("toolsStatGainingMethod", GainingMethod.NONE, EnumGetMethod.NAME_IGNORECASE, GainingMethod.values());
+    
+        rangedStatGainingMethod = builder.comment("Method of gaining stats for tools.")
+                .translation("config.tinkerslevellingaddon.general.ranged_stat_gaining_method")
+                .defineEnum("rangedStatGainingMethod", GainingMethod.NONE, EnumGetMethod.NAME_IGNORECASE, GainingMethod.values());
 
         armorStatGainingMethod = builder.comment("Method of gaining stats for armor.")
                 .translation("config.tinkerslevellingaddon.general.armorStatGainingMethod")
@@ -166,6 +195,18 @@ public class Config {
                         "Allowed values: " + String.join(", ", getToolSlotTypes()))
                 .translation("config.tinkerslevellingaddon.general.slots.toolsSlotTypeOrder")
                 .defineList("toolsSlotTypeOrder", DEFAULT_TOOLS_SLOTS_ORDER, t -> getToolSlotTypes().contains(t));
+    
+        rangedSlotTypeRandomPool = builder.comment("Set of modifier slot types from which random slot will be awarded when leveling up ranged weapons.",
+                        "If empty default pool will be used (" + String.join(", ", DEFAULT_RANGED_SLOTS_RANDOM_POOL) + "). 80% chance for upgrade and 20% chance for ability.",
+                        "Allowed values: " + String.join(", ", getToolSlotTypes()))
+                .translation("config.tinkerslevellingaddon.general.slots.ranged_slot_type_random_pool")
+                .defineList("rangedSlotTypeRandomPool", DEFAULT_RANGED_SLOTS_RANDOM_POOL, t -> getRangedSlotTypes().contains(t));
+    
+        rangedSlotTypeOrder = builder.comment("List of modifier slot types (in order) that will be awarded when leveling up ranged weapons. If level is higher than list size the mod will start over.",
+                        "If empty default order will be used (" + String.join(", ", DEFAULT_RANGED_SLOTS_ORDER) + ").",
+                        "Allowed values: " + String.join(", ", getToolSlotTypes()))
+                .translation("config.tinkerslevellingaddon.general.slots.ranged_slot_type_order")
+                .defineList("rangedSlotTypeOrder", DEFAULT_RANGED_SLOTS_ORDER, t -> getRangedSlotTypes().contains(t));
 
         armorSlotTypeRandomPool = builder.comment("Set of modifier slot types from which random slot will be awarded when leveling up armor.",
                         "If empty default pool will be used (" + String.join(", ", DEFAULT_ARMOR_SLOTS_RANDOM_POOL) + ").",
@@ -198,6 +239,21 @@ public class Config {
                 .defineList("toolsStatTypeOrder", DEFAULT_TOOLS_STATS_ORDER, t -> getToolStatTypes().contains(t));
 
         toolStatsValuesConfig(builder);
+    
+    
+        rangedStatTypeRandomPool = builder.comment("Set of stat types from which random stat will be awarded when leveling up ranged weapons.",
+                        "If empty default pool will be used (" + String.join(", ", DEFAULT_RANGED_STATS_RANDOM_POOL) + ").",
+                        "Possible values: " + String.join(", ", getRangedStatTypes()))
+                .translation("config.tinkerslevellingaddon.general.stats.ranged_stat_type_random_pool")
+                .defineList("rangedStatTypeRandomPool", DEFAULT_RANGED_STATS_RANDOM_POOL, t -> getRangedStatTypes().contains(t));
+    
+        rangedStatTypeOrder = builder.comment("List of stat types (in order) that will be awarded when leveling up ranged weapons. If level is higher than list size the mod will start over.",
+                        "If empty default rotation will be used (" + String.join(", ", DEFAULT_RANGED_STATS_ORDER) + ").",
+                        "Possible values: " + String.join(", ", getRangedStatTypes()))
+                .translation("config.tinkerslevellingaddon.general.stats.ranged_stat_type_order")
+                .defineList("rangedStatTypeRotation", DEFAULT_RANGED_STATS_ORDER, t -> getRangedStatTypes().contains(t));
+    
+        rangedStatsValuesConfig(builder);
 
         armorStatTypeRandomPool = builder.comment("Set of stat types from which random stat will be awarded when leveling up armor.",
                         "If empty default pool will be used (" + String.join(", ", DEFAULT_ARMOR_STATS_RANDOM_POOL) + ").",
@@ -233,6 +289,33 @@ public class Config {
 
         builder.pop();
     }
+    
+    private static void rangedStatsValuesConfig(ForgeConfigSpec.Builder builder) {
+        builder.comment("Ranged weapons stat values rewarded on level ups").push("rangedValues");
+        
+        rangedDurabilityValue = builder.translation("tooltip.tinkerslevellingaddon.stat.durability")
+                .defineInRange(DURABILITY, 30, 1, 1000);
+    
+        rangedDrawSpeedValue = builder.translation("tooltip.tinkerslevellingaddon.stat.draw_speed")
+                .defineInRange(DRAW_SPEED, 0.1D, 0.1D, 10D);
+    
+        rangedVelocityValue = builder.translation("tooltip.tinkerslevellingaddon.stat.velocity")
+                .defineInRange(VELOCITY, 0.1D, 0.1D, 10D);
+    
+        rangedAccuracyValue = builder.translation("tooltip.tinkerslevellingaddon.stat.accuracy")
+                .defineInRange(ACCURACY, 0.01D, 0.01D, 1D);
+    
+        rangedProjectileDamageValue = builder.translation("tooltip.tinkerslevellingaddon.stat.projectile_damage")
+                .defineInRange(PROJECTILE_DAMAGE, 0.1D, 0.1D, 10D);
+    
+        rangedAttackDamageValue = builder.translation("tooltip.tinkerslevellingaddon.stat.attack_damage")
+                .defineInRange(ATTACK_DAMAGE, 0.5D, 0.1D, 10D);
+    
+        rangedAttackSpeedValue = builder.translation("tooltip.tinkerslevellingaddon.stat.attack_speed")
+                .defineInRange(ATTACK_SPEED, 0.25D, 0.1D, 10D);
+        
+        builder.pop();
+    }
 
     private static void armorStatsValuesConfig(ForgeConfigSpec.Builder builder) {
         builder.comment("Armor stat values rewarded on level ups").push("armorValues");
@@ -255,7 +338,7 @@ public class Config {
     private static void toolLevellingConfig(ForgeConfigSpec.Builder builder) {
         builder.comment("Tool levelling settings").push("toolLevelling");
 
-        damageDealt = builder.comment("If true, base experience value gained for attacking is equal to damage dealt (rounded to whole number), otherwise 1.")
+        damageDealt = builder.comment("Melee only!", "If true, base experience value gained for attacking is equal to damage dealt (rounded to whole number), otherwise 1.")
                 .translation("config.tinkerslevellingaddon.levelling.damageDealt")
                 .define("damageDealt", true);
         damageTaken = builder.comment("If true, base experience value gained for taking damage is equal to damage taken (rounded to whole number), otherwise 1.")
@@ -301,6 +384,10 @@ public class Config {
         enableAttackingXp = builder.translation("config.tinkerslevellingaddon.levelling.actions.attacking")
                 .define("attacking", true);
 
+        enableShootingXp = builder.comment("Applies to ranged weapons like longbows and crossbows.")
+                .translation("config.tinkerslevellingaddon.levelling.actions.shooting")
+                .define("shooting", true);
+
         enableTakingDamageXp = builder.comment("Applies to armor only.")
                 .translation("config.tinkerslevellingaddon.levelling.actions.takingDamage")
                 .define("takingDamage", true);
@@ -341,6 +428,9 @@ public class Config {
 
         bonusAttackingXp = builder.translation("config.tinkerslevellingaddon.levelling.bonuses.attacking")
                 .defineInRange("attacking", 0, 0, Integer.MAX_VALUE);
+
+        bonusShootingXp = builder.translation("config.tinkerslevellingaddon.levelling.bonuses.shooting")
+                .defineInRange("shooting", 0, 0, Integer.MAX_VALUE);
 
         bonusTakingDamageXp = builder.translation("config.tinkerslevellingaddon.levelling.bonuses.takingDamage")
                 .defineInRange("takingDamage", 0, 0, Integer.MAX_VALUE);
@@ -439,6 +529,22 @@ public class Config {
         return (List<String>) statsRandomPool;
     }
 
+    public static List<String> getRangedStatsOrder() {
+        List<? extends String> statsOrder = rangedStatTypeOrder.get();
+        if (statsOrder.isEmpty()) {
+            statsOrder = DEFAULT_RANGED_STATS_ORDER;
+        }
+        return (List<String>) statsOrder;
+    }
+
+    public static List<String> getRangedStatsRandomPool() {
+        List<? extends String> statsRandomPool = rangedStatTypeRandomPool.get();
+        if (statsRandomPool.isEmpty()) {
+            statsRandomPool = DEFAULT_RANGED_STATS_RANDOM_POOL;
+        }
+        return (List<String>) statsRandomPool;
+    }
+
     public static double getToolStatValue(FloatToolStat stat) {
         if (stat.equals(ToolStats.DURABILITY)) {
             return toolDurabilityValue.get();
@@ -451,6 +557,31 @@ public class Config {
         }
         if (stat.equals(ToolStats.MINING_SPEED)) {
             return toolMiningSpeedValue.get();
+        }
+        return 0;
+    }
+    
+    public static double getRangedStatValue(FloatToolStat stat) {
+        if (stat.equals(ToolStats.DRAW_SPEED)) {
+            return rangedDrawSpeedValue.get();
+        }
+        if (stat.equals(ToolStats.VELOCITY)) {
+            return rangedVelocityValue.get();
+        }
+        if (stat.equals(ToolStats.ACCURACY)) {
+            return rangedAccuracyValue.get();
+        }
+        if (stat.equals(ToolStats.PROJECTILE_DAMAGE)) {
+            return rangedProjectileDamageValue.get();
+        }
+        if (stat.equals(ToolStats.DURABILITY)) {
+            return rangedDurabilityValue.get();
+        }
+        if (stat.equals(ToolStats.ATTACK_DAMAGE)) {
+            return rangedAttackDamageValue.get();
+        }
+        if (stat.equals(ToolStats.ATTACK_SPEED)) {
+            return rangedAttackSpeedValue.get();
         }
         return 0;
     }
