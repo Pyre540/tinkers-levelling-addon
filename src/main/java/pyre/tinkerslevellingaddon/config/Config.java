@@ -159,11 +159,11 @@ public class Config {
                 .translation("config.tinkerslevellingaddon.general.modifiers.armorModifierTypeRandomOrder")
                 .define("armorModifierTypeRandomOrder", false);
 
-        armorModifierTypeRandomPool = builder.comment("Set of stat types from which random modifier will be awarded when leveling up armor.",
-                        "If empty default pool will be used (" + String.join(", ", DEFAULT_ARMOR_SLOTS_ROTATION) + ").",
+        armorModifierTypeRandomPool = builder.comment("Set of slot types from which random modifier will be awarded when leveling up armor.",
+                        "If empty default pool will be used (" + String.join(", ", DEFAULT_ARMOR_SLOTS_RANDOM_POOL) + ").",
                         "Possible values: " + String.join(", ", getArmorSlotTypes()))
                 .translation("config.tinkerslevellingaddon.general.modifiers.armorModifierTypeRandomPool")
-                .defineList("armorModifierTypeRandomPool", DEFAULT_ARMOR_SLOTS_ROTATION, t -> getArmorSlotTypes().contains(t));
+                .defineList("armorModifierTypeRandomPool", DEFAULT_ARMOR_SLOTS_RANDOM_POOL, t -> getArmorSlotTypes().contains(t));
 
         armorModifierTypeRotation = builder.comment("List of slot types (in order) that will be awarded when leveling up armor. If level is higher than list size the mod will start over.",
                         "If empty default rotation will be used (" + String.join(", ", DEFAULT_ARMOR_SLOTS_ROTATION) + ").",
@@ -187,7 +187,7 @@ public class Config {
                 .translation("config.tinkerslevellingaddon.general.stats.toolsStatTypeRandomPool")
                 .defineList("toolsStatTypeRandomPool", DEFAULT_TOOLS_STATS_RANDOM_POOL, t -> getToolStatTypes().contains(t));
 
-        toolsStatTypeRotation = builder.comment("List of slot types (in order) that will be awarded when leveling up tools. If level is higher than list size the mod will start over.",
+        toolsStatTypeRotation = builder.comment("List of stat types (in order) that will be awarded when leveling up tools. If level is higher than list size the mod will start over.",
                         "If empty default rotation will be used (" + String.join(", ", DEFAULT_TOOLS_STATS_ROTATION) + ").",
                         "Possible values: " + String.join(", ", getToolStatTypes()))
                 .translation("config.tinkerslevellingaddon.general.stats.toolsStatTypeRotation")
@@ -199,7 +199,7 @@ public class Config {
                 .translation("config.tinkerslevellingaddon.general.stats.armorStatTypeRandomOrder")
                 .define("armorStatTypeRandomOrder", false);
 
-        armorStatTypeRandomPool = builder.comment("Set of stat types from which random modifier will be awarded when leveling up armor.",
+        armorStatTypeRandomPool = builder.comment("Set of stat types from which random stat will be awarded when leveling up armor.",
                         "If empty default pool will be used (" + String.join(", ", DEFAULT_ARMOR_STATS_RANDOM_POOL) + ").",
                         "Possible values: " + String.join(", ", getArmorStatTypes()))
                 .translation("config.tinkerslevellingaddon.general.stats.armorStatTypeRandomPool")

@@ -97,7 +97,7 @@
 
   "config.tinkerslevellingaddon.general.stats.toolsStatTypeRandomOrder": "Random tool stats",
   "config.tinkerslevellingaddon.general.stats.toolsStatTypeRandomPool": "Random tool stat types pool",
-  "config.tinkerslevellingaddon.general.stats.toolsStatTypeRotation": "Tools stat types rotation",
+  "config.tinkerslevellingaddon.general.stats.toolsStatTypeRotation": "Tool stat types rotation",
   "config.tinkerslevellingaddon.general.stats.armorStatTypeRandomOrder": "Random armor stats",
   "config.tinkerslevellingaddon.general.stats.armorStatTypeRandomPool": "Random armor stat types pool",
   "config.tinkerslevellingaddon.general.stats.armorStatTypeRotation": "Armor stat types rotation",

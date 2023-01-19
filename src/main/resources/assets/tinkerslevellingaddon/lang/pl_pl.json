@@ -86,7 +86,7 @@
   "config.tinkerslevellingaddon.general.maxLevel": "Maksymalny poziom narzędzia",
   "config.tinkerslevellingaddon.general.baseExperience": "Podstawowa ilość doświadczenia",
   "config.tinkerslevellingaddon.general.requiredXpMultiplier": "Mnożnik doświadczenia na poziom",
-  "config.tinkerslevellingaddon.general.broadToolRequiredXpMultiplier": "Mnożnik wymaganego doświadczenia dla szerokich narzędzi",
+  "config.tinkerslevellingaddon.general.broadToolRequiredXpMultiplier": "Mnożnik wymaganego doświadczenia dla dużych narzędzi",
 
   "config.tinkerslevellingaddon.general.modifiers.toolsModifierTypeRandomOrder": "Losowe modyfikatory dla narzędzi",
   "config.tinkerslevellingaddon.general.modifiers.toolsModifierTypeRandomPool": "Pula losowych typów modyfikatorów dla narzędzi",
@@ -96,10 +96,10 @@
   "config.tinkerslevellingaddon.general.modifiers.armorModifierTypeRotation": "Sekwencja typów modyfikatorów dla zbroi",
 
   "config.tinkerslevellingaddon.general.stats.toolsStatTypeRandomOrder": "Losowe statystyki dla narzędzi",
-  "config.tinkerslevellingaddon.general.stats.toolsStatTypeRandomPool": "Pula losowych typów statyk dla narzędzi",
+  "config.tinkerslevellingaddon.general.stats.toolsStatTypeRandomPool": "Pula losowych typów statystyk dla narzędzi",
   "config.tinkerslevellingaddon.general.stats.toolsStatTypeRotation": "Sekwencja typów statystyk dla narzędzi",
   "config.tinkerslevellingaddon.general.stats.armorStatTypeRandomOrder": "Losowe statystyki dla zbroi",
-  "config.tinkerslevellingaddon.general.stats.armorStatTypeRandomPool": "Pula losowych typów statyk dla zbroi",
+  "config.tinkerslevellingaddon.general.stats.armorStatTypeRandomPool": "Pula losowych typów statystyk dla zbroi",
   "config.tinkerslevellingaddon.general.stats.armorStatTypeRotation": "Sekwencja typów statystyk dla zbroi",
 
   "config.tinkerslevellingaddon.general.stats.toolValues.durability": "Wytrzymałość",
