@@ -1,4 +1,5 @@
 # Tinkers' Levelling Addon
+[![curseforge](https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@2/assets/compact/available/curseforge_vector.svg)](https://www.curseforge.com/minecraft/mc-mods/tinkers-levelling-addon)
 
 Simple, **unofficial** addon mod for [Tinkers' Construct](https://www.curseforge.com/minecraft/mc-mods/tinkers-construct) for modern Minecraft versions. Based on the [Tinkers' Tool Leveling](https://www.curseforge.com/minecraft/mc-mods/tinkers-tool-leveling) addon for Minecraft 1.12.2.
 
