@@ -18,8 +18,7 @@ import net.minecraftforge.common.ToolActions;
 import pyre.tinkerslevellingaddon.config.Config;
 import pyre.tinkerslevellingaddon.network.LevelUpPacket;
 import pyre.tinkerslevellingaddon.network.Messages;
-import pyre.tinkerslevellingaddon.util.SlotAndStatUtil;
-import slimeknights.tconstruct.common.TinkerTags;
+import pyre.tinkerslevellingaddon.util.ToolLevellingUtil;
 import slimeknights.tconstruct.library.modifiers.ModifierEntry;
 import slimeknights.tconstruct.library.modifiers.TinkerHooks;
 import slimeknights.tconstruct.library.modifiers.hook.BlockTransformModifierHook;
@@ -32,7 +31,6 @@ import slimeknights.tconstruct.library.tools.context.EquipmentContext;
 import slimeknights.tconstruct.library.tools.context.ToolAttackContext;
 import slimeknights.tconstruct.library.tools.context.ToolHarvestContext;
 import slimeknights.tconstruct.library.tools.context.ToolRebuildContext;
-import slimeknights.tconstruct.library.tools.definition.ToolDefinition;
 import slimeknights.tconstruct.library.tools.nbt.IToolStackView;
 import slimeknights.tconstruct.library.tools.nbt.ModDataNBT;
 import slimeknights.tconstruct.library.tools.nbt.ToolStack;
@@ -40,13 +38,8 @@ import slimeknights.tconstruct.library.tools.stat.FloatToolStat;
 import slimeknights.tconstruct.library.tools.stat.ModifierStatsBuilder;
 import slimeknights.tconstruct.library.utils.RestrictedCompoundTag;
 import slimeknights.tconstruct.tools.TinkerModifiers;
-import slimeknights.tconstruct.tools.ToolDefinitions;
 
 import java.util.List;
-import java.util.Set;
-
-import static pyre.tinkerslevellingaddon.util.SlotAndStatUtil.parseSlotsHistory;
-import static pyre.tinkerslevellingaddon.util.SlotAndStatUtil.parseStatsHistory;
 
 public class ImprovableModifier extends NoLevelsModifier implements PlantHarvestModifierHook, ShearsModifierHook,
         BlockTransformModifierHook {
@@ -55,10 +48,6 @@ public class ImprovableModifier extends NoLevelsModifier implements PlantHarvest
     public static final ResourceLocation LEVEL_KEY = new ResourceLocation(TinkersLevellingAddon.MOD_ID, "level");
     public static final ResourceLocation MODIFIER_HISTORY_KEY = new ResourceLocation(TinkersLevellingAddon.MOD_ID, "modifier_history");
     public static final ResourceLocation STAT_HISTORY_KEY = new ResourceLocation(TinkersLevellingAddon.MOD_ID, "stat_history");
-
-    private static final Set<ToolDefinition> BROAD_TOOLS = Set.of(ToolDefinitions.SLEDGE_HAMMER,
-            ToolDefinitions.VEIN_HAMMER, ToolDefinitions.EXCAVATOR, ToolDefinitions.BROAD_AXE, ToolDefinitions.SCYTHE,
-            ToolDefinitions.CLEAVER);
 
     @Override
     protected void registerHooks(ModifierHookMap.Builder hookBuilder) {
@@ -76,8 +65,9 @@ public class ImprovableModifier extends NoLevelsModifier implements PlantHarvest
 
     @Override
     public void addVolatileData(ToolRebuildContext context, int level, ModDataNBT volatileData) {
-        if (Config.enableModifierSlots.get()) {
-            List<SlotType> slots = parseSlotsHistory(context.getPersistentData().getString(MODIFIER_HISTORY_KEY));
+        if (ToolLevellingUtil.isSlotsLevellingEnabled(context)) {
+            List<SlotType> slots =
+                    ToolLevellingUtil.parseSlotsHistory(context.getPersistentData().getString(MODIFIER_HISTORY_KEY));
             for (SlotType slot : slots) {
                 volatileData.addSlots(slot, 1);
             }
@@ -86,9 +76,10 @@ public class ImprovableModifier extends NoLevelsModifier implements PlantHarvest
 
     @Override
     public void addToolStats(ToolRebuildContext context, int level, ModifierStatsBuilder builder) {
-        if (Config.enableStats.get()) {
-            List<FloatToolStat> stats = parseStatsHistory(context.getPersistentData().getString(STAT_HISTORY_KEY));
-            boolean isArmor = context.hasTag(TinkerTags.Items.ARMOR);
+        if (ToolLevellingUtil.isStatsLevellingEnabled(context)) {
+            List<FloatToolStat> stats =
+                    ToolLevellingUtil.parseStatsHistory(context.getPersistentData().getString(STAT_HISTORY_KEY));
+            boolean isArmor = ToolLevellingUtil.isArmor(context);
             for (FloatToolStat stat : stats) {
                 stat.add(builder, isArmor ? Config.getArmorStatValue(stat) : Config.getToolStatValue(stat));
             }
@@ -185,24 +176,23 @@ public class ImprovableModifier extends NoLevelsModifier implements PlantHarvest
         ModDataNBT data = tool.getPersistentData();
         int currentLevel = data.getInt(LEVEL_KEY);
         int currentExperience = data.getInt(EXPERIENCE_KEY) + amount;
-        boolean isBroadTool = isBroadTool(tool);
-        int experienceNeeded = getXpNeededForLevel(currentLevel + 1, isBroadTool);
+        boolean isBroadTool = ToolLevellingUtil.isBroadTool(tool);
+        int experienceNeeded = ToolLevellingUtil.getXpNeededForLevel(currentLevel + 1, isBroadTool);
 
         while (currentExperience >= experienceNeeded) {
-            if (!canLevelUp(currentLevel)) {
+            if (!ToolLevellingUtil.canLevelUp(currentLevel)) {
                 return;
             }
             data.putInt(LEVEL_KEY, ++currentLevel);
             currentExperience -= experienceNeeded;
-            experienceNeeded = getXpNeededForLevel(currentLevel + 1, isBroadTool);
+            experienceNeeded = ToolLevellingUtil.getXpNeededForLevel(currentLevel + 1, isBroadTool);
 
-            boolean isArmor = tool.hasTag(TinkerTags.Items.ARMOR);
-            if (Config.enableModifierSlots.get()) {
-                String slotName = getSlotName(currentLevel, isArmor);
+            String slotName = ToolLevellingUtil.getSlot(tool, currentLevel);
+            if (slotName != null) {
                 appendHistory(MODIFIER_HISTORY_KEY, slotName, data);
             }
-            if (Config.enableStats.get()) {
-                String statName = getStatName(currentLevel, isArmor);
+            String statName = ToolLevellingUtil.getStat(tool, currentLevel);
+            if (statName != null) {
                 appendHistory(STAT_HISTORY_KEY, statName, data);
             }
 
@@ -213,30 +203,6 @@ public class ImprovableModifier extends NoLevelsModifier implements PlantHarvest
             Messages.sendToPlayer(new LevelUpPacket(currentLevel, toolName), player);
         }
         data.putInt(EXPERIENCE_KEY, currentExperience);
-    }
-
-    private String getSlotName(int level, boolean isArmor) {
-        if (!isArmor && !Config.toolsModifierTypeRandomOrder.get()) {
-            return SlotAndStatUtil.getToolSlotForLevel(level);
-        } else if (!isArmor && Config.toolsModifierTypeRandomOrder.get()) {
-            return SlotAndStatUtil.getRandomToolSlot();
-        } else if (isArmor && !Config.armorModifierTypeRandomOrder.get()) {
-            return SlotAndStatUtil.getArmorSlotForLevel(level);
-        } else { //random armor
-            return SlotAndStatUtil.getRandomArmorSlot();
-        }
-    }
-
-    private String getStatName(int level, boolean isArmor) {
-        if (!isArmor && !Config.toolsStatTypeRandomOrder.get()) {
-            return SlotAndStatUtil.getToolStatForLevel(level);
-        } else if (!isArmor && Config.toolsStatTypeRandomOrder.get()) {
-            return SlotAndStatUtil.getRandomToolStat();
-        } else if (isArmor && !Config.armorStatTypeRandomOrder.get()) {
-            return SlotAndStatUtil.getArmorStatForLevel(level);
-        } else { //random armor
-            return SlotAndStatUtil.getRandomArmorStat();
-        }
     }
 
     private void appendHistory(ResourceLocation historyKey, String value, ModDataNBT data) {
@@ -263,24 +229,5 @@ public class ImprovableModifier extends NoLevelsModifier implements PlantHarvest
             return 0;
         }
         return RANDOM.nextFloat() < (thornsLevel * 0.15f) ? 1 + RANDOM.nextInt(Config.bonusThornsXp.get() + 1) : 0;
-    }
-
-    public static int getXpNeededForLevel(int level, boolean isBroadTool) {
-        int experienceNeeded = Config.baseExperience.get();
-        if (level > 1) {
-            experienceNeeded = (int) (getXpNeededForLevel(level - 1, false) * Config.requiredXpMultiplier.get());
-        }
-        if (isBroadTool) {
-            experienceNeeded *= Config.broadToolRequiredXpMultiplier.get();
-        }
-        return experienceNeeded;
-    }
-
-    public static boolean canLevelUp(int level) {
-        return Config.maxLevel.get() == 0 || Config.maxLevel.get() > level;
-    }
-
-    public static boolean isBroadTool(IToolStackView tool) {
-        return BROAD_TOOLS.contains(tool.getDefinition());
     }
 }

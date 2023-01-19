@@ -12,18 +12,18 @@ import slimeknights.tconstruct.library.tools.stat.ToolStats;
 
 import java.util.List;
 
-import static pyre.tinkerslevellingaddon.util.SlotAndStatUtil.*;
+import static pyre.tinkerslevellingaddon.util.ToolLevellingUtil.*;
 
 public class Config {
 
-    private static final List<String> DEFAULT_TOOLS_SLOTS_ROTATION = List.of(UPGRADE, UPGRADE, UPGRADE, ABILITY, UPGRADE);
+    private static final List<String> DEFAULT_TOOLS_SLOTS_ORDER = List.of(UPGRADE, UPGRADE, UPGRADE, ABILITY, UPGRADE);
     private static final List<String> DEFAULT_TOOLS_SLOTS_RANDOM_POOL = List.of(UPGRADE, UPGRADE, UPGRADE, UPGRADE, ABILITY);
-    private static final List<String> DEFAULT_ARMOR_SLOTS_ROTATION = List.of(UPGRADE, DEFENSE, UPGRADE, ABILITY, DEFENSE);
+    private static final List<String> DEFAULT_ARMOR_SLOTS_ORDER = List.of(UPGRADE, DEFENSE, UPGRADE, ABILITY, DEFENSE);
     private static final List<String> DEFAULT_ARMOR_SLOTS_RANDOM_POOL = List.of(UPGRADE, UPGRADE, DEFENSE, DEFENSE, ABILITY);
 
-    private static final List<String> DEFAULT_TOOLS_STATS_ROTATION = List.of(DURABILITY, ATTACK_DAMAGE, ATTACK_SPEED, MINING_SPEED);
+    private static final List<String> DEFAULT_TOOLS_STATS_ORDER = List.of(DURABILITY, ATTACK_DAMAGE, ATTACK_SPEED, MINING_SPEED);
     private static final List<String> DEFAULT_TOOLS_STATS_RANDOM_POOL = List.of(DURABILITY, ATTACK_DAMAGE, ATTACK_SPEED, MINING_SPEED);
-    private static final List<String> DEFAULT_ARMOR_STATS_ROTATION = List.of(DURABILITY, ARMOR, ARMOR_TOUGHNESS, KNOCKBACK_RESISTANCE);
+    private static final List<String> DEFAULT_ARMOR_STATS_ORDER = List.of(DURABILITY, ARMOR, ARMOR_TOUGHNESS, KNOCKBACK_RESISTANCE);
     private static final List<String> DEFAULT_ARMOR_STATS_RANDOM_POOL = List.of(DURABILITY, ARMOR, ARMOR_TOUGHNESS, KNOCKBACK_RESISTANCE);
 
     public static final ForgeConfigSpec SERVER_CONFIG;
@@ -41,28 +41,26 @@ public class Config {
 
     //SERVER
     //General
-    public static ForgeConfigSpec.BooleanValue enableModifierSlots;
-    public static ForgeConfigSpec.BooleanValue enableStats;
+    public static ForgeConfigSpec.EnumValue<GainingMethod> toolsSlotGainingMethod;
+    public static ForgeConfigSpec.EnumValue<GainingMethod> toolsStatGainingMethod;
+    public static ForgeConfigSpec.EnumValue<GainingMethod> armorSlotGainingMethod;
+    public static ForgeConfigSpec.EnumValue<GainingMethod> armorStatGainingMethod;
     public static ForgeConfigSpec.IntValue maxLevel;
     public static ForgeConfigSpec.IntValue baseExperience;
     public static ForgeConfigSpec.DoubleValue requiredXpMultiplier;
     public static ForgeConfigSpec.DoubleValue broadToolRequiredXpMultiplier;
 
-    //general.modifiers
-    public static ForgeConfigSpec.BooleanValue toolsModifierTypeRandomOrder;
-    private static ForgeConfigSpec.ConfigValue<List<? extends String>> toolsModifierTypeRandomPool;
-    private static ForgeConfigSpec.ConfigValue<List<? extends String>> toolsModifierTypeRotation;
-    public static ForgeConfigSpec.BooleanValue armorModifierTypeRandomOrder;
-    private static ForgeConfigSpec.ConfigValue<List<? extends String>> armorModifierTypeRandomPool;
-    private static ForgeConfigSpec.ConfigValue<List<? extends String>> armorModifierTypeRotation;
+    //general.slots
+    private static ForgeConfigSpec.ConfigValue<List<? extends String>> toolsSlotTypeRandomPool;
+    private static ForgeConfigSpec.ConfigValue<List<? extends String>> toolsSlotTypeOrder;
+    private static ForgeConfigSpec.ConfigValue<List<? extends String>> armorSlotTypeRandomPool;
+    private static ForgeConfigSpec.ConfigValue<List<? extends String>> armorSlotTypeOrder;
 
     //general.stats
-    public static ForgeConfigSpec.BooleanValue toolsStatTypeRandomOrder;
     private static ForgeConfigSpec.ConfigValue<List<? extends String>> toolsStatTypeRandomPool;
-    private static ForgeConfigSpec.ConfigValue<List<? extends String>> toolsStatTypeRotation;
-    public static ForgeConfigSpec.BooleanValue armorStatTypeRandomOrder;
+    private static ForgeConfigSpec.ConfigValue<List<? extends String>> toolsStatTypeOrder;
     private static ForgeConfigSpec.ConfigValue<List<? extends String>> armorStatTypeRandomPool;
-    private static ForgeConfigSpec.ConfigValue<List<? extends String>> armorStatTypeRotation;
+    private static ForgeConfigSpec.ConfigValue<List<? extends String>> armorStatTypeOrder;
 
     //general.stats.toolValues
     public static ForgeConfigSpec.IntValue toolDurabilityValue;
@@ -115,15 +113,23 @@ public class Config {
     private static void generalConfig(ForgeConfigSpec.Builder builder) {
         builder.comment("General addon settings").push("general");
 
-        enableModifierSlots = builder.comment("If true, modifier slots will be rewarded on level ups.")
-                .translation("config.tinkerslevellingaddon.general.enableModifierSlots")
-                .define("enableModifierSlots", true);
+        toolsSlotGainingMethod = builder.comment("Method of gaining modifier slots for tools.")
+                .translation("config.tinkerslevellingaddon.general.toolsSlotGainingMethod")
+                .defineEnum("toolsSlotGainingMethod", GainingMethod.PREDEFINED_ORDER, EnumGetMethod.NAME_IGNORECASE, GainingMethod.values());
 
-        modifiersConfig(builder);
+        armorSlotGainingMethod = builder.comment("Method of gaining modifier slots for armor.")
+                .translation("config.tinkerslevellingaddon.general.armorSlotGainingMethod")
+                .defineEnum("armorSlotGainingMethod", GainingMethod.PREDEFINED_ORDER, EnumGetMethod.NAME_IGNORECASE, GainingMethod.values());
 
-        enableStats = builder.comment("If true, raw stats will be rewarded on level ups.")
-                .translation("config.tinkerslevellingaddon.general.enableStats")
-                .define("enableStats", false);
+        slotsConfig(builder);
+
+        toolsStatGainingMethod = builder.comment("Method of gaining stats for tools.")
+                .translation("config.tinkerslevellingaddon.general.toolsStatGainingMethod")
+                .defineEnum("toolsStatGainingMethod", GainingMethod.NONE, EnumGetMethod.NAME_IGNORECASE, GainingMethod.values());
+
+        armorStatGainingMethod = builder.comment("Method of gaining stats for armor.")
+                .translation("config.tinkerslevellingaddon.general.armorStatGainingMethod")
+                .defineEnum("armorStatGainingMethod", GainingMethod.NONE, EnumGetMethod.NAME_IGNORECASE, GainingMethod.values());
 
         statsConfig(builder);
 
@@ -139,47 +145,39 @@ public class Config {
                 .translation("config.tinkerslevellingaddon.general.requiredXpMultiplier")
                 .defineInRange("requiredXpMultiplier", 2D, 1D, 10D);
 
-        broadToolRequiredXpMultiplier = builder.comment("Additional modifier for broad tools for experience required to level up.")
+        broadToolRequiredXpMultiplier = builder.comment("Additional multiplier for broad tools for experience required to level up.")
                 .translation("config.tinkerslevellingaddon.general.broadToolRequiredXpMultiplier")
                 .defineInRange("broadToolRequiredXpMultiplier", 3D, 1D, 10D);
 
         builder.pop();
     }
 
-    private static void modifiersConfig(ForgeConfigSpec.Builder builder) {
-        builder.comment("Modifiers settings").push("modifiers");
+    private static void slotsConfig(ForgeConfigSpec.Builder builder) {
+        builder.comment("Modifier slots settings").push("slots");
 
-        toolsModifierTypeRandomOrder = builder.comment("If true, instead of defined rotation order, tool modifiers will be awarded randomly on level ups.")
-                .translation("config.tinkerslevellingaddon.general.modifiers.toolsModifierTypeRandomOrder")
-                .define("toolsModifierTypeRandomOrder", false);
-
-        toolsModifierTypeRandomPool = builder.comment("Set of modifier slot types from which random modifier will be awarded when leveling up tools.",
+        toolsSlotTypeRandomPool = builder.comment("Set of modifier slot types from which random slot will be awarded when leveling up tools.",
                         "If empty default pool will be used (" + String.join(", ", DEFAULT_TOOLS_SLOTS_RANDOM_POOL) + "). 80% chance for upgrade and 20% chance for ability.",
-                        "Possible values: " + String.join(", ", getToolSlotTypes()))
-                .translation("config.tinkerslevellingaddon.general.modifiers.toolsModifierTypeRandomPool")
-                .defineList("toolsModifierTypeRandomPool", DEFAULT_TOOLS_SLOTS_RANDOM_POOL, t -> getToolSlotTypes().contains(t));
+                        "Allowed values: " + String.join(", ", getToolSlotTypes()))
+                .translation("config.tinkerslevellingaddon.general.slots.toolsSlotTypeRandomPool")
+                .defineList("toolsSlotTypeRandomPool", DEFAULT_TOOLS_SLOTS_RANDOM_POOL, t -> getToolSlotTypes().contains(t));
 
-        toolsModifierTypeRotation = builder.comment("List of slot types (in order) that will be awarded when leveling up tools. If level is higher than list size the mod will start over.",
-                        "If empty default rotation will be used (" + String.join(", ", DEFAULT_TOOLS_SLOTS_ROTATION) + ").",
-                        "Possible values: " + String.join(", ", getToolSlotTypes()))
-                .translation("config.tinkerslevellingaddon.general.modifiers.toolsModifierTypeRotation")
-                .defineList("toolsModifierTypeRotation", DEFAULT_TOOLS_SLOTS_ROTATION, t -> getToolSlotTypes().contains(t));
+        toolsSlotTypeOrder = builder.comment("List of modifier slot types (in order) that will be awarded when leveling up tools. If level is higher than list size the mod will start over.",
+                        "If empty default order will be used (" + String.join(", ", DEFAULT_TOOLS_SLOTS_ORDER) + ").",
+                        "Allowed values: " + String.join(", ", getToolSlotTypes()))
+                .translation("config.tinkerslevellingaddon.general.slots.toolsSlotTypeOrder")
+                .defineList("toolsSlotTypeOrder", DEFAULT_TOOLS_SLOTS_ORDER, t -> getToolSlotTypes().contains(t));
 
-        armorModifierTypeRandomOrder = builder.comment("If true, instead of defined rotation order, armor modifiers will be awarded randomly on level ups.")
-                .translation("config.tinkerslevellingaddon.general.modifiers.armorModifierTypeRandomOrder")
-                .define("armorModifierTypeRandomOrder", false);
-
-        armorModifierTypeRandomPool = builder.comment("Set of stat types from which random modifier will be awarded when leveling up armor.",
-                        "If empty default pool will be used (" + String.join(", ", DEFAULT_ARMOR_SLOTS_ROTATION) + ").",
-                        "Possible values: " + String.join(", ", getArmorSlotTypes()))
+        armorSlotTypeRandomPool = builder.comment("Set of modifier slot types from which random slot will be awarded when leveling up armor.",
+                        "If empty default pool will be used (" + String.join(", ", DEFAULT_ARMOR_SLOTS_RANDOM_POOL) + ").",
+                        "Allowed values: " + String.join(", ", getArmorSlotTypes()))
                 .translation("config.tinkerslevellingaddon.general.modifiers.armorModifierTypeRandomPool")
-                .defineList("armorModifierTypeRandomPool", DEFAULT_ARMOR_SLOTS_ROTATION, t -> getArmorSlotTypes().contains(t));
+                .defineList("armorSlotTypeRandomPool", DEFAULT_ARMOR_SLOTS_RANDOM_POOL, t -> getArmorSlotTypes().contains(t));
 
-        armorModifierTypeRotation = builder.comment("List of slot types (in order) that will be awarded when leveling up armor. If level is higher than list size the mod will start over.",
-                        "If empty default rotation will be used (" + String.join(", ", DEFAULT_ARMOR_SLOTS_ROTATION) + ").",
-                        "Possible values: " + String.join(", ", getArmorSlotTypes()))
-                .translation("config.tinkerslevellingaddon.general.modifiers.armorModifierTypeRotation")
-                .defineList("armorModifierTypeRotation", DEFAULT_ARMOR_SLOTS_ROTATION, t -> getArmorSlotTypes().contains(t));
+        armorSlotTypeOrder = builder.comment("List of modifier slot types (in order) that will be awarded when leveling up armor. If level is higher than list size the mod will start over.",
+                        "If empty default order will be used (" + String.join(", ", DEFAULT_ARMOR_SLOTS_ORDER) + ").",
+                        "Allowed values: " + String.join(", ", getArmorSlotTypes()))
+                .translation("config.tinkerslevellingaddon.general.slots.armorSlotTypeOrder")
+                .defineList("armorSlotTypeOrder", DEFAULT_ARMOR_SLOTS_ORDER, t -> getArmorSlotTypes().contains(t));
 
         builder.pop();
     }
@@ -187,39 +185,31 @@ public class Config {
     private static void statsConfig(ForgeConfigSpec.Builder builder) {
         builder.comment("Stats settings").push("stats");
 
-        toolsStatTypeRandomOrder = builder.comment("If true, instead of defined rotation order, tool stats will be awarded randomly on level ups.")
-                .translation("config.tinkerslevellingaddon.general.stats.toolsStatTypeRandomOrder")
-                .define("toolsStatTypeRandomOrder", false);
-
         toolsStatTypeRandomPool = builder.comment("Set of stat types from which random stat will be awarded when leveling up tools.",
                         "If empty default pool will be used (" + String.join(", ", DEFAULT_TOOLS_STATS_RANDOM_POOL) + "). 25% chance for every stat.",
-                        "Possible values: " + String.join(", ", getToolStatTypes()))
+                        "Allowed values: " + String.join(", ", getToolStatTypes()))
                 .translation("config.tinkerslevellingaddon.general.stats.toolsStatTypeRandomPool")
                 .defineList("toolsStatTypeRandomPool", DEFAULT_TOOLS_STATS_RANDOM_POOL, t -> getToolStatTypes().contains(t));
 
-        toolsStatTypeRotation = builder.comment("List of slot types (in order) that will be awarded when leveling up tools. If level is higher than list size the mod will start over.",
-                        "If empty default rotation will be used (" + String.join(", ", DEFAULT_TOOLS_STATS_ROTATION) + ").",
-                        "Possible values: " + String.join(", ", getToolStatTypes()))
-                .translation("config.tinkerslevellingaddon.general.stats.toolsStatTypeRotation")
-                .defineList("toolsStatTypeRotation", DEFAULT_TOOLS_STATS_ROTATION, t -> getToolStatTypes().contains(t));
+        toolsStatTypeOrder = builder.comment("List of stat types (in order) that will be awarded when leveling up tools. If level is higher than list size the mod will start over.",
+                        "If empty default order will be used (" + String.join(", ", DEFAULT_TOOLS_STATS_ORDER) + ").",
+                        "Allowed values: " + String.join(", ", getToolStatTypes()))
+                .translation("config.tinkerslevellingaddon.general.stats.toolsStatTypeOrder")
+                .defineList("toolsStatTypeOrder", DEFAULT_TOOLS_STATS_ORDER, t -> getToolStatTypes().contains(t));
 
         toolStatsValuesConfig(builder);
 
-        armorStatTypeRandomOrder = builder.comment("If true, instead of defined rotation order, armor modifiers will be awarded randomly on level ups.")
-                .translation("config.tinkerslevellingaddon.general.stats.armorStatTypeRandomOrder")
-                .define("armorStatTypeRandomOrder", false);
-
-        armorStatTypeRandomPool = builder.comment("Set of stat types from which random modifier will be awarded when leveling up armor.",
+        armorStatTypeRandomPool = builder.comment("Set of stat types from which random stat will be awarded when leveling up armor.",
                         "If empty default pool will be used (" + String.join(", ", DEFAULT_ARMOR_STATS_RANDOM_POOL) + ").",
-                        "Possible values: " + String.join(", ", getArmorStatTypes()))
+                        "Allowed values: " + String.join(", ", getArmorStatTypes()))
                 .translation("config.tinkerslevellingaddon.general.stats.armorStatTypeRandomPool")
                 .defineList("armorStatTypeRandomPool", DEFAULT_ARMOR_STATS_RANDOM_POOL, t -> getArmorStatTypes().contains(t));
 
-        armorStatTypeRotation = builder.comment("List of stat types (in order) that will be awarded when leveling up armor. If level is higher than list size the mod will start over.",
-                        "If empty default rotation will be used (" + String.join(", ", DEFAULT_ARMOR_STATS_ROTATION) + ").",
-                        "Possible values: " + String.join(", ", getArmorStatTypes()))
-                .translation("config.tinkerslevellingaddon.general.stats.armorStatTypeRotation")
-                .defineList("armorStatTypeRotation", DEFAULT_ARMOR_STATS_ROTATION, t -> getArmorStatTypes().contains(t));
+        armorStatTypeOrder = builder.comment("List of stat types (in order) that will be awarded when leveling up armor. If level is higher than list size the mod will start over.",
+                        "If empty default order will be used (" + String.join(", ", DEFAULT_ARMOR_STATS_ORDER) + ").",
+                        "Allowed values: " + String.join(", ", getArmorStatTypes()))
+                .translation("config.tinkerslevellingaddon.general.stats.armorStatTypeOrder")
+                .defineList("armorStatTypeOrder", DEFAULT_ARMOR_STATS_ORDER, t -> getArmorStatTypes().contains(t));
 
         armorStatsValuesConfig(builder);
 
@@ -385,68 +375,68 @@ public class Config {
         ModLoadingContext.get().registerConfig(ModConfig.Type.CLIENT, CLIENT_CONFIG);
     }
 
-    public static List<String> getToolsSlotsRotation() {
-        List<? extends String> toolsRotation = toolsModifierTypeRotation.get();
-        if (toolsRotation.isEmpty()) {
-            toolsRotation = DEFAULT_TOOLS_SLOTS_ROTATION;
+    public static List<String> getToolsSlotsOrder() {
+        List<? extends String> slotsOrder = toolsSlotTypeOrder.get();
+        if (slotsOrder.isEmpty()) {
+            slotsOrder = DEFAULT_TOOLS_SLOTS_ORDER;
         }
-        return (List<String>) toolsRotation;
+        return (List<String>) slotsOrder;
     }
 
     public static List<String> getToolsSlotsRandomPool() {
-        List<? extends String> toolsRandomPool = toolsModifierTypeRandomPool.get();
-        if (toolsRandomPool.isEmpty()) {
-            toolsRandomPool = DEFAULT_TOOLS_SLOTS_RANDOM_POOL;
+        List<? extends String> slotsRandomPool = toolsSlotTypeRandomPool.get();
+        if (slotsRandomPool.isEmpty()) {
+            slotsRandomPool = DEFAULT_TOOLS_SLOTS_RANDOM_POOL;
         }
-        return (List<String>) toolsRandomPool;
+        return (List<String>) slotsRandomPool;
     }
 
-    public static List<String> getToolsStatsRotation() {
-        List<? extends String> toolsRotation = toolsStatTypeRotation.get();
-        if (toolsRotation.isEmpty()) {
-            toolsRotation = DEFAULT_TOOLS_STATS_ROTATION;
+    public static List<String> getToolsStatsOrder() {
+        List<? extends String> statsOrder = toolsStatTypeOrder.get();
+        if (statsOrder.isEmpty()) {
+            statsOrder = DEFAULT_TOOLS_STATS_ORDER;
         }
-        return (List<String>) toolsRotation;
+        return (List<String>) statsOrder;
     }
 
     public static List<String> getToolsStatsRandomPool() {
-        List<? extends String> toolsRandomPool = toolsStatTypeRandomPool.get();
-        if (toolsRandomPool.isEmpty()) {
-            toolsRandomPool = DEFAULT_TOOLS_STATS_RANDOM_POOL;
+        List<? extends String> statsRandomPool = toolsStatTypeRandomPool.get();
+        if (statsRandomPool.isEmpty()) {
+            statsRandomPool = DEFAULT_TOOLS_STATS_RANDOM_POOL;
         }
-        return (List<String>) toolsRandomPool;
+        return (List<String>) statsRandomPool;
     }
 
-    public static List<String> getArmorSlotsRotation() {
-        List<? extends String> armorRotation = armorModifierTypeRotation.get();
-        if (armorRotation.isEmpty()) {
-            armorRotation = DEFAULT_ARMOR_SLOTS_ROTATION;
+    public static List<String> getArmorSlotsOrder() {
+        List<? extends String> slotsOrder = armorSlotTypeOrder.get();
+        if (slotsOrder.isEmpty()) {
+            slotsOrder = DEFAULT_ARMOR_SLOTS_ORDER;
         }
-        return (List<String>) armorRotation;
+        return (List<String>) slotsOrder;
     }
 
     public static List<String> getArmorSlotsRandomPool() {
-        List<? extends String> armorRandomPool = armorModifierTypeRandomPool.get();
-        if (armorRandomPool.isEmpty()) {
-            armorRandomPool = DEFAULT_ARMOR_SLOTS_RANDOM_POOL;
+        List<? extends String> slotsRandomPool = armorSlotTypeRandomPool.get();
+        if (slotsRandomPool.isEmpty()) {
+            slotsRandomPool = DEFAULT_ARMOR_SLOTS_RANDOM_POOL;
         }
-        return (List<String>) armorRandomPool;
+        return (List<String>) slotsRandomPool;
     }
 
-    public static List<String> getArmorStatsRotation() {
-        List<? extends String> armorRotation = armorStatTypeRotation.get();
-        if (armorRotation.isEmpty()) {
-            armorRotation = DEFAULT_ARMOR_STATS_ROTATION;
+    public static List<String> getArmorStatsOrder() {
+        List<? extends String> statsOrder = armorStatTypeOrder.get();
+        if (statsOrder.isEmpty()) {
+            statsOrder = DEFAULT_ARMOR_STATS_ORDER;
         }
-        return (List<String>) armorRotation;
+        return (List<String>) statsOrder;
     }
 
     public static List<String> getArmorStatsRandomPool() {
-        List<? extends String> armorRandomPool = armorStatTypeRandomPool.get();
-        if (armorRandomPool.isEmpty()) {
-            armorRandomPool = DEFAULT_ARMOR_STATS_RANDOM_POOL;
+        List<? extends String> statsRandomPool = armorStatTypeRandomPool.get();
+        if (statsRandomPool.isEmpty()) {
+            statsRandomPool = DEFAULT_ARMOR_STATS_RANDOM_POOL;
         }
-        return (List<String>) armorRandomPool;
+        return (List<String>) statsRandomPool;
     }
 
     public static double getToolStatValue(FloatToolStat stat) {
@@ -496,5 +486,11 @@ public class Config {
         public SoundEvent getSoundEvent() {
             return soundEvent == null ? null : soundEvent.get();
         }
+    }
+
+    public enum GainingMethod {
+        NONE,
+        PREDEFINED_ORDER,
+        RANDOM
     }
 }

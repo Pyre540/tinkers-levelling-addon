@@ -14,10 +14,9 @@ import net.minecraftforge.fml.common.Mod;
 import pyre.tinkerslevellingaddon.ImprovableModifier;
 import pyre.tinkerslevellingaddon.TinkersLevellingAddon;
 import pyre.tinkerslevellingaddon.config.Config;
-import pyre.tinkerslevellingaddon.util.SlotAndStatUtil;
+import pyre.tinkerslevellingaddon.util.ToolLevellingUtil;
 import slimeknights.tconstruct.library.tools.helper.ModifierUtil;
 import slimeknights.tconstruct.library.tools.helper.TooltipUtil;
-import slimeknights.tconstruct.library.tools.nbt.ModDataNBT;
 import slimeknights.tconstruct.library.tools.nbt.ToolStack;
 
 import java.awt.*;
@@ -25,8 +24,6 @@ import java.util.*;
 import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-
-import static slimeknights.tconstruct.common.TinkerTags.Items.ARMOR;
 
 @Mod.EventBusSubscriber(modid = TinkersLevellingAddon.MOD_ID, value = Dist.CLIENT, bus = Mod.EventBusSubscriber.Bus.FORGE)
 public class ClientEventHandler {
@@ -81,14 +78,13 @@ public class ClientEventHandler {
 
         List<Component> infoEntries = new ArrayList<>();
         ToolStack tool = ToolStack.from(stack);
-        ModDataNBT data = tool.getPersistentData();
         if (activeModifierKey == KeyModifier.ALT) {
             infoEntries.add(event.getToolTip().get(0));
-            infoEntries.addAll(prepareLevelInfo(tool, data));
+            infoEntries.addAll(prepareLevelInfo(tool));
             event.getToolTip().clear();
             event.getToolTip().addAll(infoEntries);
         } else {
-            infoEntries = prepareGeneralInfo(tool, data);
+            infoEntries = prepareGeneralInfo(tool);
             //add tooltips under tool durability
             for (int i = 2; i < infoEntries.size() + 2; i++) {
                 event.getToolTip().add(i, infoEntries.get(i - 2));
@@ -96,31 +92,30 @@ public class ClientEventHandler {
         }
     }
 
-    private static List<Component> prepareGeneralInfo(ToolStack tool, ModDataNBT data) {
+    private static List<Component> prepareGeneralInfo(ToolStack tool) {
         List<Component> infoEntries = new ArrayList<>();
-        int level = data.getInt(ImprovableModifier.LEVEL_KEY);
+        int level = tool.getPersistentData().getInt(ImprovableModifier.LEVEL_KEY);
 
         MutableComponent levelTooltip = new TranslatableComponent(TOOLTIP_LEVEL_KEY,
                 new TextComponent(getLevelName(level)).withStyle(s -> s.withColor(getLevelColor(level))))
                 .append(new TextComponent(" [" + level + "]").withStyle(ChatFormatting.GRAY));
         infoEntries.add(levelTooltip);
 
-        if (ImprovableModifier.canLevelUp(level)) {
-            MutableComponent xp = new TextComponent("" + data.getInt(ImprovableModifier.EXPERIENCE_KEY))
+        if (ToolLevellingUtil.canLevelUp(level)) {
+            MutableComponent xp = new TextComponent("" + tool.getPersistentData().getInt(ImprovableModifier.EXPERIENCE_KEY))
                     .withStyle(ChatFormatting.GOLD);
-            MutableComponent xpNeeded = new TextComponent("" + ImprovableModifier.getXpNeededForLevel(level + 1,
-                    ImprovableModifier.isBroadTool(tool))).withStyle(ChatFormatting.GOLD);
+            MutableComponent xpNeeded = new TextComponent("" + ToolLevellingUtil.getXpNeededForLevel(level + 1,
+                    ToolLevellingUtil.isBroadTool(tool))).withStyle(ChatFormatting.GOLD);
             TranslatableComponent xpTooltip = new TranslatableComponent(TOOLTIP_XP_KEY, xp, xpNeeded);
             infoEntries.add(xpTooltip);
         }
         return infoEntries;
     }
 
-    private static List<Component> prepareLevelInfo(ToolStack tool, ModDataNBT data) {
+    private static List<Component> prepareLevelInfo(ToolStack tool) {
         List<Component> infoEntries = new ArrayList<>();
-        boolean isArmor = tool.hasTag(ARMOR);
 
-        String modifierHistory = data.getString(ImprovableModifier.MODIFIER_HISTORY_KEY);
+        String modifierHistory = tool.getPersistentData().getString(ImprovableModifier.MODIFIER_HISTORY_KEY);
         if (!modifierHistory.isBlank()) {
             Map<String, Long> gainedModifiers = Arrays.stream(modifierHistory.split(";"))
                     .sorted(Comparator.reverseOrder())
@@ -129,34 +124,32 @@ public class ClientEventHandler {
             for (Map.Entry<String, Long> entry : gainedModifiers.entrySet()) {
                 TranslatableComponent modifierEntry = new TranslatableComponent(TOOLTIP_MODIFIERS_KEY + entry.getKey(),
                         new TextComponent("" + entry.getValue())
-                                .withStyle(s -> s.withColor(SlotAndStatUtil.getModifierColor(entry.getKey()))));
+                                .withStyle(s -> s.withColor(ToolLevellingUtil.getSlotColor(entry.getKey()))));
                 infoEntries.add(modifierEntry);
             }
         }
 
-        String statHistory = data.getString(ImprovableModifier.STAT_HISTORY_KEY);
+        String statHistory = tool.getPersistentData().getString(ImprovableModifier.STAT_HISTORY_KEY);
         if (!statHistory.isBlank()) {
             if (!infoEntries.isEmpty()) {
                 infoEntries.add(TextComponent.EMPTY);
             }
-            Map<String, Double> gainedStats = Arrays.stream(statHistory.split(";"))
+            Map<String, Double> gainedStats = new LinkedHashMap<>();
+            Arrays.stream(statHistory.split(";"))
                     .sorted()
-                    .collect(Collectors.groupingBy(Function.identity(), LinkedHashMap::new,
-                            Collectors.summingDouble(s -> isArmor ?
-                                    Config.getArmorStatValue(SlotAndStatUtil.getStatForName(s)) :
-                                    Config.getToolStatValue(SlotAndStatUtil.getStatForName(s)))));
+                    .forEach(s -> gainedStats.merge(s, ToolLevellingUtil.getStatValue(tool, s), Double::sum));
             //vanilla multiplies knockback resistance by 10
-            gainedStats.computeIfPresent(SlotAndStatUtil.KNOCKBACK_RESISTANCE, (k, v) -> v * 10);
+            gainedStats.computeIfPresent(ToolLevellingUtil.KNOCKBACK_RESISTANCE, (k, v) -> v * 10);
             infoEntries.add(TOOLTIP_STATS_GAINED);
             for (Map.Entry<String, Double> entry : gainedStats.entrySet()) {
                 TranslatableComponent statEntry = new TranslatableComponent(TOOLTIP_STATS_KEY + entry.getKey(),
                         new TextComponent("" + entry.getValue())
-                                .withStyle(s -> s.withColor(SlotAndStatUtil.getStatColor(entry.getKey()))));
+                                .withStyle(s -> s.withColor(ToolLevellingUtil.getStatColor(entry.getKey()))));
                 infoEntries.add(statEntry);
             }
         }
 
-        List<Component> nextLevelInfo = prepareNextLevelInfo(data, isArmor);
+        List<Component> nextLevelInfo = prepareNextLevelInfo(tool);
         if (!infoEntries.isEmpty() && !nextLevelInfo.isEmpty()) {
             infoEntries.add(TextComponent.EMPTY);
         }
@@ -165,36 +158,31 @@ public class ClientEventHandler {
         return infoEntries;
     }
 
-    private static List<Component> prepareNextLevelInfo(ModDataNBT data, boolean isArmor) {
+    private static List<Component> prepareNextLevelInfo(ToolStack tool) {
         List<Component> infoEntries = new ArrayList<>();
-        int level = data.getInt(ImprovableModifier.LEVEL_KEY);
-        boolean canLevelUp = ImprovableModifier.canLevelUp(level);
-        boolean isRandomModifier = isArmor ? Config.armorModifierTypeRandomOrder.get() :
-                Config.toolsModifierTypeRandomOrder.get();
-        boolean isRandomStat = isArmor ? Config.armorStatTypeRandomOrder.get() : Config.toolsStatTypeRandomOrder.get();
+        int level = tool.getPersistentData().getInt(ImprovableModifier.LEVEL_KEY);
+        boolean canLevelUp = ToolLevellingUtil.canLevelUp(level);
+        boolean knowNextSlot = ToolLevellingUtil.canPredictNextSlot(tool);
+        boolean knowNextStat = ToolLevellingUtil.canPredictNextStat(tool);
 
-        if (canLevelUp && (Config.enableModifierSlots.get() || Config.enableStats.get()) &&
-                (!isRandomModifier || !isRandomStat)) {
+        if (canLevelUp && (knowNextSlot || knowNextStat)) {
             infoEntries.add(TOOLTIP_NEXT_LEVEL);
-            if (Config.enableModifierSlots.get() && !isRandomModifier) {
-                String nextSlot = isArmor ? SlotAndStatUtil.getArmorSlotForLevel(level + 1) :
-                        SlotAndStatUtil.getToolSlotForLevel(level + 1);
+            if (knowNextSlot) {
+                String nextSlot = ToolLevellingUtil.getSlot(tool, level + 1);
                 infoEntries.add(new TranslatableComponent(TOOLTIP_NEXT_MODIFIER_KEY,
                         new TranslatableComponent(TOOLTIP_MODIFIER_KEY + nextSlot)
-                                .withStyle(s -> s.withColor(SlotAndStatUtil.getModifierColor(nextSlot)))));
+                                .withStyle(s -> s.withColor(ToolLevellingUtil.getSlotColor(nextSlot)))));
             }
-            if (Config.enableStats.get() && !isRandomStat) {
-                String nextStat = isArmor ? SlotAndStatUtil.getArmorStatForLevel(level + 1) :
-                        SlotAndStatUtil.getToolStatForLevel(level + 1);
-                double statValue = isArmor ? Config.getArmorStatValue(SlotAndStatUtil.getStatForName(nextStat)) :
-                        Config.getToolStatValue(SlotAndStatUtil.getStatForName(nextStat));
+            if (knowNextStat) {
+                String nextStat = ToolLevellingUtil.getStat(tool, level + 1);
+                double statValue = ToolLevellingUtil.getStatValue(tool, nextStat);
                 //vanilla multiplies knockback resistance by 10
-                if (nextStat.equals(SlotAndStatUtil.KNOCKBACK_RESISTANCE)) {
+                if (nextStat.equals(ToolLevellingUtil.KNOCKBACK_RESISTANCE)) {
                     statValue *= 10;
                 }
                 infoEntries.add(new TranslatableComponent(TOOLTIP_NEXT_STAT_KEY,
                         new TextComponent(ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(statValue))
-                                .withStyle(s -> s.withColor(SlotAndStatUtil.getStatColor(nextStat))),
+                                .withStyle(s -> s.withColor(ToolLevellingUtil.getStatColor(nextStat))),
                         new TranslatableComponent(TOOLTIP_STAT_KEY + nextStat)));
             }
         }
