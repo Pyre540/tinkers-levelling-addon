@@ -146,7 +146,7 @@ public class ClientEventHandler {
             infoEntries.add(TOOLTIP_STATS_GAINED);
             for (Map.Entry<String, Double> entry : gainedStats.entrySet()) {
                 TranslationTextComponent statEntry = new TranslationTextComponent(TOOLTIP_STATS_KEY + entry.getKey(),
-                        new StringTextComponent("" + entry.getValue())
+                        new StringTextComponent("" + ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(entry.getValue()))
                                 .withStyle(s -> s.withColor(SlotAndStatUtil.getStatColor(entry.getKey()))));
                 infoEntries.add(statEntry);
             }
