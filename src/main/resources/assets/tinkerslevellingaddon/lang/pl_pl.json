@@ -37,7 +37,7 @@
   "tooltip.tinkerslevellingaddon.improvable.tooltip.info.stat.knockbackResistance": "Odporność na Odrzut",
   "tooltip.tinkerslevellingaddon.improvable.tooltip.info.stat.miningSpeed": "Szybkość kopania",
 
-  "tooltip.tinkerslevellingaddon.improvable.tooltip.xp": "PD: %s/%s",
+  "tooltip.tinkerslevellingaddon.improvable.tooltip.xp": "PD: %s / %s",
   "tooltip.tinkerslevellingaddon.improvable.tooltip.level": "Poziom: %s",
   "tooltip.tinkerslevellingaddon.improvable.tooltip.level.0": "Jak Nowy",
   "tooltip.tinkerslevellingaddon.improvable.tooltip.level.1": "Niezdarny",

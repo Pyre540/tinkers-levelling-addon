@@ -37,7 +37,7 @@
   "tooltip.tinkerslevellingaddon.improvable.tooltip.info.stat.knockbackResistance": "Knockback Resistance",
   "tooltip.tinkerslevellingaddon.improvable.tooltip.info.stat.miningSpeed": "Mining Speed",
 
-  "tooltip.tinkerslevellingaddon.improvable.tooltip.xp": "XP: %s/%s",
+  "tooltip.tinkerslevellingaddon.improvable.tooltip.xp": "XP: %s / %s",
   "tooltip.tinkerslevellingaddon.improvable.tooltip.level": "Level: %s",
   "tooltip.tinkerslevellingaddon.improvable.tooltip.level.0": "Like new",
   "tooltip.tinkerslevellingaddon.improvable.tooltip.level.1": "Clumsy",
