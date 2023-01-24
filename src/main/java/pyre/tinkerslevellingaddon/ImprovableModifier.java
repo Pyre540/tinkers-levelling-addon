@@ -2,6 +2,7 @@ package pyre.tinkerslevellingaddon;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextColor;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -21,6 +22,7 @@ import org.jetbrains.annotations.Nullable;
 import pyre.tinkerslevellingaddon.config.Config;
 import pyre.tinkerslevellingaddon.network.LevelUpPacket;
 import pyre.tinkerslevellingaddon.network.Messages;
+import pyre.tinkerslevellingaddon.util.ModUtil;
 import pyre.tinkerslevellingaddon.util.ToolLevellingUtil;
 import slimeknights.tconstruct.library.modifiers.ModifierEntry;
 import slimeknights.tconstruct.library.modifiers.TinkerHooks;
@@ -48,12 +50,14 @@ import java.util.List;
 
 public class ImprovableModifier extends NoLevelsModifier implements PlantHarvestModifierHook, ShearsModifierHook,
         BlockTransformModifierHook, ProjectileLaunchModifierHook {
-
-    public static final ResourceLocation EXPERIENCE_KEY = new ResourceLocation(TinkersLevellingAddon.MOD_ID, "experience");
-    public static final ResourceLocation LEVEL_KEY = new ResourceLocation(TinkersLevellingAddon.MOD_ID, "level");
-    public static final ResourceLocation MODIFIER_HISTORY_KEY = new ResourceLocation(TinkersLevellingAddon.MOD_ID, "modifier_history");
-    public static final ResourceLocation STAT_HISTORY_KEY = new ResourceLocation(TinkersLevellingAddon.MOD_ID, "stat_history");
-
+    
+    public static final TextColor IMPROVABLE_MODIFIER_COLOR = TextColor.fromRgb(9337340);
+    
+    public static final ResourceLocation EXPERIENCE_KEY = ModUtil.getResource("experience");
+    public static final ResourceLocation LEVEL_KEY = ModUtil.getResource("level");
+    public static final ResourceLocation MODIFIER_HISTORY_KEY = ModUtil.getResource("modifier_history");
+    public static final ResourceLocation STAT_HISTORY_KEY = ModUtil.getResource("stat_history");
+    
     @Override
     protected void registerHooks(ModifierHookMap.Builder hookBuilder) {
         super.registerHooks(hookBuilder);

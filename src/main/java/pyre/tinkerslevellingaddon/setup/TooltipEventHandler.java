@@ -1,7 +1,6 @@
 package pyre.tinkerslevellingaddon.setup;
 
 import net.minecraft.ChatFormatting;
-import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.*;
@@ -28,22 +27,18 @@ import java.util.stream.Collectors;
 
 @Mod.EventBusSubscriber(modid = TinkersLevellingAddon.MOD_ID, value = Dist.CLIENT, bus = Mod.EventBusSubscriber.Bus.FORGE)
 public class TooltipEventHandler {
-
-    private static final TextColor IMPROVABLE_MODIFIER_COLOR = TextColor.fromRgb(9337340);
     
-    private static final String TOOLTIP_LEVEL_NAME_KEY = "tooltip.tinkerslevellingaddon.level.";
-
     private static final Component TOOLTIP_HOLD_ALT =  ModUtil.makeTranslation("tooltip", "hold_alt",
-            ModUtil.makeTranslation("key", "alt", IMPROVABLE_MODIFIER_COLOR)
+            ModUtil.makeTranslation("key", "alt", ImprovableModifier.IMPROVABLE_MODIFIER_COLOR)
                     .withStyle(s -> s.withItalic(true)));
     private static final Component TOOLTIP_MODIFIERS_GAINED =
-            ModUtil.makeTranslation("tooltip", "info.slots", IMPROVABLE_MODIFIER_COLOR)
+            ModUtil.makeTranslation("tooltip", "info.slots", ImprovableModifier.IMPROVABLE_MODIFIER_COLOR)
                     .withStyle(s -> s.withUnderlined(true));
     private static final Component TOOLTIP_STATS_GAINED =
-            ModUtil.makeTranslation("tooltip", "info.stats", IMPROVABLE_MODIFIER_COLOR)
+            ModUtil.makeTranslation("tooltip", "info.stats", ImprovableModifier.IMPROVABLE_MODIFIER_COLOR)
                     .withStyle(s -> s.withUnderlined(true));
     private static final Component TOOLTIP_NEXT_LEVEL =
-            ModUtil.makeTranslation("tooltip", "info.next_level", IMPROVABLE_MODIFIER_COLOR)
+            ModUtil.makeTranslation("tooltip", "info.next_level", ImprovableModifier.IMPROVABLE_MODIFIER_COLOR)
                     .withStyle(s -> s.withUnderlined(true));
 
     @SubscribeEvent
@@ -85,10 +80,9 @@ public class TooltipEventHandler {
     private static List<Component> prepareGeneralInfo(ToolStack tool) {
         List<Component> infoEntries = new ArrayList<>();
         int level = tool.getPersistentData().getInt(ImprovableModifier.LEVEL_KEY);
-    
-        MutableComponent levelName = ModUtil.makeText(getLevelName(level), getLevelColor(level));
-        MutableComponent levelNumber = ModUtil.makeText(level, ChatFormatting.GRAY);
-        MutableComponent fullLevelName = ModUtil.makeTranslation("tooltip", "level.name", ChatFormatting.GRAY, levelName, levelNumber);
+        
+        MutableComponent fullLevelName = ModUtil.makeTranslation("tooltip", "level.name", ChatFormatting.GRAY,
+                getLevelName(level), ModUtil.makeText(level, ChatFormatting.GRAY));
         infoEntries.add(ModUtil.makeTranslation("tooltip", "level", fullLevelName));
 
         if (ToolLevellingUtil.canLevelUp(level)) {
@@ -175,18 +169,20 @@ public class TooltipEventHandler {
         return infoEntries;
     }
 
-    private static String getLevelName(int level) {
-        if(I18n.exists(TOOLTIP_LEVEL_NAME_KEY + level)) {
-            return I18n.get(TOOLTIP_LEVEL_NAME_KEY + level);
+    private static MutableComponent getLevelName(int level) {
+        TextColor levelColor = getLevelColor(level);
+        if(ModUtil.canTranslate("tooltip", "level." + level)) {
+            return ModUtil.makeTranslation("tooltip", "level." + level, levelColor);
         }
 
         int i = 1;
-        while(I18n.exists(TOOLTIP_LEVEL_NAME_KEY + i)) {
+        while(ModUtil.canTranslate("tooltip", "level." + i)) {
             i++;
         }
         int tier = level / i;
         String suffix = Config.squashLevelPluses.get() && level > 0 ? "+" + tier : "+".repeat(tier);
-        return I18n.get(TOOLTIP_LEVEL_NAME_KEY + (level % i)) + suffix;
+        return ModUtil.makeTranslation("tooltip", "level." + (level % i), levelColor)
+                .append(ModUtil.makeText(suffix, levelColor));
     }
 
     private static TextColor getLevelColor(int level) {

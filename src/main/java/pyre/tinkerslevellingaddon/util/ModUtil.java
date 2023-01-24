@@ -2,6 +2,7 @@ package pyre.tinkerslevellingaddon.util;
 
 import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
+import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TextColor;
 import net.minecraft.network.chat.TextComponent;
@@ -13,6 +14,10 @@ public class ModUtil {
     
     public static ResourceLocation getResource(String name) {
         return new ResourceLocation(TinkersLevellingAddon.MOD_ID, name);
+    }
+    
+    public static boolean canTranslate(String base, String name) {
+        return I18n.exists(Util.makeDescriptionId(base, getResource(toSnakeCase(name))));
     }
     
     public static MutableComponent makeTranslation(String base, String name) {
