@@ -7,7 +7,7 @@ import net.minecraft.world.item.Items;
 import net.minecraftforge.common.crafting.conditions.IConditionBuilder;
 import pyre.tinkerslevellingaddon.TinkersLevellingAddon;
 import pyre.tinkerslevellingaddon.util.ModUtil;
-import slimeknights.tconstruct.library.data.recipe.IRecipeHelper;
+import slimeknights.mantle.recipe.data.IRecipeHelper;
 import slimeknights.tconstruct.library.modifiers.ModifierId;
 import slimeknights.tconstruct.library.recipe.modifiers.adding.ModifierRecipeBuilder;
 import slimeknights.tconstruct.library.tools.SlotType;
