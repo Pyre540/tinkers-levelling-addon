@@ -1,7 +1,6 @@
 package pyre.tinkerslevellingaddon;
 
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextColor;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
@@ -20,8 +19,6 @@ import net.minecraftforge.common.ToolAction;
 import net.minecraftforge.common.ToolActions;
 import org.jetbrains.annotations.Nullable;
 import pyre.tinkerslevellingaddon.config.Config;
-import pyre.tinkerslevellingaddon.network.LevelUpPacket;
-import pyre.tinkerslevellingaddon.network.Messages;
 import pyre.tinkerslevellingaddon.util.ModUtil;
 import pyre.tinkerslevellingaddon.util.ToolLevellingUtil;
 import slimeknights.tconstruct.library.modifiers.ModifierEntry;
@@ -48,6 +45,8 @@ import slimeknights.tconstruct.tools.TinkerModifiers;
 
 import java.util.List;
 
+import static pyre.tinkerslevellingaddon.util.ToolLevellingUtil.addExperience;
+
 public class ImprovableModifier extends NoLevelsModifier implements PlantHarvestModifierHook, ShearsModifierHook,
         BlockTransformModifierHook, ProjectileLaunchModifierHook {
     
@@ -55,7 +54,8 @@ public class ImprovableModifier extends NoLevelsModifier implements PlantHarvest
     
     public static final ResourceLocation EXPERIENCE_KEY = ModUtil.getResource("experience");
     public static final ResourceLocation LEVEL_KEY = ModUtil.getResource("level");
-    public static final ResourceLocation MODIFIER_HISTORY_KEY = ModUtil.getResource("modifier_history");
+    //todo 1.19 rename to "slot_history"
+    public static final ResourceLocation SLOT_HISTORY_KEY = ModUtil.getResource("modifier_history");
     public static final ResourceLocation STAT_HISTORY_KEY = ModUtil.getResource("stat_history");
     
     @Override
@@ -69,7 +69,7 @@ public class ImprovableModifier extends NoLevelsModifier implements PlantHarvest
     public void beforeRemoved(IToolStackView tool, RestrictedCompoundTag tag) {
         tool.getPersistentData().remove(EXPERIENCE_KEY);
         tool.getPersistentData().remove(LEVEL_KEY);
-        tool.getPersistentData().remove(MODIFIER_HISTORY_KEY);
+        tool.getPersistentData().remove(SLOT_HISTORY_KEY);
         tool.getPersistentData().remove(STAT_HISTORY_KEY);
     }
 
@@ -77,7 +77,7 @@ public class ImprovableModifier extends NoLevelsModifier implements PlantHarvest
     public void addVolatileData(ToolRebuildContext context, int level, ModDataNBT volatileData) {
         if (ToolLevellingUtil.isSlotsLevellingEnabled(context)) {
             List<SlotType> slots =
-                    ToolLevellingUtil.parseSlotsHistory(context.getPersistentData().getString(MODIFIER_HISTORY_KEY));
+                    ToolLevellingUtil.parseSlotsHistory(context.getPersistentData().getString(SLOT_HISTORY_KEY));
             for (SlotType slot : slots) {
                 volatileData.addSlots(slot, 1);
             }
@@ -190,49 +190,6 @@ public class ImprovableModifier extends NoLevelsModifier implements PlantHarvest
         } else if(Config.enablePathMakingXp.get() && action.equals(ToolActions.SHOVEL_FLATTEN)) {
             addExperience(toolStack, 1 + Config.bonusPathMakingXp.get(), player);
         }
-    }
-
-    private void addExperience(ToolStack tool, int amount, ServerPlayer player) {
-        if (tool == null) {
-            return;
-        }
-
-        ModDataNBT data = tool.getPersistentData();
-        int currentLevel = data.getInt(LEVEL_KEY);
-        int currentExperience = data.getInt(EXPERIENCE_KEY) + amount;
-        boolean isBroadTool = ToolLevellingUtil.isBroadTool(tool);
-        int experienceNeeded = ToolLevellingUtil.getXpNeededForLevel(currentLevel + 1, isBroadTool);
-
-        while (currentExperience >= experienceNeeded) {
-            if (!ToolLevellingUtil.canLevelUp(currentLevel)) {
-                return;
-            }
-            data.putInt(LEVEL_KEY, ++currentLevel);
-            currentExperience -= experienceNeeded;
-            experienceNeeded = ToolLevellingUtil.getXpNeededForLevel(currentLevel + 1, isBroadTool);
-
-            String slotName = ToolLevellingUtil.getSlot(tool, currentLevel);
-            if (slotName != null) {
-                appendHistory(MODIFIER_HISTORY_KEY, slotName, data);
-            }
-            String statName = ToolLevellingUtil.getStat(tool, currentLevel);
-            if (statName != null) {
-                appendHistory(STAT_HISTORY_KEY, statName, data);
-            }
-
-            //temporarily set xp to 0, so it displays nicely in chat message
-            data.putInt(EXPERIENCE_KEY, 0);
-            tool.rebuildStats();
-            Component toolName = tool.createStack().getDisplayName();
-            Messages.sendToPlayer(new LevelUpPacket(currentLevel, toolName), player);
-        }
-        data.putInt(EXPERIENCE_KEY, currentExperience);
-    }
-
-    private void appendHistory(ResourceLocation historyKey, String value, ModDataNBT data) {
-        String modifierHistory = data.getString(historyKey);
-        modifierHistory = modifierHistory + value + ";";
-        data.putString(historyKey, modifierHistory);
     }
 
     private boolean isEqualTinkersItem(IToolStackView item1, IToolStackView item2) {

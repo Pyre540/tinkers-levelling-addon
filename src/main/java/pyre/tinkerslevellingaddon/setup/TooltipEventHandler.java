@@ -97,7 +97,7 @@ public class TooltipEventHandler {
     private static List<Component> prepareLevelInfo(ToolStack tool) {
         List<Component> infoEntries = new ArrayList<>();
 
-        String modifierHistory = tool.getPersistentData().getString(ImprovableModifier.MODIFIER_HISTORY_KEY);
+        String modifierHistory = tool.getPersistentData().getString(ImprovableModifier.SLOT_HISTORY_KEY);
         if (!modifierHistory.isBlank()) {
             Map<String, Long> gainedModifiers = Arrays.stream(modifierHistory.split(";"))
                     .sorted(Comparator.reverseOrder())

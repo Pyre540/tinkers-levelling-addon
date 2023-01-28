@@ -160,5 +160,22 @@
   "config.tinkerslevellingaddon.client.squash_pluses": "Alternative suffix for level names",
   "config.tinkerslevellingaddon.client.sound": "Sound",
 
-  "sounds.tinkerslevellingaddon.tool_level_up": "Tool levels up"
+  "sounds.tinkerslevellingaddon.tool_level_up": "Tool levels up",
+
+  "command.tinkerslevellingaddon.levels.failure.add.already_max_level": "Cannot add levels, %s is already max level.",
+  "command.tinkerslevellingaddon.levels.failure.set.current_level": "%s is already level %s.",
+  "command.tinkerslevellingaddon.levels.failure.set.invalid_count": "Cannot set higher level than the configured max level (%s).",
+
+  "command.tinkerslevellingaddon.levels.success.add.single": "Added %s levels to %s's item.",
+  "command.tinkerslevellingaddon.levels.success.add.multiple": "Added %s levels to %s entities.",
+  "command.tinkerslevellingaddon.levels.success.set.single": "Set level to %s on %s's item.",
+  "command.tinkerslevellingaddon.levels.success.set.multiple": "Set level to %s on %s entities.",
+
+  "command.tinkerslevellingaddon.xp.failure.add.already_max_level": "Cannot add XP, %s is already max level and cannot gain experience.",
+  "command.tinkerslevellingaddon.xp.failure.set.already_max_level": "Cannot set XP, %s is already max level and cannot gain experience.",
+
+  "command.tinkerslevellingaddon.xp.success.add.single": "Added %s XP to %s's item.",
+  "command.tinkerslevellingaddon.xp.success.add.multiple": "Added %s XP to %s entities.",
+  "command.tinkerslevellingaddon.xp.success.set.single": "Set XP to %s on %s's item.",
+  "command.tinkerslevellingaddon.xp.success.set.multiple": "Set XP to %s on %s entities."
 }

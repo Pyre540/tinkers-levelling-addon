@@ -6,6 +6,7 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.forge.event.lifecycle.GatherDataEvent;
 import org.slf4j.Logger;
+import pyre.tinkerslevellingaddon.command.ModCommands;
 import pyre.tinkerslevellingaddon.config.Config;
 import pyre.tinkerslevellingaddon.data.ModifierRecipeProvider;
 import pyre.tinkerslevellingaddon.network.Messages;
@@ -23,6 +24,7 @@ public class TinkersLevellingAddon {
         Config.init();
         Registration.init();
         Messages.register();
+        ModCommands.init();
     }
 
     @SubscribeEvent

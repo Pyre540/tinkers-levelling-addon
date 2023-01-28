@@ -160,5 +160,22 @@
   "config.tinkerslevellingaddon.client.squash_pluses": "Alternatywny przyrostek dla nazw poziomów",
   "config.tinkerslevellingaddon.client.sound": "Dźwięk",
 
-  "sounds.tinkerslevellingaddon.tool_level_up": "Narzędzie zdobywa poziom"
+  "sounds.tinkerslevellingaddon.tool_level_up": "Narzędzie zdobywa poziom",
+
+  "command.tinkerslevellingaddon.levels.failure.add.already_max_level": "Nie można dodać poziomów, %s ma już maksymalny poziom.",
+  "command.tinkerslevellingaddon.levels.failure.set.current_level": "%s jest już na poziomie %s.",
+  "command.tinkerslevellingaddon.levels.failure.set.invalid_count": "Nie można ustawić poziomu wyższego niż ustawiony maksymalny poziom (%s).",
+
+  "command.tinkerslevellingaddon.levels.success.add.single": "Dodano %s poziomów do przedmiotu %s.",
+  "command.tinkerslevellingaddon.levels.success.add.multiple": "Dodano %s poziomów na %s bytach.",
+  "command.tinkerslevellingaddon.levels.success.set.single": "Ustawiono poziom na %s na przedmiocie %s.",
+  "command.tinkerslevellingaddon.levels.success.set.multiple": "Ustawiono poziom na %s na %s bytach.",
+
+  "command.tinkerslevellingaddon.xp.failure.add.already_max_level": "Nie można dodać PD, %s ma już maksymalny poziom i nie może zdobywać doświadczenia.",
+  "command.tinkerslevellingaddon.xp.failure.set.already_max_level": "Nie można ustawić PD, %s ma już maksymalny poziom i nie może zdobywać doświadczenia.",
+
+  "command.tinkerslevellingaddon.xp.success.add.single": "Dodano %s PD do przedmiotu %s.",
+  "command.tinkerslevellingaddon.xp.success.add.multiple": "Dodano %s PD na %s bytach.",
+  "command.tinkerslevellingaddon.xp.success.set.single": "Ustawiono PD na %s na przedmiocie %s.",
+  "command.tinkerslevellingaddon.xp.success.set.multiple": "Ustawiono PD na %s na %s bytach."
 }
