@@ -357,43 +357,43 @@ public class Config {
     private static void actionsConfig(ForgeConfigSpec.Builder builder) {
         builder.comment("If true, given action will yield tool experience.").push("actions");
 
-        enableMiningXp = builder.translation("config.tinkerslevellingaddon.levelling.actions.mining")
+        enableMiningXp = builder.translation("config.tinkerslevellingaddon.levelling.mining")
                 .define("mining", true);
 
-        enableHarvestingXp = builder.translation("config.tinkerslevellingaddon.levelling.actions.harvesting")
+        enableHarvestingXp = builder.translation("config.tinkerslevellingaddon.levelling.harvesting")
                 .define("harvesting", true);
 
-        enableShearingXp = builder.translation("config.tinkerslevellingaddon.levelling.actions.shearing")
+        enableShearingXp = builder.translation("config.tinkerslevellingaddon.levelling.shearing")
                 .define("shearing", true);
 
-        enableStrippingXp = builder.translation("config.tinkerslevellingaddon.levelling.actions.stripping")
+        enableStrippingXp = builder.translation("config.tinkerslevellingaddon.levelling.stripping")
                 .define("stripping", true);
 
-        enableScrappingXp = builder.translation("config.tinkerslevellingaddon.levelling.actions.scrapping")
+        enableScrappingXp = builder.translation("config.tinkerslevellingaddon.levelling.scrapping")
                 .define("scrapping", true);
 
-        enableWaxingOffXp = builder.translation("config.tinkerslevellingaddon.levelling.actions.waxingOff")
+        enableWaxingOffXp = builder.translation("config.tinkerslevellingaddon.levelling.waxingOff")
                 .define("waxingOff", true);
 
-        enableTillingXp = builder.translation("config.tinkerslevellingaddon.levelling.actions.tilling")
+        enableTillingXp = builder.translation("config.tinkerslevellingaddon.levelling.tilling")
                 .define("tilling", true);
 
-        enablePathMakingXp = builder.translation("config.tinkerslevellingaddon.levelling.actions.pathMaking")
+        enablePathMakingXp = builder.translation("config.tinkerslevellingaddon.levelling.pathMaking")
                 .define("pathMaking", true);
 
-        enableAttackingXp = builder.translation("config.tinkerslevellingaddon.levelling.actions.attacking")
+        enableAttackingXp = builder.translation("config.tinkerslevellingaddon.levelling.attacking")
                 .define("attacking", true);
 
         enableShootingXp = builder.comment("Applies to ranged weapons like longbows and crossbows.")
-                .translation("config.tinkerslevellingaddon.levelling.actions.shooting")
+                .translation("config.tinkerslevellingaddon.levelling.shooting")
                 .define("shooting", true);
 
         enableTakingDamageXp = builder.comment("Applies to armor only.")
-                .translation("config.tinkerslevellingaddon.levelling.actions.takingDamage")
+                .translation("config.tinkerslevellingaddon.levelling.takingDamage")
                 .define("takingDamage", true);
 
         enableThornsXp = builder.comment("Applies to armor only. Thorns modifier gives 15% chance per level to gain experience.")
-                .translation("config.tinkerslevellingaddon.levelling.actions.thorns")
+                .translation("config.tinkerslevellingaddon.levelling.thorns")
                 .define("thorns", true);
 
         builder.pop();
@@ -402,42 +402,42 @@ public class Config {
     private static void bonusesConfig(ForgeConfigSpec.Builder builder) {
         builder.comment("Amount of bonus experience for performing actions. If set to 0 there is no bonus experience.").push("bonuses");
 
-        bonusMiningXp = builder.translation("config.tinkerslevellingaddon.levelling.bonuses.mining")
+        bonusMiningXp = builder.translation("config.tinkerslevellingaddon.levelling.mining")
                 .defineInRange("mining", 0, 0, Integer.MAX_VALUE);
 
-        bonusHarvestingXp = builder.translation("config.tinkerslevellingaddon.levelling.bonuses.harvesting")
+        bonusHarvestingXp = builder.translation("config.tinkerslevellingaddon.levelling.harvesting")
                 .defineInRange("harvesting", 0, 0, Integer.MAX_VALUE);
 
-        bonusShearingXp = builder.translation("config.tinkerslevellingaddon.levelling.bonuses.shearing")
+        bonusShearingXp = builder.translation("config.tinkerslevellingaddon.levelling.shearing")
                 .defineInRange("shearing", 0, 0, Integer.MAX_VALUE);
 
-        bonusStrippingXp = builder.translation("config.tinkerslevellingaddon.levelling.bonuses.stripping")
+        bonusStrippingXp = builder.translation("config.tinkerslevellingaddon.levelling.stripping")
                 .defineInRange("stripping", 0, 0, Integer.MAX_VALUE);
 
-        bonusScrappingXp = builder.translation("config.tinkerslevellingaddon.levelling.bonuses.scrapping")
+        bonusScrappingXp = builder.translation("config.tinkerslevellingaddon.levelling.scrapping")
                 .defineInRange("scrapping", 0, 0, Integer.MAX_VALUE);
 
-        bonusWaxingOffXp = builder.translation("config.tinkerslevellingaddon.levelling.bonuses.waxingOff")
+        bonusWaxingOffXp = builder.translation("config.tinkerslevellingaddon.levelling.waxingOff")
                 .defineInRange("waxingOff", 0, 0, Integer.MAX_VALUE);
 
-        bonusTillingXp = builder.translation("config.tinkerslevellingaddon.levelling.bonuses.tilling")
+        bonusTillingXp = builder.translation("config.tinkerslevellingaddon.levelling.tilling")
                 .defineInRange("tilling", 0, 0, Integer.MAX_VALUE);
 
-        bonusPathMakingXp = builder.translation("config.tinkerslevellingaddon.levelling.bonuses.pathMaking")
+        bonusPathMakingXp = builder.translation("config.tinkerslevellingaddon.levelling.pathMaking")
                 .defineInRange("pathMaking", 0, 0, Integer.MAX_VALUE);
 
-        bonusAttackingXp = builder.translation("config.tinkerslevellingaddon.levelling.bonuses.attacking")
+        bonusAttackingXp = builder.translation("config.tinkerslevellingaddon.levelling.attacking")
                 .defineInRange("attacking", 0, 0, Integer.MAX_VALUE);
 
-        bonusShootingXp = builder.translation("config.tinkerslevellingaddon.levelling.bonuses.shooting")
+        bonusShootingXp = builder.translation("config.tinkerslevellingaddon.levelling.shooting")
                 .defineInRange("shooting", 0, 0, Integer.MAX_VALUE);
 
-        bonusTakingDamageXp = builder.translation("config.tinkerslevellingaddon.levelling.bonuses.takingDamage")
+        bonusTakingDamageXp = builder.translation("config.tinkerslevellingaddon.levelling.takingDamage")
                 .defineInRange("takingDamage", 0, 0, Integer.MAX_VALUE);
 
         bonusThornsXp = builder.comment("As with Thorns damage calculations, this is the upper bound of the bonus experience that could be granted.",
                         "For example, for the value of 3 (default), we get: 1 (base xp) + 0 to 3 (bonus xp) = 1 to 4 (result xp)")
-                .translation("config.tinkerslevellingaddon.levelling.bonuses.thorns")
+                .translation("config.tinkerslevellingaddon.levelling.thorns")
                 .defineInRange("thorns", 3, 0, Integer.MAX_VALUE);
 
         builder.pop();
