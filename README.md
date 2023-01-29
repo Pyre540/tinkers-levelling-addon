@@ -1,4 +1,5 @@
 # Tinkers' Levelling Addon
+[![curseforge](https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@2/assets/compact/available/curseforge_vector.svg)](https://www.curseforge.com/minecraft/mc-mods/tinkers-levelling-addon)
 
 Simple, **unofficial** addon mod for [Tinkers' Construct](https://www.curseforge.com/minecraft/mc-mods/tinkers-construct) for modern Minecraft versions. Based on the [Tinkers' Tool Leveling](https://www.curseforge.com/minecraft/mc-mods/tinkers-tool-leveling) addon for Minecraft 1.12.2.
 
@@ -32,12 +33,27 @@ Hold _Alt_ key to display summary of perks gained so far.
 
 <img src="https://raw.githubusercontent.com/Pyre540/tinkers-levelling-addon/1.18/examples/image/example-level-info.png" alt="Example level info" height="300px"/>
 
-
 ## License
 
 Code, Textures and binaries of this addon are licensed under the [MIT License](https://tldrlegal.com/license/mit-license). Any alternate licenses are noted where appropriate.
 
 You are allowed to use the mod in your modpack.
+
+## FAQ
+
+#### I can't find config files! Where are they?
+
+- Server config file is stored in a world/save specific _"serverconfig"_ folder.
+
+  For local/singleplayer instances you can find config file in `.minecraft/saves/<world_name>/serverconfig/tinkerslevellingaddon-server.toml` 
+
+  For server/multiplayer instances you can find config file in `<server_folder>/world/serverconfig/tinkerslevellingaddon-server.toml`
+
+- Client config file is stored in your local instance's _"config"_ folder in `.minecraft/config/tinkerslevellingaddon-client.toml`
+
+#### Can you port this mod to Fabric to work with Hephaestus?
+
+- No. I have no plans to port this mod to Fabric.
 
 ## Credits
 

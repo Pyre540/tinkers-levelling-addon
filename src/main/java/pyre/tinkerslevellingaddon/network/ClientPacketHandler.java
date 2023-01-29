@@ -4,13 +4,12 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.sounds.SoundEvent;
+import pyre.tinkerslevellingaddon.ImprovableModifier;
 import pyre.tinkerslevellingaddon.config.Config;
+import pyre.tinkerslevellingaddon.util.ModUtil;
 
 public class ClientPacketHandler {
 
@@ -21,14 +20,13 @@ public class ClientPacketHandler {
         }
         if (Config.enableLevelUpMessage.get()) {
             MutableComponent message;
-            if (I18n.exists("message.tinkerslevellingaddon.levelUp." + level)) {
-                message = new TranslatableComponent("message.tinkerslevellingaddon.levelUp." + level, toolName);
+            if (ModUtil.canTranslate("message", "level_up." + level)) {
+                message = ModUtil.makeTranslation("message", "level_up." + level, toolName);
             } else {
-                MutableComponent levelComponent = new TextComponent(String.valueOf(level))
-                        .withStyle(s -> s.withColor(ChatFormatting.GOLD));
-                message = new TranslatableComponent("message.tinkerslevellingaddon.levelUp.generic", toolName, levelComponent);
+                MutableComponent levelComponent = ModUtil.makeText(level, ChatFormatting.GOLD);
+                message = ModUtil.makeTranslation("message", "level_up.generic", toolName, levelComponent);
             }
-            message.withStyle(style -> style.withColor(9337340));
+            message.withStyle(style -> style.withColor(ImprovableModifier.IMPROVABLE_MODIFIER_COLOR));
             player.sendMessage(message, Util.NIL_UUID);
         }
         SoundEvent soundEvent = Config.levelUpSound.get().getSoundEvent();

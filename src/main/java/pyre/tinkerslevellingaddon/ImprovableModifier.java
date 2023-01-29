@@ -1,7 +1,7 @@
 package pyre.tinkerslevellingaddon;
 
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextColor;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -11,61 +11,73 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.projectile.AbstractArrow;
+import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraftforge.common.ToolAction;
+import net.minecraftforge.common.ToolActions;
+import org.jetbrains.annotations.Nullable;
 import pyre.tinkerslevellingaddon.config.Config;
-import pyre.tinkerslevellingaddon.network.LevelUpPacket;
-import pyre.tinkerslevellingaddon.network.Messages;
-import pyre.tinkerslevellingaddon.util.SlotAndStatUtil;
-import slimeknights.tconstruct.common.TinkerTags;
-import slimeknights.tconstruct.library.modifiers.hooks.IHarvestModifier;
-import slimeknights.tconstruct.library.modifiers.hooks.IShearModifier;
+import pyre.tinkerslevellingaddon.util.ModUtil;
+import pyre.tinkerslevellingaddon.util.ToolLevellingUtil;
+import slimeknights.tconstruct.library.modifiers.ModifierEntry;
+import slimeknights.tconstruct.library.modifiers.TinkerHooks;
+import slimeknights.tconstruct.library.modifiers.hook.BlockTransformModifierHook;
+import slimeknights.tconstruct.library.modifiers.hook.PlantHarvestModifierHook;
+import slimeknights.tconstruct.library.modifiers.hook.ProjectileLaunchModifierHook;
+import slimeknights.tconstruct.library.modifiers.hook.ShearsModifierHook;
 import slimeknights.tconstruct.library.modifiers.impl.NoLevelsModifier;
+import slimeknights.tconstruct.library.modifiers.util.ModifierHookMap;
 import slimeknights.tconstruct.library.tools.SlotType;
 import slimeknights.tconstruct.library.tools.context.EquipmentContext;
 import slimeknights.tconstruct.library.tools.context.ToolAttackContext;
 import slimeknights.tconstruct.library.tools.context.ToolHarvestContext;
 import slimeknights.tconstruct.library.tools.context.ToolRebuildContext;
-import slimeknights.tconstruct.library.tools.definition.ToolDefinition;
 import slimeknights.tconstruct.library.tools.nbt.IToolStackView;
 import slimeknights.tconstruct.library.tools.nbt.ModDataNBT;
+import slimeknights.tconstruct.library.tools.nbt.NamespacedNBT;
 import slimeknights.tconstruct.library.tools.nbt.ToolStack;
 import slimeknights.tconstruct.library.tools.stat.FloatToolStat;
 import slimeknights.tconstruct.library.tools.stat.ModifierStatsBuilder;
 import slimeknights.tconstruct.library.utils.RestrictedCompoundTag;
 import slimeknights.tconstruct.tools.TinkerModifiers;
-import slimeknights.tconstruct.tools.ToolDefinitions;
 
-import javax.annotation.Nullable;
 import java.util.List;
-import java.util.Set;
 
-import static pyre.tinkerslevellingaddon.util.SlotAndStatUtil.parseSlotsHistory;
-import static pyre.tinkerslevellingaddon.util.SlotAndStatUtil.parseStatsHistory;
+import static pyre.tinkerslevellingaddon.util.ToolLevellingUtil.addExperience;
 
-public class ImprovableModifier extends NoLevelsModifier implements IHarvestModifier, IShearModifier {
-
-    public static final ResourceLocation EXPERIENCE_KEY = new ResourceLocation(TinkersLevellingAddon.MOD_ID, "experience");
-    public static final ResourceLocation LEVEL_KEY = new ResourceLocation(TinkersLevellingAddon.MOD_ID, "level");
-    public static final ResourceLocation MODIFIER_HISTORY_KEY = new ResourceLocation(TinkersLevellingAddon.MOD_ID, "modifier_history");
-    public static final ResourceLocation STAT_HISTORY_KEY = new ResourceLocation(TinkersLevellingAddon.MOD_ID, "stat_history");
-
-    private static final Set<ToolDefinition> BROAD_TOOLS = Set.of(ToolDefinitions.SLEDGE_HAMMER,
-            ToolDefinitions.VEIN_HAMMER, ToolDefinitions.EXCAVATOR, ToolDefinitions.BROAD_AXE, ToolDefinitions.SCYTHE,
-            ToolDefinitions.CLEAVER);
+public class ImprovableModifier extends NoLevelsModifier implements PlantHarvestModifierHook, ShearsModifierHook,
+        BlockTransformModifierHook, ProjectileLaunchModifierHook {
+    
+    public static final TextColor IMPROVABLE_MODIFIER_COLOR = TextColor.fromRgb(9337340);
+    
+    public static final ResourceLocation EXPERIENCE_KEY = ModUtil.getResource("experience");
+    public static final ResourceLocation LEVEL_KEY = ModUtil.getResource("level");
+    //todo 1.19 rename to "slot_history"
+    public static final ResourceLocation SLOT_HISTORY_KEY = ModUtil.getResource("modifier_history");
+    public static final ResourceLocation STAT_HISTORY_KEY = ModUtil.getResource("stat_history");
+    
+    @Override
+    protected void registerHooks(ModifierHookMap.Builder hookBuilder) {
+        super.registerHooks(hookBuilder);
+        hookBuilder.addHook(this, TinkerHooks.PLANT_HARVEST, TinkerHooks.SHEAR_ENTITY, TinkerHooks.BLOCK_TRANSFORM,
+                TinkerHooks.PROJECTILE_LAUNCH);
+    }
 
     @Override
     public void beforeRemoved(IToolStackView tool, RestrictedCompoundTag tag) {
         tool.getPersistentData().remove(EXPERIENCE_KEY);
         tool.getPersistentData().remove(LEVEL_KEY);
-        tool.getPersistentData().remove(MODIFIER_HISTORY_KEY);
+        tool.getPersistentData().remove(SLOT_HISTORY_KEY);
         tool.getPersistentData().remove(STAT_HISTORY_KEY);
     }
 
     @Override
     public void addVolatileData(ToolRebuildContext context, int level, ModDataNBT volatileData) {
-        if (Config.enableModifierSlots.get()) {
-            List<SlotType> slots = parseSlotsHistory(context.getPersistentData().getString(MODIFIER_HISTORY_KEY));
+        if (ToolLevellingUtil.isSlotsLevellingEnabled(context)) {
+            List<SlotType> slots =
+                    ToolLevellingUtil.parseSlotsHistory(context.getPersistentData().getString(SLOT_HISTORY_KEY));
             for (SlotType slot : slots) {
                 volatileData.addSlots(slot, 1);
             }
@@ -74,11 +86,11 @@ public class ImprovableModifier extends NoLevelsModifier implements IHarvestModi
 
     @Override
     public void addToolStats(ToolRebuildContext context, int level, ModifierStatsBuilder builder) {
-        if (Config.enableStats.get()) {
-            List<FloatToolStat> stats = parseStatsHistory(context.getPersistentData().getString(STAT_HISTORY_KEY));
-            boolean isArmor = context.hasTag(TinkerTags.Items.ARMOR);
+        if (ToolLevellingUtil.isStatsLevellingEnabled(context)) {
+            List<FloatToolStat> stats =
+                    ToolLevellingUtil.parseStatsHistory(context.getPersistentData().getString(STAT_HISTORY_KEY));
             for (FloatToolStat stat : stats) {
-                stat.add(builder, isArmor ? Config.getArmorStatValue(stat) : Config.getToolStatValue(stat));
+                stat.add(builder, ToolLevellingUtil.getStatValue(context, stat));
             }
         }
     }
@@ -90,37 +102,33 @@ public class ImprovableModifier extends NoLevelsModifier implements IHarvestModi
             return;
         }
         ToolStack toolStack = getHeldTool(player, InteractionHand.MAIN_HAND);
-        Component toolName = player.getMainHandItem().getDisplayName();
         if (!isEqualTinkersItem(tool, toolStack)) {
             toolStack = getHeldTool(player, InteractionHand.OFF_HAND);
-            toolName = player.getOffhandItem().getDisplayName();
         }
-        addExperience(toolStack, 1 + Config.bonusMiningXp.get(), player, toolName);
+        addExperience(toolStack, 1 + Config.bonusMiningXp.get(), player);
     }
 
     @Override
-    public void afterHarvest(IToolStackView tool, int level, UseOnContext context, ServerLevel world,
+    public void afterHarvest(IToolStackView tool, ModifierEntry modifier, UseOnContext context, ServerLevel world,
                              BlockState state, BlockPos pos) {
         if (!Config.enableHarvestingXp.get() || !(context.getPlayer() instanceof ServerPlayer player)) {
             return;
         }
         ToolStack toolStack = getHeldTool(player, context.getHand());
-        Component toolName = player.getItemInHand(context.getHand()).getDisplayName();
-        addExperience(toolStack, 1 + Config.bonusHarvestingXp.get(), player, toolName);
+        addExperience(toolStack, 1 + Config.bonusHarvestingXp.get(), player);
     }
 
     @Override
-    public void afterShearEntity(IToolStackView tool, int level, Player player, Entity entity, boolean isTarget) {
+    public void afterShearEntity(IToolStackView tool, ModifierEntry modifier, Player player, Entity entity,
+                                 boolean isTarget) {
         if (!Config.enableShearingXp.get() || !(player instanceof ServerPlayer)) {
             return;
         }
         ToolStack toolStack = getHeldTool(player, InteractionHand.MAIN_HAND);
-        Component toolName = player.getMainHandItem().getDisplayName();
         if (!isEqualTinkersItem(tool, toolStack)) {
             toolStack = getHeldTool(player, InteractionHand.OFF_HAND);
-            toolName = player.getOffhandItem().getDisplayName();
         }
-        addExperience(toolStack, 1 + Config.bonusShearingXp.get(), (ServerPlayer) player, toolName);
+        addExperience(toolStack, 1 + Config.bonusShearingXp.get(), (ServerPlayer) player);
     }
 
     @Override
@@ -131,8 +139,7 @@ public class ImprovableModifier extends NoLevelsModifier implements IHarvestModi
         }
         int xp = (Config.damageDealt.get() ? Math.round(damageDealt) : 1) + Config.bonusAttackingXp.get();
         ToolStack toolStack = getHeldTool(context.getPlayerAttacker(), context.getSlotType());
-        Component toolName = context.getPlayerAttacker().getItemBySlot(context.getSlotType()).getDisplayName();
-        addExperience(toolStack, xp, player, toolName);
+        addExperience(toolStack, xp, player);
         return 0;
     }
 
@@ -145,85 +152,44 @@ public class ImprovableModifier extends NoLevelsModifier implements IHarvestModi
             return;
         }
         int xp = (Config.damageTaken.get() ? Math.round(amount) : 1) + Config.bonusTakingDamageXp.get() + getThornsBonus(tool);
-        Component toolName = player.getItemBySlot(slotType).getDisplayName();
-        addExperience(getHeldTool(player, slotType), xp, player, toolName);
+        addExperience(getHeldTool(player, slotType), xp, player);
     }
 
-    //currently no hooks for tilling, striping wood, making paths...
-
-    @SuppressWarnings("unchecked")
-    @Nullable
     @Override
-    public <T> T getModule(Class<T> type) {
-        if (type == IHarvestModifier.class || type == IShearModifier.class) {
-            return (T) this;
+    public void onProjectileLaunch(IToolStackView tool, ModifierEntry modifier, LivingEntity shooter,
+                                   Projectile projectile, @Nullable AbstractArrow arrow, NamespacedNBT persistentData,
+                                   boolean primary) {
+        //no way to get tool context when the arrow lands, so reward xp on launch instead
+        if (!Config.enableShootingXp.get() || !(shooter instanceof ServerPlayer player)) {
+            return;
         }
-        return null;
+        ToolStack toolStack = getHeldTool(player, InteractionHand.MAIN_HAND);
+        if (!isEqualTinkersItem(tool, toolStack)) {
+            toolStack = getHeldTool(player, InteractionHand.OFF_HAND);
+        }
+        addExperience(toolStack, 1 + Config.bonusShootingXp.get(), player);
     }
 
-    private void addExperience(ToolStack tool, int amount, ServerPlayer player, Component toolName) {
-        if (tool == null) {
+    //todo currently flint and brick and boots modifiers do not use blockTransform hook
+    @Override
+    public void afterTransformBlock(IToolStackView tool, ModifierEntry modifier, UseOnContext context,
+                                    BlockState state, BlockPos pos, ToolAction action) {
+        if (!(context.getPlayer() instanceof ServerPlayer player)) {
             return;
         }
 
-        ModDataNBT data = tool.getPersistentData();
-        int currentLevel = data.getInt(LEVEL_KEY);
-        int currentExperience = data.getInt(EXPERIENCE_KEY) + amount;
-        boolean isBroadTool = isBroadTool(tool);
-        int experienceNeeded = getXpNeededForLevel(currentLevel + 1, isBroadTool);
-
-        while (currentExperience >= experienceNeeded) {
-            if (!canLevelUp(currentLevel)) {
-                return;
-            }
-            data.putInt(LEVEL_KEY, ++currentLevel);
-            currentExperience -= experienceNeeded;
-            experienceNeeded = getXpNeededForLevel(currentLevel + 1, isBroadTool);
-
-            boolean isArmor = tool.hasTag(TinkerTags.Items.ARMOR);
-            if (Config.enableModifierSlots.get()) {
-                String slotName = getSlotName(currentLevel, isArmor);
-                appendHistory(MODIFIER_HISTORY_KEY, slotName, data);
-            }
-            if (Config.enableStats.get()) {
-                String statName = getStatName(currentLevel, isArmor);
-                appendHistory(STAT_HISTORY_KEY, statName, data);
-            }
-
-            Messages.sendToPlayer(new LevelUpPacket(currentLevel, toolName), player);
-            tool.rebuildStats();
+        ToolStack toolStack = getHeldTool(player, context.getHand());
+        if (Config.enableStrippingXp.get() && action.equals(ToolActions.AXE_STRIP)) {
+            addExperience(toolStack, 1 + Config.bonusStrippingXp.get(), player);
+        } else if(Config.enableScrappingXp.get() && action.equals(ToolActions.AXE_SCRAPE)) {
+            addExperience(toolStack, 1 + Config.bonusScrappingXp.get(), player);
+        } else if(Config.enableWaxingOffXp.get() && action.equals(ToolActions.AXE_WAX_OFF)) {
+            addExperience(toolStack, 1 + Config.bonusWaxingOffXp.get(), player);
+        } else if(Config.enableTillingXp.get() && action.equals(ToolActions.HOE_TILL)) {
+            addExperience(toolStack, 1 + Config.bonusTillingXp.get(), player);
+        } else if(Config.enablePathMakingXp.get() && action.equals(ToolActions.SHOVEL_FLATTEN)) {
+            addExperience(toolStack, 1 + Config.bonusPathMakingXp.get(), player);
         }
-        data.putInt(EXPERIENCE_KEY, currentExperience);
-    }
-
-    private String getSlotName(int level, boolean isArmor) {
-        if (!isArmor && !Config.toolsModifierTypeRandomOrder.get()) {
-            return SlotAndStatUtil.getToolSlotForLevel(level);
-        } else if (!isArmor && Config.toolsModifierTypeRandomOrder.get()) {
-            return SlotAndStatUtil.getRandomToolSlot();
-        } else if (isArmor && !Config.armorModifierTypeRandomOrder.get()) {
-            return SlotAndStatUtil.getArmorSlotForLevel(level);
-        } else { //random armor
-            return SlotAndStatUtil.getRandomArmorSlot();
-        }
-    }
-
-    private String getStatName(int level, boolean isArmor) {
-        if (!isArmor && !Config.toolsStatTypeRandomOrder.get()) {
-            return SlotAndStatUtil.getToolStatForLevel(level);
-        } else if (!isArmor && Config.toolsStatTypeRandomOrder.get()) {
-            return SlotAndStatUtil.getRandomToolStat();
-        } else if (isArmor && !Config.armorStatTypeRandomOrder.get()) {
-            return SlotAndStatUtil.getArmorStatForLevel(level);
-        } else { //random armor
-            return SlotAndStatUtil.getRandomArmorStat();
-        }
-    }
-
-    private void appendHistory(ResourceLocation historyKey, String value, ModDataNBT data) {
-        String modifierHistory = data.getString(historyKey);
-        modifierHistory = modifierHistory + value + ";";
-        data.putString(historyKey, modifierHistory);
     }
 
     private boolean isEqualTinkersItem(IToolStackView item1, IToolStackView item2) {
@@ -244,24 +210,5 @@ public class ImprovableModifier extends NoLevelsModifier implements IHarvestModi
             return 0;
         }
         return RANDOM.nextFloat() < (thornsLevel * 0.15f) ? 1 + RANDOM.nextInt(Config.bonusThornsXp.get() + 1) : 0;
-    }
-
-    public static int getXpNeededForLevel(int level, boolean isBroadTool) {
-        int experienceNeeded = Config.baseExperience.get();
-        if (level > 1) {
-            experienceNeeded = (int) (getXpNeededForLevel(level - 1, false) * Config.requiredXpMultiplier.get());
-        }
-        if (isBroadTool) {
-            experienceNeeded *= Config.broadToolRequiredXpMultiplier.get();
-        }
-        return experienceNeeded;
-    }
-
-    public static boolean canLevelUp(int level) {
-        return Config.maxLevel.get() == 0 || Config.maxLevel.get() > level;
-    }
-
-    public static boolean isBroadTool(IToolStackView tool) {
-        return BROAD_TOOLS.contains(tool.getDefinition());
     }
 }

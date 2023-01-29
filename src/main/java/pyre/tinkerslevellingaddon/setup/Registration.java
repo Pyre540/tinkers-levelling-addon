@@ -1,6 +1,5 @@
 package pyre.tinkerslevellingaddon.setup;
 
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
@@ -9,6 +8,7 @@ import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
 import pyre.tinkerslevellingaddon.ImprovableModifier;
 import pyre.tinkerslevellingaddon.TinkersLevellingAddon;
+import pyre.tinkerslevellingaddon.util.ModUtil;
 import slimeknights.tconstruct.library.modifiers.util.ModifierDeferredRegister;
 import slimeknights.tconstruct.library.modifiers.util.StaticModifier;
 
@@ -32,7 +32,6 @@ public class Registration {
     }
 
     private static RegistryObject<SoundEvent> registerSoundEvent(String name) {
-        return SOUND_EVENTS.register(name,
-                () -> new SoundEvent(new ResourceLocation(TinkersLevellingAddon.MOD_ID, name)));
+        return SOUND_EVENTS.register(name, () -> new SoundEvent(ModUtil.getResource(name)));
     }
 }
