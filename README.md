@@ -1,5 +1,6 @@
 # Tinkers' Levelling Addon
 [![curseforge](https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@2/assets/compact/available/curseforge_vector.svg)](https://www.curseforge.com/minecraft/mc-mods/tinkers-levelling-addon)
+[![modrinth](https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@2/assets/compact/available/modrinth_vector.svg)](https://modrinth.com/mod/tinkers-levelling-addon)
 
 Simple, **unofficial** addon mod for [Tinkers' Construct](https://www.curseforge.com/minecraft/mc-mods/tinkers-construct) for modern Minecraft versions. Based on the [Tinkers' Tool Leveling](https://www.curseforge.com/minecraft/mc-mods/tinkers-tool-leveling) addon for Minecraft 1.12.2.
 
@@ -13,7 +14,7 @@ This is an **unofficial** addon. Please do **not** reach out to the Tinkers' Con
 
 - Earn tool XP by performing actions with your tools (mining, harvesting, shearing, attacking)
 - Earn armor XP by taking damage or using Thorns modifier
-- Gain 1 free modifier and/or stat per level up
+- Gain 1 free modifier slot and/or stat per level up
 - Customize the order of modifier slot and/or stat types gained after each level up (or set it to random)
 - Set maximum level (or make it unlimited)
 - Adjust level requirements and experience sources
