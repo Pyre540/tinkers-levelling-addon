@@ -1,4 +1,6 @@
 # Tinkers' Levelling Addon
+[![curseforge](https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@2/assets/compact/available/curseforge_vector.svg)](https://www.curseforge.com/minecraft/mc-mods/tinkers-levelling-addon)
+[![modrinth](https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@2/assets/compact/available/modrinth_vector.svg)](https://modrinth.com/mod/tinkers-levelling-addon)
 
 Simple, **unofficial** addon mod for [Tinkers' Construct](https://www.curseforge.com/minecraft/mc-mods/tinkers-construct) for modern Minecraft versions. Based on the [Tinkers' Tool Leveling](https://www.curseforge.com/minecraft/mc-mods/tinkers-tool-leveling) addon for Minecraft 1.12.2.
 
@@ -10,9 +12,9 @@ This is an **unofficial** addon. Please do **not** reach out to the Tinkers' Con
 
 ## Features
 
-- Earn tool XP by performing actions with your tools (mining, harvesting, shearing, attacking)
+- Earn tool XP by performing actions with your tools (mining, harvesting, shearing, attacking, etc.)
 - Earn armor XP by taking damage or using Thorns modifier
-- Gain 1 free modifier and/or stat per level up
+- Gain 1 free modifier slot and/or stat per level up
 - Customize the order of modifier slot and/or stat types gained after each level up (or set it to random)
 - Set maximum level (or make it unlimited)
 - Adjust level requirements and experience sources
@@ -20,24 +22,39 @@ This is an **unofficial** addon. Please do **not** reach out to the Tinkers' Con
 
 ## Getting started
 
-To get started simply apply _Improvable_ modifier to your tool/armor piece. As it's designed to be an endgame modifier, the default recipe is pricey (1x Nether Star, 4x Bottle o' Enchanting) and requires Tinker's Anvil and 1 ability slot (This recipe can be easily changed by simple datapack - [example](https://github.com/Pyre540/tinkers-levelling-addon/tree/master/examples/datapacks/override_improvable_recipe_1.18.2)).
+To get started simply apply _Improvable_ modifier to your tool/armor piece. As it's designed to be an endgame modifier, the default recipe is pricey (1x Nether Star, 4x Bottle o' Enchanting) and requires Tinker's Anvil and 1 ability slot (This recipe can be easily changed by simple datapack - [example](https://github.com/Pyre540/tinkers-levelling-addon/tree/1.18/examples/datapacks/override_improvable_recipe_1.18.2)).
 
-<img src="https://raw.githubusercontent.com/Pyre540/tinkers-levelling-addon/master/examples/image/default-modifier-recipe.png" alt="Default modifier recipe" width="400px"/>
+<img src="https://raw.githubusercontent.com/Pyre540/tinkers-levelling-addon/1.18/examples/image/default-modifier-recipe.png" alt="Default modifier recipe"/>
 
 After that your tool is ready to earn some XP, so go and mine some stuff, cut some trees and kill some mobs!
 
-<img src="https://raw.githubusercontent.com/Pyre540/tinkers-levelling-addon/master/examples/image/example-tool.png" alt="Example tool" height="300px"/>
+<img src="https://raw.githubusercontent.com/Pyre540/tinkers-levelling-addon/1.18/examples/image/example-tool.png" alt="Example tool"/>
 
 Hold _Alt_ key to display summary of perks gained so far.
 
-<img src="https://raw.githubusercontent.com/Pyre540/tinkers-levelling-addon/master/examples/image/example-level-info.png" alt="Example level info" height="300px"/>
-
+<img src="https://raw.githubusercontent.com/Pyre540/tinkers-levelling-addon/1.18/examples/image/example-level-info.png" alt="Example level info"/>
 
 ## License
 
 Code, Textures and binaries of this addon are licensed under the [MIT License](https://tldrlegal.com/license/mit-license). Any alternate licenses are noted where appropriate.
 
 You are allowed to use the mod in your modpack.
+
+## FAQ
+
+#### I can't find config files! Where are they?
+
+- Server config file is stored in a world/save specific _"serverconfig"_ folder.
+
+  For local/singleplayer instances you can find config file in `.minecraft/saves/<world_name>/serverconfig/tinkerslevellingaddon-server.toml` 
+
+  For server/multiplayer instances you can find config file in `<server_folder>/world/serverconfig/tinkerslevellingaddon-server.toml`
+
+- Client config file is stored in your local instance's _"config"_ folder in `.minecraft/config/tinkerslevellingaddon-client.toml`
+
+#### Can you port this mod to Fabric to work with Hephaestus?
+
+- No. I have no plans to port this mod to Fabric.
 
 ## Credits
 

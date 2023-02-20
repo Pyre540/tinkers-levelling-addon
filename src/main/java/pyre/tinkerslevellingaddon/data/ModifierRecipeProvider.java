@@ -6,7 +6,8 @@ import net.minecraft.data.recipes.RecipeProvider;
 import net.minecraft.world.item.Items;
 import net.minecraftforge.common.crafting.conditions.IConditionBuilder;
 import pyre.tinkerslevellingaddon.TinkersLevellingAddon;
-import slimeknights.tconstruct.library.data.recipe.IRecipeHelper;
+import pyre.tinkerslevellingaddon.util.ModUtil;
+import slimeknights.mantle.recipe.data.IRecipeHelper;
 import slimeknights.tconstruct.library.modifiers.ModifierId;
 import slimeknights.tconstruct.library.recipe.modifiers.adding.ModifierRecipeBuilder;
 import slimeknights.tconstruct.library.tools.SlotType;
@@ -29,7 +30,7 @@ public class ModifierRecipeProvider extends RecipeProvider implements ICondition
         String abilityFolder = "tools/modifiers/ability/";
         String abilitySalvage = "tools/modifiers/salvage/ability/";
 
-        ModifierId improvableId = new ModifierId(TinkersLevellingAddon.MOD_ID, "improvable");
+        ModifierId improvableId = new ModifierId(ModUtil.getResource("improvable"));
         ModifierRecipeBuilder.modifier(improvableId)
                 .addInput(Items.EXPERIENCE_BOTTLE)
                 .addInput(Items.NETHER_STAR)
