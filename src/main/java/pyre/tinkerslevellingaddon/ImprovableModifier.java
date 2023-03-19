@@ -5,6 +5,7 @@ import net.minecraft.network.chat.TextColor;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
@@ -13,20 +14,21 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.entity.projectile.Projectile;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ShieldItem;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.ToolAction;
 import net.minecraftforge.common.ToolActions;
 import org.jetbrains.annotations.Nullable;
 import pyre.tinkerslevellingaddon.config.Config;
 import pyre.tinkerslevellingaddon.util.ModUtil;
 import pyre.tinkerslevellingaddon.util.ToolLevellingUtil;
+import slimeknights.tconstruct.common.TinkerTags;
 import slimeknights.tconstruct.library.modifiers.ModifierEntry;
 import slimeknights.tconstruct.library.modifiers.TinkerHooks;
-import slimeknights.tconstruct.library.modifiers.hook.BlockTransformModifierHook;
-import slimeknights.tconstruct.library.modifiers.hook.PlantHarvestModifierHook;
-import slimeknights.tconstruct.library.modifiers.hook.ProjectileLaunchModifierHook;
-import slimeknights.tconstruct.library.modifiers.hook.ShearsModifierHook;
+import slimeknights.tconstruct.library.modifiers.hook.*;
 import slimeknights.tconstruct.library.modifiers.impl.NoLevelsModifier;
 import slimeknights.tconstruct.library.modifiers.util.ModifierHookMap;
 import slimeknights.tconstruct.library.tools.SlotType;
@@ -40,6 +42,7 @@ import slimeknights.tconstruct.library.tools.nbt.NamespacedNBT;
 import slimeknights.tconstruct.library.tools.nbt.ToolStack;
 import slimeknights.tconstruct.library.tools.stat.FloatToolStat;
 import slimeknights.tconstruct.library.tools.stat.ModifierStatsBuilder;
+import slimeknights.tconstruct.library.tools.stat.ToolStats;
 import slimeknights.tconstruct.library.utils.RestrictedCompoundTag;
 import slimeknights.tconstruct.tools.TinkerModifiers;
 
@@ -151,7 +154,12 @@ public class ImprovableModifier extends NoLevelsModifier implements PlantHarvest
                 !isValidDamageSource(source, player)) {
             return;
         }
-        int xp = (Config.damageTaken.get() ? Math.round(amount) : 1) + Config.bonusTakingDamageXp.get() + getThornsBonus(tool);
+        float damageBlocked = damageBlocked(player, source, amount);
+        if (amount <= damageBlocked) {
+            return;
+        }
+        int xp = (Config.damageTaken.get() ? Math.round(amount - damageBlocked) : 1) + Config.bonusTakingDamageXp.get()
+                + getThornsBonus(tool);
         addExperience(getHeldTool(player, slotType), xp, player);
     }
 
@@ -210,5 +218,40 @@ public class ImprovableModifier extends NoLevelsModifier implements PlantHarvest
             return 0;
         }
         return RANDOM.nextFloat() < (thornsLevel * 0.15f) ? 1 + RANDOM.nextInt(Config.bonusThornsXp.get() + 1) : 0;
+    }
+    
+    private float damageBlocked(ServerPlayer player, DamageSource source, float amount) {
+        ItemStack activeStack = player.getUseItem();
+        if (activeStack.isEmpty()) {
+            return 0;
+        }
+        if (activeStack.is(TinkerTags.Items.MODIFIABLE)) {
+            ToolStack tool = ToolStack.from(activeStack);
+            if (!tool.isBroken()) {
+                float blockAngle = ConditionalStatModifierHook.getModifiedStat(tool, player, ToolStats.BLOCK_ANGLE) / 2;
+                if (canBlock(player, source.getSourcePosition(), blockAngle)) {
+                    return tool.getStats().get(ToolStats.BLOCK_AMOUNT);
+                }
+            }
+        } else if (activeStack.getItem() instanceof ShieldItem && canBlock(player, source.getSourcePosition(), 90)) {
+                return amount;
+            
+        }
+        return 0;
+    }
+    
+    private boolean canBlock(ServerPlayer player, @Nullable Vec3 sourcePosition, float blockAngle) {
+        if (sourcePosition == null) {
+            return false;
+        }
+        Vec3 viewVector = player.getViewVector(1.0f);
+        Vec3 entityPosition = player.position();
+        Vec3 direction = new Vec3(entityPosition.x - sourcePosition.x, 0, entityPosition.z - sourcePosition.z);
+        double length = viewVector.length() * direction.length();
+        if (length < 1.0E-4D) {
+            return false;
+        }
+        double angle = Math.abs(180 - Math.acos(direction.dot(viewVector) / length) * Mth.RAD_TO_DEG);
+        return blockAngle >= angle;
     }
 }
