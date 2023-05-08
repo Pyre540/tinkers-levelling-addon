@@ -540,6 +540,22 @@ public class Config {
         }
         return (List<String>) statsRandomPool;
     }
+    
+    public static List<String> getRangedSlotsOrder() {
+        List<? extends String> slotsOrder = rangedSlotTypeOrder.get();
+        if (slotsOrder.isEmpty()) {
+            slotsOrder = DEFAULT_RANGED_SLOTS_ORDER;
+        }
+        return (List<String>) slotsOrder;
+    }
+    
+    public static List<String> getRangedSlotsRandomPool() {
+        List<? extends String> slotsRandomPool = rangedSlotTypeRandomPool.get();
+        if (slotsRandomPool.isEmpty()) {
+            slotsRandomPool = DEFAULT_RANGED_SLOTS_RANDOM_POOL;
+        }
+        return (List<String>) slotsRandomPool;
+    }
 
     public static List<String> getRangedStatsOrder() {
         List<? extends String> statsOrder = rangedStatTypeOrder.get();

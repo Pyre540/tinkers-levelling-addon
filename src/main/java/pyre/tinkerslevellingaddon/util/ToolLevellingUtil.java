@@ -333,13 +333,13 @@ public class ToolLevellingUtil {
     }
     
     private static String getRangedSlotForLevel(int level) {
-        List<String> toolsSlotsOrder = Config.getToolsSlotsOrder();
-        return toolsSlotsOrder.get((level - 1) % toolsSlotsOrder.size());
+        List<String> rangedSlotsOrder = Config.getRangedSlotsOrder();
+        return rangedSlotsOrder.get((level - 1) % rangedSlotsOrder.size());
     }
     
     private static String getRandomRangedSlot() {
-        List<String> toolsSlotsRandomPool = Config.getToolsSlotsRandomPool();
-        return toolsSlotsRandomPool.get(RANDOM.nextInt(toolsSlotsRandomPool.size()));
+        List<String> rangedSlotsRandomPool = Config.getRangedSlotsRandomPool();
+        return rangedSlotsRandomPool.get(RANDOM.nextInt(rangedSlotsRandomPool.size()));
     }
     
     private static String getArmorSlotForLevel(int level) {
