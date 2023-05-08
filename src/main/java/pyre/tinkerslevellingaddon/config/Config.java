@@ -96,6 +96,7 @@ public class Config {
     //toolLevelling
     public static ForgeConfigSpec.BooleanValue damageDealt;
     public static ForgeConfigSpec.BooleanValue damageTaken;
+    public static ForgeConfigSpec.BooleanValue damageBlocked;
     public static ForgeConfigSpec.BooleanValue enablePvp;
 
     //toolLevelling.actions
@@ -110,6 +111,7 @@ public class Config {
     public static ForgeConfigSpec.BooleanValue enableAttackingXp;
     public static ForgeConfigSpec.BooleanValue enableShootingXp;
     public static ForgeConfigSpec.BooleanValue enableTakingDamageXp;
+    public static ForgeConfigSpec.BooleanValue enableBlockingDamageXp;
     public static ForgeConfigSpec.BooleanValue enableThornsXp;
 
     //toolLevelling.bonuses
@@ -124,6 +126,7 @@ public class Config {
     public static ForgeConfigSpec.IntValue bonusAttackingXp;
     public static ForgeConfigSpec.IntValue bonusShootingXp;
     public static ForgeConfigSpec.IntValue bonusTakingDamageXp;
+    public static ForgeConfigSpec.IntValue bonusBlockingDamageXp;
     public static ForgeConfigSpec.IntValue bonusThornsXp;
 
     //CLIENT
@@ -344,6 +347,9 @@ public class Config {
         damageTaken = builder.comment("If true, base experience value gained for taking damage is equal to damage taken (rounded to whole number), otherwise 1.")
                 .translation("config.tinkerslevellingaddon.levelling.damageTaken")
                 .define("damageTaken", true);
+        damageBlocked = builder.comment("If true, base experience value gained for blocking damage is equal to damage blocked (rounded to whole number), otherwise 1.")
+                .translation("config.tinkerslevellingaddon.levelling.damageBlocked")
+                .define("damageBlocked", true);
         enablePvp = builder.comment("If true, allows to gain experience from dealing damage to or taking damage from other players.")
                 .translation("config.tinkerslevellingaddon.levelling.enablePvp")
                 .define("pvp", true);
@@ -391,6 +397,9 @@ public class Config {
         enableTakingDamageXp = builder.comment("Applies to armor only.")
                 .translation("config.tinkerslevellingaddon.levelling.takingDamage")
                 .define("takingDamage", true);
+        
+        enableBlockingDamageXp = builder.translation("config.tinkerslevellingaddon.levelling.blockingDamage")
+                .define("blockingDamage", true);
 
         enableThornsXp = builder.comment("Applies to armor only. Thorns modifier gives 15% chance per level to gain experience.")
                 .translation("config.tinkerslevellingaddon.levelling.thorns")
@@ -434,6 +443,9 @@ public class Config {
 
         bonusTakingDamageXp = builder.translation("config.tinkerslevellingaddon.levelling.takingDamage")
                 .defineInRange("takingDamage", 0, 0, Integer.MAX_VALUE);
+        
+        bonusBlockingDamageXp = builder.translation("config.tinkerslevellingaddon.levelling.blockingDamage")
+                .defineInRange("blockingDamage", 0, 0, Integer.MAX_VALUE);
 
         bonusThornsXp = builder.comment("As with Thorns damage calculations, this is the upper bound of the bonus experience that could be granted.",
                         "For example, for the value of 3 (default), we get: 1 (base xp) + 0 to 3 (bonus xp) = 1 to 4 (result xp)")

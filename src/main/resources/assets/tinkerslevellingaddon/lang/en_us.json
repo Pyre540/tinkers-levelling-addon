@@ -118,6 +118,7 @@
 
   "config.tinkerslevellingaddon.levelling.damage_dealt": "Damage dealt",
   "config.tinkerslevellingaddon.levelling.damage_taken": "Damage taken",
+  "config.tinkerslevellingaddon.levelling.damage_blocked": "Damage blocked",
   "config.tinkerslevellingaddon.levelling.enable_pvp": "Enable PvP",
 
   "config.tinkerslevellingaddon.levelling.mining": "Mining",
@@ -131,6 +132,7 @@
   "config.tinkerslevellingaddon.levelling.attacking": "Attacking",
   "config.tinkerslevellingaddon.levelling.shooting": "Shooting",
   "config.tinkerslevellingaddon.levelling.taking_damage": "Taking damage",
+  "config.tinkerslevellingaddon.levelling.blocking_damage": "Blocking damage",
   "config.tinkerslevellingaddon.levelling.thorns": "Thorns",
 
   "config.tinkerslevellingaddon.client.messages": "Messages",

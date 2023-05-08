@@ -118,6 +118,7 @@
 
   "config.tinkerslevellingaddon.levelling.damage_dealt": "Zadane obrażenia",
   "config.tinkerslevellingaddon.levelling.damage_taken": "Otrzymane obrażenia",
+  "config.tinkerslevellingaddon.levelling.damage_blocked": "Zablokowane obrażenia",
   "config.tinkerslevellingaddon.levelling.enable_pvp": "Włącz PvP",
 
   "config.tinkerslevellingaddon.levelling.mining": "Kopanie",
@@ -131,6 +132,7 @@
   "config.tinkerslevellingaddon.levelling.attacking": "Zadawanie obrażeń",
   "config.tinkerslevellingaddon.levelling.shooting": "Strzelanie",
   "config.tinkerslevellingaddon.levelling.taking_damage": "Otrzymywanie obrażeń",
+  "config.tinkerslevellingaddon.levelling.blocking_damage": "Blokowanie obrażeń",
   "config.tinkerslevellingaddon.levelling.thorns": "Ciernie",
 
   "config.tinkerslevellingaddon.client.messages": "Wiadomości",

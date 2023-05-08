@@ -21,8 +21,12 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.ToolAction;
 import net.minecraftforge.common.ToolActions;
+import net.minecraftforge.event.entity.living.ShieldBlockEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod;
 import org.jetbrains.annotations.Nullable;
 import pyre.tinkerslevellingaddon.config.Config;
+import pyre.tinkerslevellingaddon.setup.Registration;
 import pyre.tinkerslevellingaddon.util.ModUtil;
 import pyre.tinkerslevellingaddon.util.ToolLevellingUtil;
 import slimeknights.tconstruct.common.TinkerTags;
@@ -36,6 +40,7 @@ import slimeknights.tconstruct.library.tools.context.EquipmentContext;
 import slimeknights.tconstruct.library.tools.context.ToolAttackContext;
 import slimeknights.tconstruct.library.tools.context.ToolHarvestContext;
 import slimeknights.tconstruct.library.tools.context.ToolRebuildContext;
+import slimeknights.tconstruct.library.tools.helper.ModifierUtil;
 import slimeknights.tconstruct.library.tools.nbt.IToolStackView;
 import slimeknights.tconstruct.library.tools.nbt.ModDataNBT;
 import slimeknights.tconstruct.library.tools.nbt.NamespacedNBT;
@@ -50,6 +55,7 @@ import java.util.List;
 
 import static pyre.tinkerslevellingaddon.util.ToolLevellingUtil.addExperience;
 
+@Mod.EventBusSubscriber(modid = TinkersLevellingAddon.MOD_ID, bus = Mod.EventBusSubscriber.Bus.FORGE)
 public class ImprovableModifier extends NoLevelsModifier implements PlantHarvestModifierHook, ShearsModifierHook,
         BlockTransformModifierHook, ProjectileLaunchModifierHook {
     
@@ -199,6 +205,28 @@ public class ImprovableModifier extends NoLevelsModifier implements PlantHarvest
             addExperience(toolStack, 1 + Config.bonusPathMakingXp.get(), player);
         }
     }
+    
+    @SubscribeEvent
+    static void onBlock(ShieldBlockEvent event) {
+        if (!Config.enableBlockingDamageXp.get()) {
+            return;
+        }
+        LivingEntity entity = event.getEntityLiving();
+        ItemStack activeStack = entity.getUseItem();
+        if (ModifierUtil.getModifierLevel(activeStack, Registration.IMPROVABLE.get().getId()) <= 0) {
+            return;
+        }
+        if (!activeStack.isEmpty() && activeStack.is(TinkerTags.Items.MODIFIABLE)
+                && entity instanceof ServerPlayer player) {
+            ToolStack tool = ToolStack.from(activeStack);
+            float blockAngle = ConditionalStatModifierHook.getModifiedStat(tool, player, ToolStats.BLOCK_ANGLE) / 2;
+            if (!tool.isBroken() && canBlock(player, event.getDamageSource().getSourcePosition(), blockAngle)) {
+                int xp = (int) ((Config.damageBlocked.get() ? Math.min(event.getBlockedDamage(),
+                        tool.getStats().get(ToolStats.BLOCK_AMOUNT)) : 1) + Config.bonusBlockingDamageXp.get());
+                addExperience(tool, xp, player);
+            }
+        }
+    }
 
     private boolean isEqualTinkersItem(IToolStackView item1, IToolStackView item2) {
         if(item1 == null || item2 == null || item1.getItem() != item2.getItem()) {
@@ -234,13 +262,12 @@ public class ImprovableModifier extends NoLevelsModifier implements PlantHarvest
                 }
             }
         } else if (activeStack.getItem() instanceof ShieldItem && canBlock(player, source.getSourcePosition(), 90)) {
-                return amount;
-            
+            return amount;
         }
         return 0;
     }
     
-    private boolean canBlock(ServerPlayer player, @Nullable Vec3 sourcePosition, float blockAngle) {
+    private static boolean canBlock(ServerPlayer player, @Nullable Vec3 sourcePosition, float blockAngle) {
         if (sourcePosition == null) {
             return false;
         }
