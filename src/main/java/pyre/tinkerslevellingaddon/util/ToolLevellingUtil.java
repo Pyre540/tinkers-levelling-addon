@@ -22,7 +22,7 @@ import java.util.*;
 import static pyre.tinkerslevellingaddon.ImprovableModifier.*;
 
 public class ToolLevellingUtil {
-    //modifier types
+    //slot types
     public static final String UPGRADE = "upgrade";
     public static final String ABILITY = "ability";
     public static final String SOUL = "soul";
@@ -58,8 +58,12 @@ public class ToolLevellingUtil {
         TOOL_SLOT_TYPES.put(UPGRADE, SlotType.UPGRADE);
         TOOL_SLOT_TYPES.put(ABILITY, SlotType.ABILITY);
         TOOL_SLOT_TYPES.put(SOUL, SlotType.SOUL);
+        TOOL_SLOT_TYPES.put(DEFENSE, SlotType.DEFENSE);
         
-        ARMOR_SLOT_TYPES = new LinkedHashMap<>(TOOL_SLOT_TYPES);
+        ARMOR_SLOT_TYPES = new LinkedHashMap<>();
+        ARMOR_SLOT_TYPES.put(UPGRADE, SlotType.UPGRADE);
+        ARMOR_SLOT_TYPES.put(ABILITY, SlotType.ABILITY);
+        ARMOR_SLOT_TYPES.put(SOUL, SlotType.SOUL);
         ARMOR_SLOT_TYPES.put(DEFENSE, SlotType.DEFENSE);
         
         ALL_SLOT_TYPES = new HashMap<>(TOOL_SLOT_TYPES);
