@@ -1,4 +1,16 @@
 # CHANGELOG
+## 1.3.0
+**Requires Tinkers' Construct 3.6.3.113+**
+### Changed
+- Tools can now gain defence slot. This option is disabled by default. It can be enabled in server config (\*SlotTypeOrder/\*SlotTypeRandomPool).
+### Added
+- Support for shields and corresponding config settings.
+- Modifier textures for [Materialis](https://www.curseforge.com/minecraft/mc-mods/materialis) and [Tinkers Reforged](https://www.curseforge.com/minecraft/mc-mods/tinkers-reforged) tools.
+- Ukrainian translation (Thanks @ItzNyuel).
+### Fixed
+- Armor gets experience, when all damage is blocked by shield.
+- Ranged weapons uses tool's slot configs.
+
 ## 1.2.0
 **Requires Tinkers' Construct 3.6.2.92+**
 ### Changed
