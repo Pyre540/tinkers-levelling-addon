@@ -211,7 +211,7 @@ public class ImprovableModifier extends NoLevelsModifier implements PlantHarvest
         if (!Config.enableBlockingDamageXp.get()) {
             return;
         }
-        LivingEntity entity = event.getEntityLiving();
+        LivingEntity entity = event.getEntity();
         ItemStack activeStack = entity.getUseItem();
         if (ModifierUtil.getModifierLevel(activeStack, Registration.IMPROVABLE.get().getId()) <= 0) {
             return;

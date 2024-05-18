@@ -4,7 +4,7 @@ import com.mojang.logging.LogUtils;
 import net.minecraft.data.DataGenerator;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.forge.event.lifecycle.GatherDataEvent;
+import net.minecraftforge.data.event.GatherDataEvent;
 import org.slf4j.Logger;
 import pyre.tinkerslevellingaddon.command.ModCommands;
 import pyre.tinkerslevellingaddon.config.Config;
