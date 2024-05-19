@@ -1,11 +1,10 @@
 {
   "type": "tconstruct:modifier_salvage",
-  "tools": {
-    "tag": "tconstruct:modifiable"
-  },
+  "modifier": "tinkerslevellingaddon:improvable",
   "slots": {
     "abilities": 1
   },
-  "modifier": "tinkerslevellingaddon:improvable",
-  "min_level": 1
+  "tools": {
+    "tag": "tconstruct:modifiable"
+  }
 }

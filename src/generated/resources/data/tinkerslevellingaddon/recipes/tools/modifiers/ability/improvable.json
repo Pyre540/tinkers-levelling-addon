@@ -1,5 +1,6 @@
 {
   "type": "tconstruct:modifier",
+  "allow_crystal": true,
   "inputs": [
     {
       "item": "minecraft:experience_bottle"
@@ -17,16 +18,12 @@
       "item": "minecraft:experience_bottle"
     }
   ],
-  "tools": {
-    "tag": "tconstruct:modifiable"
-  },
+  "level": 1,
+  "result": "tinkerslevellingaddon:improvable",
   "slots": {
     "abilities": 1
   },
-  "allow_crystal": true,
-  "result": {
-    "name": "tinkerslevellingaddon:improvable",
-    "level": 1
-  },
-  "max_level": 1
+  "tools": {
+    "tag": "tconstruct:modifiable"
+  }
 }

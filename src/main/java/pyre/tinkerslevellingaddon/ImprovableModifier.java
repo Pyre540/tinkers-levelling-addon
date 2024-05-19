@@ -1,6 +1,7 @@
 package pyre.tinkerslevellingaddon;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextColor;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
@@ -30,25 +31,31 @@ import pyre.tinkerslevellingaddon.setup.Registration;
 import pyre.tinkerslevellingaddon.util.ModUtil;
 import pyre.tinkerslevellingaddon.util.ToolLevellingUtil;
 import slimeknights.tconstruct.common.TinkerTags;
+import slimeknights.tconstruct.library.modifiers.Modifier;
 import slimeknights.tconstruct.library.modifiers.ModifierEntry;
-import slimeknights.tconstruct.library.modifiers.TinkerHooks;
-import slimeknights.tconstruct.library.modifiers.hook.*;
+import slimeknights.tconstruct.library.modifiers.ModifierHooks;
+import slimeknights.tconstruct.library.modifiers.hook.armor.OnAttackedModifierHook;
+import slimeknights.tconstruct.library.modifiers.hook.build.ConditionalStatModifierHook;
+import slimeknights.tconstruct.library.modifiers.hook.build.ModifierRemovalHook;
+import slimeknights.tconstruct.library.modifiers.hook.build.ToolStatsModifierHook;
+import slimeknights.tconstruct.library.modifiers.hook.build.VolatileDataModifierHook;
+import slimeknights.tconstruct.library.modifiers.hook.combat.MeleeHitModifierHook;
+import slimeknights.tconstruct.library.modifiers.hook.mining.BlockBreakModifierHook;
+import slimeknights.tconstruct.library.modifiers.hook.ranged.ProjectileLaunchModifierHook;
+import slimeknights.tconstruct.library.modifiers.hook.special.BlockTransformModifierHook;
+import slimeknights.tconstruct.library.modifiers.hook.special.PlantHarvestModifierHook;
+import slimeknights.tconstruct.library.modifiers.hook.special.ShearsModifierHook;
 import slimeknights.tconstruct.library.modifiers.impl.NoLevelsModifier;
-import slimeknights.tconstruct.library.modifiers.util.ModifierHookMap;
+import slimeknights.tconstruct.library.module.ModuleHookMap;
 import slimeknights.tconstruct.library.tools.SlotType;
 import slimeknights.tconstruct.library.tools.context.EquipmentContext;
 import slimeknights.tconstruct.library.tools.context.ToolAttackContext;
 import slimeknights.tconstruct.library.tools.context.ToolHarvestContext;
-import slimeknights.tconstruct.library.tools.context.ToolRebuildContext;
 import slimeknights.tconstruct.library.tools.helper.ModifierUtil;
-import slimeknights.tconstruct.library.tools.nbt.IToolStackView;
-import slimeknights.tconstruct.library.tools.nbt.ModDataNBT;
-import slimeknights.tconstruct.library.tools.nbt.NamespacedNBT;
-import slimeknights.tconstruct.library.tools.nbt.ToolStack;
+import slimeknights.tconstruct.library.tools.nbt.*;
 import slimeknights.tconstruct.library.tools.stat.FloatToolStat;
 import slimeknights.tconstruct.library.tools.stat.ModifierStatsBuilder;
 import slimeknights.tconstruct.library.tools.stat.ToolStats;
-import slimeknights.tconstruct.library.utils.RestrictedCompoundTag;
 import slimeknights.tconstruct.tools.TinkerModifiers;
 
 import java.util.List;
@@ -57,7 +64,8 @@ import static pyre.tinkerslevellingaddon.util.ToolLevellingUtil.addExperience;
 
 @Mod.EventBusSubscriber(modid = TinkersLevellingAddon.MOD_ID, bus = Mod.EventBusSubscriber.Bus.FORGE)
 public class ImprovableModifier extends NoLevelsModifier implements PlantHarvestModifierHook, ShearsModifierHook,
-        BlockTransformModifierHook, ProjectileLaunchModifierHook {
+        BlockBreakModifierHook, BlockTransformModifierHook, ProjectileLaunchModifierHook, OnAttackedModifierHook,
+        MeleeHitModifierHook, ModifierRemovalHook, VolatileDataModifierHook, ToolStatsModifierHook {
     
     public static final TextColor IMPROVABLE_MODIFIER_COLOR = TextColor.fromRgb(9337340);
     
@@ -68,22 +76,25 @@ public class ImprovableModifier extends NoLevelsModifier implements PlantHarvest
     public static final ResourceLocation STAT_HISTORY_KEY = ModUtil.getResource("stat_history");
     
     @Override
-    protected void registerHooks(ModifierHookMap.Builder hookBuilder) {
+    protected void registerHooks(ModuleHookMap.Builder hookBuilder) {
         super.registerHooks(hookBuilder);
-        hookBuilder.addHook(this, TinkerHooks.PLANT_HARVEST, TinkerHooks.SHEAR_ENTITY, TinkerHooks.BLOCK_TRANSFORM,
-                TinkerHooks.PROJECTILE_LAUNCH);
+        hookBuilder.addHook(this, ModifierHooks.PLANT_HARVEST, ModifierHooks.SHEAR_ENTITY,
+                ModifierHooks.BLOCK_TRANSFORM, ModifierHooks.PROJECTILE_LAUNCH, ModifierHooks.BLOCK_BREAK,
+                ModifierHooks.ON_ATTACKED, ModifierHooks.MELEE_HIT, ModifierHooks.VOLATILE_DATA,
+                ModifierHooks.TOOL_STATS);
     }
 
     @Override
-    public void beforeRemoved(IToolStackView tool, RestrictedCompoundTag tag) {
+    public Component onRemoved(IToolStackView tool, Modifier modifier) {
         tool.getPersistentData().remove(EXPERIENCE_KEY);
         tool.getPersistentData().remove(LEVEL_KEY);
         tool.getPersistentData().remove(SLOT_HISTORY_KEY);
         tool.getPersistentData().remove(STAT_HISTORY_KEY);
+        return null;
     }
 
     @Override
-    public void addVolatileData(ToolRebuildContext context, int level, ModDataNBT volatileData) {
+    public void addVolatileData(IToolContext context, ModifierEntry modifier, ModDataNBT volatileData) {
         if (ToolLevellingUtil.isSlotsLevellingEnabled(context)) {
             List<SlotType> slots =
                     ToolLevellingUtil.parseSlotsHistory(context.getPersistentData().getString(SLOT_HISTORY_KEY));
@@ -94,7 +105,7 @@ public class ImprovableModifier extends NoLevelsModifier implements PlantHarvest
     }
 
     @Override
-    public void addToolStats(ToolRebuildContext context, int level, ModifierStatsBuilder builder) {
+    public void addToolStats(IToolContext context, ModifierEntry modifier, ModifierStatsBuilder builder) {
         if (ToolLevellingUtil.isStatsLevellingEnabled(context)) {
             List<FloatToolStat> stats =
                     ToolLevellingUtil.parseStatsHistory(context.getPersistentData().getString(STAT_HISTORY_KEY));
@@ -105,7 +116,7 @@ public class ImprovableModifier extends NoLevelsModifier implements PlantHarvest
     }
 
     @Override
-    public void afterBlockBreak(IToolStackView tool, int level, ToolHarvestContext context) {
+    public void afterBlockBreak(IToolStackView tool, ModifierEntry modifier, ToolHarvestContext context) {
         ServerPlayer player = context.getPlayer();
         if (!Config.enableMiningXp.get() || !context.isEffective() || player == null) {
             return;
@@ -141,19 +152,18 @@ public class ImprovableModifier extends NoLevelsModifier implements PlantHarvest
     }
 
     @Override
-    public int afterEntityHit(IToolStackView tool, int level, ToolAttackContext context, float damageDealt) {
+    public void afterMeleeHit(IToolStackView tool, ModifierEntry modifier, ToolAttackContext context, float damageDealt) {
         if (!Config.enableAttackingXp.get() || !(context.getPlayerAttacker() instanceof ServerPlayer player) ||
                 (!Config.enablePvp.get() && context.getLivingTarget() instanceof Player) || context.getLivingTarget() == null) {
-            return 0;
+            return;
         }
         int xp = (Config.damageDealt.get() ? Math.round(damageDealt) : 1) + Config.bonusAttackingXp.get();
         ToolStack toolStack = getHeldTool(context.getPlayerAttacker(), context.getSlotType());
         addExperience(toolStack, xp, player);
-        return 0;
     }
 
     @Override
-    public void onAttacked(IToolStackView tool, int level, EquipmentContext context, EquipmentSlot slotType,
+    public void onAttacked(IToolStackView tool, ModifierEntry modifier, EquipmentContext context, EquipmentSlot slotType,
                            DamageSource source, float amount, boolean isDirectDamage) {
         if (!Config.enableTakingDamageXp.get() || slotType.getType() != EquipmentSlot.Type.ARMOR || !isDirectDamage ||
                 !(context.getEntity() instanceof ServerPlayer player) || player.invulnerableTime > 10 ||

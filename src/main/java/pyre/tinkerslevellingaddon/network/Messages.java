@@ -30,7 +30,7 @@ public class Messages {
         net.messageBuilder(LevelUpPacket.class, id(), NetworkDirection.PLAY_TO_CLIENT)
                 .decoder(LevelUpPacket::new)
                 .encoder(LevelUpPacket::toBytes)
-                .consumer(LevelUpPacket::handle)
+                .consumerMainThread(LevelUpPacket::handle)
                 .add();
     }
 

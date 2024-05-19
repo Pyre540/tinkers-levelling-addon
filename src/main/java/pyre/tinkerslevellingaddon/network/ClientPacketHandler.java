@@ -1,7 +1,6 @@
 package pyre.tinkerslevellingaddon.network;
 
 import net.minecraft.ChatFormatting;
-import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.chat.Component;
@@ -27,7 +26,7 @@ public class ClientPacketHandler {
                 message = ModUtil.makeTranslation("message", "level_up.generic", toolName, levelComponent);
             }
             message.withStyle(style -> style.withColor(ImprovableModifier.IMPROVABLE_MODIFIER_COLOR));
-            player.sendMessage(message, Util.NIL_UUID);
+            player.displayClientMessage(message, false);
         }
         SoundEvent soundEvent = Config.levelUpSound.get().getSoundEvent();
         if (soundEvent != null) {

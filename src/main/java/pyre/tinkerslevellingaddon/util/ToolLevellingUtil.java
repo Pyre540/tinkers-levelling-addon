@@ -120,7 +120,7 @@ public class ToolLevellingUtil {
         return ARMOR_STAT_TYPES.keySet();
     }
     
-    public static boolean isSlotsLevellingEnabled(ToolRebuildContext context) {
+    public static boolean isSlotsLevellingEnabled(IToolContext context) {
         if (isArmor(context)) {
             return Config.armorSlotGainingMethod.get() != Config.GainingMethod.NONE;
         }
@@ -130,7 +130,7 @@ public class ToolLevellingUtil {
         return Config.toolsSlotGainingMethod.get() != Config.GainingMethod.NONE;
     }
     
-    public static boolean isStatsLevellingEnabled(ToolRebuildContext context) {
+    public static boolean isStatsLevellingEnabled(IToolContext context) {
         if (isArmor(context)) {
             return Config.armorStatGainingMethod.get() != Config.GainingMethod.NONE;
         }

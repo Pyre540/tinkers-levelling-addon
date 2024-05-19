@@ -2,8 +2,8 @@ package pyre.tinkerslevellingaddon.setup;
 
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.*;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.TextColor;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.settings.KeyModifier;
@@ -112,7 +112,7 @@ public class TooltipEventHandler {
         String statHistory = tool.getPersistentData().getString(ImprovableModifier.STAT_HISTORY_KEY);
         if (!statHistory.isBlank()) {
             if (!infoEntries.isEmpty()) {
-                infoEntries.add(TextComponent.EMPTY);
+                infoEntries.add(Component.empty());
             }
             Map<String, Double> gainedStats = new LinkedHashMap<>();
             Arrays.stream(statHistory.split(";"))
@@ -130,7 +130,7 @@ public class TooltipEventHandler {
 
         List<Component> nextLevelInfo = prepareNextLevelInfo(tool);
         if (!infoEntries.isEmpty() && !nextLevelInfo.isEmpty()) {
-            infoEntries.add(TextComponent.EMPTY);
+            infoEntries.add(Component.empty());
         }
         infoEntries.addAll(nextLevelInfo);
 
