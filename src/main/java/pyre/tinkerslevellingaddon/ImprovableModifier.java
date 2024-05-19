@@ -71,8 +71,7 @@ public class ImprovableModifier extends NoLevelsModifier implements PlantHarvest
     
     public static final ResourceLocation EXPERIENCE_KEY = ModUtil.getResource("experience");
     public static final ResourceLocation LEVEL_KEY = ModUtil.getResource("level");
-    //todo 1.19 rename to "slot_history"
-    public static final ResourceLocation SLOT_HISTORY_KEY = ModUtil.getResource("modifier_history");
+    public static final ResourceLocation SLOT_HISTORY_KEY = ModUtil.getResource("slot_history");
     public static final ResourceLocation STAT_HISTORY_KEY = ModUtil.getResource("stat_history");
     
     @Override
