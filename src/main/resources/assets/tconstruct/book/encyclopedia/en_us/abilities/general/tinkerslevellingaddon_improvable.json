@@ -1,0 +1,17 @@
+{
+  "modifier_id": "tinkerslevellingaddon:improvable",
+  "text": [
+    {
+      "text": "Enables gaining experience points and level ups. XP is earned by performing tool's intended actions like mining, harvesting, dealing damage, etc."
+    },
+    {
+      "text": "On level up additional modifier slot and/or stat is rewarded.",
+      "paragraph": true
+    }
+  ],
+  "more_text_space": true,
+  "effects": [
+    "Single use",
+    "Requires 1 ability slot"
+  ]
+}

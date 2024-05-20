@@ -1,0 +1,14 @@
+{
+  "modifier_id": "tinkerslevellingaddon:improvable",
+  "text": [
+    {
+      "text": "Grind! Improve! Overcome!"
+    }
+  ],
+  "more_text_space": true,
+  "effects": [
+    "Enables tool levelling",
+    "Single use",
+    "Requires 1 ability slot"
+  ]
+}
