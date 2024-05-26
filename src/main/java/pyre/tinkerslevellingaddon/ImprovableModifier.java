@@ -80,7 +80,7 @@ public class ImprovableModifier extends NoLevelsModifier implements PlantHarvest
         hookBuilder.addHook(this, ModifierHooks.PLANT_HARVEST, ModifierHooks.SHEAR_ENTITY,
                 ModifierHooks.BLOCK_TRANSFORM, ModifierHooks.PROJECTILE_LAUNCH, ModifierHooks.BLOCK_BREAK,
                 ModifierHooks.ON_ATTACKED, ModifierHooks.MELEE_HIT, ModifierHooks.VOLATILE_DATA,
-                ModifierHooks.TOOL_STATS);
+                ModifierHooks.TOOL_STATS, ModifierHooks.REMOVE);
     }
 
     @Override
