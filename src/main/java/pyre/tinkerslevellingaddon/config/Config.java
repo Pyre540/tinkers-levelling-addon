@@ -22,6 +22,8 @@ public class Config {
     private static final List<String> DEFAULT_RANGED_SLOTS_RANDOM_POOL = List.of(UPGRADE, UPGRADE, UPGRADE, UPGRADE, ABILITY);
     private static final List<String> DEFAULT_ARMOR_SLOTS_ORDER = List.of(UPGRADE, DEFENSE, UPGRADE, ABILITY, DEFENSE);
     private static final List<String> DEFAULT_ARMOR_SLOTS_RANDOM_POOL = List.of(UPGRADE, UPGRADE, DEFENSE, DEFENSE, ABILITY);
+    private static final List<String> DEFAULT_STAFF_SLOTS_ORDER = List.of(UPGRADE, UPGRADE, UPGRADE, DEFENSE, ABILITY);
+    private static final List<String> DEFAULT_STAFF_SLOTS_RANDOM_POOL = List.of(UPGRADE, UPGRADE, UPGRADE, DEFENSE, ABILITY);
 
     private static final List<String> DEFAULT_TOOLS_STATS_ORDER = List.of(DURABILITY, ATTACK_DAMAGE, ATTACK_SPEED, MINING_SPEED);
     private static final List<String> DEFAULT_TOOLS_STATS_RANDOM_POOL = List.of(DURABILITY, ATTACK_DAMAGE, ATTACK_SPEED, MINING_SPEED);
@@ -29,6 +31,8 @@ public class Config {
     private static final List<String> DEFAULT_RANGED_STATS_RANDOM_POOL = List.of(DURABILITY, DRAW_SPEED, VELOCITY, ACCURACY, PROJECTILE_DAMAGE);
     private static final List<String> DEFAULT_ARMOR_STATS_ORDER = List.of(DURABILITY, ARMOR, ARMOR_TOUGHNESS, KNOCKBACK_RESISTANCE);
     private static final List<String> DEFAULT_ARMOR_STATS_RANDOM_POOL = List.of(DURABILITY, ARMOR, ARMOR_TOUGHNESS, KNOCKBACK_RESISTANCE);
+    private static final List<String> DEFAULT_STAFF_STATS_ORDER = List.of(DURABILITY, DRAW_SPEED, VELOCITY, ACCURACY, PROJECTILE_DAMAGE, ARMOR);
+    private static final List<String> DEFAULT_STAFF_STATS_RANDOM_POOL = List.of(DURABILITY, DRAW_SPEED, VELOCITY, ACCURACY, PROJECTILE_DAMAGE, ARMOR);
 
     public static final ForgeConfigSpec SERVER_CONFIG;
     public static final ForgeConfigSpec CLIENT_CONFIG;
@@ -51,6 +55,8 @@ public class Config {
     public static ForgeConfigSpec.EnumValue<GainingMethod> rangedStatGainingMethod;
     public static ForgeConfigSpec.EnumValue<GainingMethod> armorSlotGainingMethod;
     public static ForgeConfigSpec.EnumValue<GainingMethod> armorStatGainingMethod;
+    public static ForgeConfigSpec.EnumValue<GainingMethod> staffSlotGainingMethod;
+    public static ForgeConfigSpec.EnumValue<GainingMethod> staffStatGainingMethod;
     public static ForgeConfigSpec.IntValue maxLevel;
     public static ForgeConfigSpec.IntValue baseExperience;
     public static ForgeConfigSpec.DoubleValue requiredXpMultiplier;
@@ -63,6 +69,8 @@ public class Config {
     private static ForgeConfigSpec.ConfigValue<List<? extends String>> rangedSlotTypeOrder;
     private static ForgeConfigSpec.ConfigValue<List<? extends String>> armorSlotTypeRandomPool;
     private static ForgeConfigSpec.ConfigValue<List<? extends String>> armorSlotTypeOrder;
+    private static ForgeConfigSpec.ConfigValue<List<? extends String>> staffSlotTypeRandomPool;
+    private static ForgeConfigSpec.ConfigValue<List<? extends String>> staffSlotTypeOrder;
 
     //general.stats
     private static ForgeConfigSpec.ConfigValue<List<? extends String>> toolsStatTypeRandomPool;
@@ -71,6 +79,8 @@ public class Config {
     private static ForgeConfigSpec.ConfigValue<List<? extends String>> rangedStatTypeOrder;
     private static ForgeConfigSpec.ConfigValue<List<? extends String>> armorStatTypeRandomPool;
     private static ForgeConfigSpec.ConfigValue<List<? extends String>> armorStatTypeOrder;
+    private static ForgeConfigSpec.ConfigValue<List<? extends String>> staffStatTypeRandomPool;
+    private static ForgeConfigSpec.ConfigValue<List<? extends String>> staffStatTypeOrder;
 
     //general.stats.toolValues
     public static ForgeConfigSpec.IntValue toolDurabilityValue;
@@ -92,6 +102,14 @@ public class Config {
     public static ForgeConfigSpec.DoubleValue armorArmorValue;
     public static ForgeConfigSpec.DoubleValue armorArmorToughnessValue;
     public static ForgeConfigSpec.DoubleValue armorKnockbackResistanceValue;
+    
+    //general.stats.staffValues
+    public static ForgeConfigSpec.IntValue staffDurabilityValue;
+    public static ForgeConfigSpec.DoubleValue staffDrawSpeedValue;
+    public static ForgeConfigSpec.DoubleValue staffVelocityValue;
+    public static ForgeConfigSpec.DoubleValue staffAccuracyValue;
+    public static ForgeConfigSpec.DoubleValue staffProjectileDamageValue;
+    public static ForgeConfigSpec.DoubleValue staffArmorValue;
 
     //toolLevelling
     public static ForgeConfigSpec.BooleanValue damageDealt;
@@ -148,6 +166,10 @@ public class Config {
         armorSlotGainingMethod = builder.comment("Method of gaining modifier slots for armor.")
                 .translation("config.tinkerslevellingaddon.general.armorSlotGainingMethod")
                 .defineEnum("armorSlotGainingMethod", GainingMethod.PREDEFINED_ORDER, EnumGetMethod.NAME_IGNORECASE, GainingMethod.values());
+        
+        staffSlotGainingMethod = builder.comment("Method of gaining modifier slots for staffs.")
+                .translation("config.tinkerslevellingaddon.general.staff_slot_gaining_method")
+                .defineEnum("staffSlotGainingMethod", GainingMethod.PREDEFINED_ORDER, EnumGetMethod.NAME_IGNORECASE, GainingMethod.values());
 
         slotsConfig(builder);
 
@@ -162,6 +184,10 @@ public class Config {
         armorStatGainingMethod = builder.comment("Method of gaining stats for armor.")
                 .translation("config.tinkerslevellingaddon.general.armorStatGainingMethod")
                 .defineEnum("armorStatGainingMethod", GainingMethod.NONE, EnumGetMethod.NAME_IGNORECASE, GainingMethod.values());
+        
+        staffStatGainingMethod = builder.comment("Method of gaining stats for staffs.")
+                .translation("config.tinkerslevellingaddon.general.staff_stat_gaining_method")
+                .defineEnum("staffStatGainingMethod", GainingMethod.NONE, EnumGetMethod.NAME_IGNORECASE, GainingMethod.values());
 
         statsConfig(builder);
 
@@ -222,6 +248,18 @@ public class Config {
                         "Allowed values: " + String.join(", ", getArmorSlotTypes()))
                 .translation("config.tinkerslevellingaddon.general.slots.armorSlotTypeOrder")
                 .defineList("armorSlotTypeOrder", DEFAULT_ARMOR_SLOTS_ORDER, t -> getArmorSlotTypes().contains(t));
+        
+        staffSlotTypeRandomPool = builder.comment("Set of modifier slot types from which random slot will be awarded when leveling up staffs.",
+                        "If empty default pool will be used (" + String.join(", ", DEFAULT_STAFF_SLOTS_RANDOM_POOL) + ").",
+                        "Allowed values: " + String.join(", ", getArmorSlotTypes()))
+                .translation("config.tinkerslevellingaddon.general.modifiers.staff_slot_type_random_pool")
+                .defineList("staffSlotTypeRandomPool", DEFAULT_STAFF_SLOTS_RANDOM_POOL, t -> getStaffSlotTypes().contains(t));
+        
+        staffSlotTypeOrder = builder.comment("List of modifier slot types (in order) that will be awarded when leveling up staffs. If level is higher than list size the mod will start over.",
+                        "If empty default order will be used (" + String.join(", ", DEFAULT_STAFF_SLOTS_ORDER) + ").",
+                        "Allowed values: " + String.join(", ", getStaffSlotTypes()))
+                .translation("config.tinkerslevellingaddon.general.slots.staff_slot_type_order")
+                .defineList("staffSlotTypeOrder", DEFAULT_STAFF_SLOTS_ORDER, t -> getStaffSlotTypes().contains(t));
 
         builder.pop();
     }
@@ -271,6 +309,20 @@ public class Config {
                 .defineList("armorStatTypeOrder", DEFAULT_ARMOR_STATS_ORDER, t -> getArmorStatTypes().contains(t));
 
         armorStatsValuesConfig(builder);
+        
+        staffStatTypeRandomPool = builder.comment("Set of stat types from which random stat will be awarded when leveling up staffs.",
+                        "If empty default pool will be used (" + String.join(", ", DEFAULT_STAFF_STATS_RANDOM_POOL) + ").",
+                        "Allowed values: " + String.join(", ", getStaffStatTypes()))
+                .translation("config.tinkerslevellingaddon.general.stats.staff_stat_type_random_pool")
+                .defineList("staffStatTypeRandomPool", DEFAULT_STAFF_STATS_RANDOM_POOL, t -> getStaffStatTypes().contains(t));
+        
+        staffStatTypeOrder = builder.comment("List of stat types (in order) that will be awarded when leveling up staffs. If level is higher than list size the mod will start over.",
+                        "If empty default order will be used (" + String.join(", ", DEFAULT_STAFF_STATS_ORDER) + ").",
+                        "Allowed values: " + String.join(", ", getStaffStatTypes()))
+                .translation("config.tinkerslevellingaddon.general.stats.staff_stat_type_order")
+                .defineList("staffStatTypeOrder", DEFAULT_STAFF_STATS_ORDER, t -> getStaffStatTypes().contains(t));
+        
+        staffStatsValuesConfig(builder);
 
         builder.pop();
     }
@@ -335,6 +387,30 @@ public class Config {
         armorKnockbackResistanceValue = builder.translation("config.tinkerslevellingaddon.general.stats.armorValues.knockbackResistance")
                 .defineInRange(KNOCKBACK_RESISTANCE, 0.1D, 0.1D, 1D);
 
+        builder.pop();
+    }
+    
+    private static void staffStatsValuesConfig(ForgeConfigSpec.Builder builder) {
+        builder.comment("Staff stat values rewarded on level ups").push("staffValues");
+        
+        staffDurabilityValue = builder.translation("tooltip.tinkerslevellingaddon.stat.durability")
+                .defineInRange(DURABILITY, 30, 1, 1000);
+        
+        staffDrawSpeedValue = builder.translation("tooltip.tinkerslevellingaddon.stat.draw_speed")
+                .defineInRange(DRAW_SPEED, 0.1D, 0.1D, 10D);
+        
+        staffVelocityValue = builder.translation("tooltip.tinkerslevellingaddon.stat.velocity")
+                .defineInRange(VELOCITY, 0.1D, 0.1D, 10D);
+        
+        staffAccuracyValue = builder.translation("tooltip.tinkerslevellingaddon.stat.accuracy")
+                .defineInRange(ACCURACY, 0.01D, 0.01D, 1D);
+        
+        staffProjectileDamageValue = builder.translation("tooltip.tinkerslevellingaddon.stat.projectile_damage")
+                .defineInRange(PROJECTILE_DAMAGE, 0.1D, 0.1D, 10D);
+        
+        staffArmorValue = builder.translation("config.tinkerslevellingaddon.general.stats.armorValues.armor")
+                .defineInRange(ARMOR, 0.25D, 0.1D, 10D);
+        
         builder.pop();
     }
 
@@ -572,6 +648,38 @@ public class Config {
         }
         return (List<String>) statsRandomPool;
     }
+    
+    public static List<String> getStaffSlotsOrder() {
+        List<? extends String> slotsOrder = staffSlotTypeOrder.get();
+        if (slotsOrder.isEmpty()) {
+            slotsOrder = DEFAULT_STAFF_SLOTS_ORDER;
+        }
+        return (List<String>) slotsOrder;
+    }
+    
+    public static List<String> getStaffSlotsRandomPool() {
+        List<? extends String> slotsRandomPool = staffSlotTypeRandomPool.get();
+        if (slotsRandomPool.isEmpty()) {
+            slotsRandomPool = DEFAULT_STAFF_SLOTS_RANDOM_POOL;
+        }
+        return (List<String>) slotsRandomPool;
+    }
+    
+    public static List<String> getStaffStatsOrder() {
+        List<? extends String> statsOrder = staffStatTypeOrder.get();
+        if (statsOrder.isEmpty()) {
+            statsOrder = DEFAULT_STAFF_STATS_ORDER;
+        }
+        return (List<String>) statsOrder;
+    }
+    
+    public static List<String> getStaffStatsRandomPool() {
+        List<? extends String> statsRandomPool = staffStatTypeRandomPool.get();
+        if (statsRandomPool.isEmpty()) {
+            statsRandomPool = DEFAULT_STAFF_STATS_RANDOM_POOL;
+        }
+        return (List<String>) statsRandomPool;
+    }
 
     public static double getToolStatValue(FloatToolStat stat) {
         if (stat.equals(ToolStats.DURABILITY)) {
@@ -626,6 +734,28 @@ public class Config {
         }
         if (stat.equals(ToolStats.KNOCKBACK_RESISTANCE)) {
             return armorKnockbackResistanceValue.get();
+        }
+        return 0;
+    }
+    
+    public static double getStaffStatValue(FloatToolStat stat) {
+        if (stat.equals(ToolStats.DRAW_SPEED)) {
+            return staffDrawSpeedValue.get();
+        }
+        if (stat.equals(ToolStats.VELOCITY)) {
+            return staffVelocityValue.get();
+        }
+        if (stat.equals(ToolStats.ACCURACY)) {
+            return staffAccuracyValue.get();
+        }
+        if (stat.equals(ToolStats.PROJECTILE_DAMAGE)) {
+            return staffProjectileDamageValue.get();
+        }
+        if (stat.equals(ToolStats.DURABILITY)) {
+            return staffDurabilityValue.get();
+        }
+        if (stat.equals(ToolStats.ARMOR)) {
+            return staffArmorValue.get();
         }
         return 0;
     }

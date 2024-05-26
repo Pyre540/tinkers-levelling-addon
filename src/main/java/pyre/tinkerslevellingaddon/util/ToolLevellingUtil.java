@@ -9,7 +9,6 @@ import pyre.tinkerslevellingaddon.network.LevelUpPacket;
 import pyre.tinkerslevellingaddon.network.Messages;
 import slimeknights.tconstruct.common.TinkerTags;
 import slimeknights.tconstruct.library.tools.SlotType;
-import slimeknights.tconstruct.library.tools.context.ToolRebuildContext;
 import slimeknights.tconstruct.library.tools.nbt.IToolContext;
 import slimeknights.tconstruct.library.tools.nbt.IToolStackView;
 import slimeknights.tconstruct.library.tools.nbt.ModDataNBT;
@@ -49,6 +48,7 @@ public class ToolLevellingUtil {
     private static final Map<String, FloatToolStat> TOOL_STAT_TYPES;
     private static final Map<String, FloatToolStat> RANGED_STAT_TYPES;
     private static final Map<String, FloatToolStat> ARMOR_STAT_TYPES;
+    private static final Map<String, FloatToolStat> STAFF_STAT_TYPES;
     private static final Map<String, FloatToolStat> ALL_STAT_TYPES;
     
     private static final Random RANDOM = new Random();
@@ -90,9 +90,18 @@ public class ToolLevellingUtil {
         ARMOR_STAT_TYPES.put(ARMOR_TOUGHNESS, ToolStats.ARMOR_TOUGHNESS);
         ARMOR_STAT_TYPES.put(KNOCKBACK_RESISTANCE, ToolStats.KNOCKBACK_RESISTANCE);
         
+        STAFF_STAT_TYPES = new LinkedHashMap<>();
+        STAFF_STAT_TYPES.put(DRAW_SPEED, ToolStats.DRAW_SPEED);
+        STAFF_STAT_TYPES.put(VELOCITY, ToolStats.VELOCITY);
+        STAFF_STAT_TYPES.put(ACCURACY, ToolStats.ACCURACY);
+        STAFF_STAT_TYPES.put(PROJECTILE_DAMAGE, ToolStats.PROJECTILE_DAMAGE);
+        STAFF_STAT_TYPES.put(DURABILITY, ToolStats.DURABILITY);
+        STAFF_STAT_TYPES.put(ARMOR, ToolStats.ARMOR);
+        
         ALL_STAT_TYPES = new HashMap<>(TOOL_STAT_TYPES);
         ALL_STAT_TYPES.putAll(RANGED_STAT_TYPES);
         ALL_STAT_TYPES.putAll(ARMOR_STAT_TYPES);
+        ALL_STAT_TYPES.putAll(STAFF_STAT_TYPES);
     }
     
     public static Set<String> getToolSlotTypes() {
@@ -108,6 +117,11 @@ public class ToolLevellingUtil {
         return ARMOR_SLOT_TYPES.keySet();
     }
     
+    public static Set<String> getStaffSlotTypes() {
+        //this probably always be the same as tools
+        return TOOL_SLOT_TYPES.keySet();
+    }
+    
     public static Set<String> getToolStatTypes() {
         return TOOL_STAT_TYPES.keySet();
     }
@@ -120,47 +134,75 @@ public class ToolLevellingUtil {
         return ARMOR_STAT_TYPES.keySet();
     }
     
+    public static Set<String> getStaffStatTypes() {
+        return STAFF_STAT_TYPES.keySet();
+    }
+    
     public static boolean isSlotsLevellingEnabled(IToolContext context) {
+        if (isStaff(context)) {
+            return Config.staffSlotGainingMethod.get() != Config.GainingMethod.NONE;
+        }
         if (isArmor(context)) {
             return Config.armorSlotGainingMethod.get() != Config.GainingMethod.NONE;
         }
         if (isRanged(context)) {
             return Config.rangedSlotGainingMethod.get() != Config.GainingMethod.NONE;
         }
+        //tools
         return Config.toolsSlotGainingMethod.get() != Config.GainingMethod.NONE;
     }
     
     public static boolean isStatsLevellingEnabled(IToolContext context) {
+        if (isStaff(context)) {
+            return Config.staffStatGainingMethod.get() != Config.GainingMethod.NONE;
+        }
         if (isArmor(context)) {
             return Config.armorStatGainingMethod.get() != Config.GainingMethod.NONE;
         }
         if (isRanged(context)) {
             return Config.rangedStatGainingMethod.get() != Config.GainingMethod.NONE;
         }
+        //tools
         return Config.toolsStatGainingMethod.get() != Config.GainingMethod.NONE;
     }
     
     public static boolean canPredictNextSlot(ToolStack tool) {
+        if (isStaff(tool)) {
+            return Config.staffSlotGainingMethod.get() == Config.GainingMethod.PREDEFINED_ORDER;
+        }
         if (isArmor(tool)) {
             return Config.armorSlotGainingMethod.get() == Config.GainingMethod.PREDEFINED_ORDER;
         }
         if (isRanged(tool)) {
             return Config.rangedSlotGainingMethod.get() == Config.GainingMethod.PREDEFINED_ORDER;
         }
+        //tools
         return Config.toolsSlotGainingMethod.get() == Config.GainingMethod.PREDEFINED_ORDER;
     }
     
     public static boolean canPredictNextStat(ToolStack tool) {
+        if (isStaff(tool)) {
+            return Config.staffStatGainingMethod.get() == Config.GainingMethod.PREDEFINED_ORDER;
+        }
         if (isArmor(tool)) {
             return Config.armorStatGainingMethod.get() == Config.GainingMethod.PREDEFINED_ORDER;
         }
         if (isRanged(tool)) {
             return Config.rangedStatGainingMethod.get() == Config.GainingMethod.PREDEFINED_ORDER;
         }
+        //tools
         return Config.toolsStatGainingMethod.get() == Config.GainingMethod.PREDEFINED_ORDER;
     }
     
     public static String getSlot(ToolStack tool, int level) {
+        if (isStaff(tool)) {
+            return switch (Config.staffSlotGainingMethod.get()) {
+                case NONE -> null;
+                case PREDEFINED_ORDER -> getStaffSlotForLevel(level);
+                case RANDOM -> getRandomStaffSlot();
+            };
+        }
+        
         if (isArmor(tool)) {
             return switch (Config.armorSlotGainingMethod.get()) {
                 case NONE -> null;
@@ -176,7 +218,7 @@ public class ToolLevellingUtil {
                 case RANDOM -> getRandomRangedSlot();
             };
         }
-        
+        //tools
         return switch (Config.toolsSlotGainingMethod.get()) {
             case NONE -> null;
             case PREDEFINED_ORDER -> getToolSlotForLevel(level);
@@ -185,6 +227,14 @@ public class ToolLevellingUtil {
     }
     
     public static String getStat(ToolStack tool, int level) {
+        if (isStaff(tool)) {
+            return switch (Config.staffStatGainingMethod.get()) {
+                case NONE -> null;
+                case PREDEFINED_ORDER -> getStaffStatForLevel(level);
+                case RANDOM -> getRandomStaffStat();
+            };
+        }
+        
         if (isArmor(tool)) {
             return switch (Config.armorStatGainingMethod.get()) {
                 case NONE -> null;
@@ -200,7 +250,7 @@ public class ToolLevellingUtil {
                 case RANDOM -> getRandomRangedStat();
             };
         }
-        
+        //tools
         return switch (Config.toolsStatGainingMethod.get()) {
             case NONE -> null;
             case PREDEFINED_ORDER -> getToolStatForLevel(level);
@@ -213,12 +263,16 @@ public class ToolLevellingUtil {
     }
     
     public static double getStatValue(IToolContext tool, FloatToolStat stat) {
+        if (isStaff(tool)) {
+            return Config.getStaffStatValue(stat);
+        }
         if (isArmor(tool)) {
             return Config.getArmorStatValue(stat);
         }
         if (isRanged(tool)){
             return Config.getRangedStatValue(stat);
         }
+        //tools
         return Config.getToolStatValue(stat);
     }
     
@@ -306,6 +360,10 @@ public class ToolLevellingUtil {
         data.putInt(EXPERIENCE_KEY, currentExperience);
     }
     
+    public static boolean isStaff(IToolContext tool) {
+        return tool.hasTag(TinkerTags.Items.STAFFS);
+    }
+    
     public static boolean isArmor(IToolContext tool) {
         return tool.hasTag(TinkerTags.Items.ARMOR);
     }
@@ -315,7 +373,7 @@ public class ToolLevellingUtil {
     }
     
     public static boolean isBroadTool(IToolStackView tool) {
-        return tool.getMaterials().size() > 3;
+        return tool.getMaterials().size() > 3 || isStaff(tool);
     }
     
     public static TextColor getSlotColor(String slotName) {
@@ -356,6 +414,16 @@ public class ToolLevellingUtil {
         return armorSlotsRandomPool.get(RANDOM.nextInt(armorSlotsRandomPool.size()));
     }
     
+    private static String getStaffSlotForLevel(int level) {
+        List<String> staffSlotsOrder = Config.getStaffSlotsOrder();
+        return staffSlotsOrder.get((level - 1) % staffSlotsOrder.size());
+    }
+    
+    private static String getRandomStaffSlot() {
+        List<String> staffSlotsRandomPool = Config.getStaffSlotsRandomPool();
+        return staffSlotsRandomPool.get(RANDOM.nextInt(staffSlotsRandomPool.size()));
+    }
+    
     private static String getToolStatForLevel(int level) {
         List<String> toolsStatsOrder = Config.getToolsStatsOrder();
         return toolsStatsOrder.get((level - 1) % toolsStatsOrder.size());
@@ -384,6 +452,16 @@ public class ToolLevellingUtil {
     private static String getRandomArmorStat() {
         List<String> armorStatsRandomPool = Config.getArmorStatsRandomPool();
         return armorStatsRandomPool.get(RANDOM.nextInt(armorStatsRandomPool.size()));
+    }
+    
+    private static String getStaffStatForLevel(int level) {
+        List<String> staffStatsOrder = Config.getStaffStatsOrder();
+        return staffStatsOrder.get((level - 1) % staffStatsOrder.size());
+    }
+    
+    private static String getRandomStaffStat() {
+        List<String> staffStatsRandomPool = Config.getStaffStatsRandomPool();
+        return staffStatsRandomPool.get(RANDOM.nextInt(staffStatsRandomPool.size()));
     }
     
     private static void appendHistory(ResourceLocation historyKey, String value, ModDataNBT data) {
