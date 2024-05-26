@@ -156,7 +156,7 @@ public class Config {
         builder.comment("General addon settings").push("general");
 
         toolsSlotGainingMethod = builder.comment("Method of gaining modifier slots for tools.")
-                .translation("config.tinkerslevellingaddon.general.toolsSlotGainingMethod")
+                .translation("config.tinkerslevellingaddon.general.tools_slot_gaining_method")
                 .defineEnum("toolsSlotGainingMethod", GainingMethod.PREDEFINED_ORDER, EnumGetMethod.NAME_IGNORECASE, GainingMethod.values());
     
         rangedSlotGainingMethod = builder.comment("Method of gaining modifier slots for ranged weapons.")
@@ -164,7 +164,7 @@ public class Config {
                 .defineEnum("rangedSlotGainingMethod", GainingMethod.PREDEFINED_ORDER, EnumGetMethod.NAME_IGNORECASE, GainingMethod.values());
 
         armorSlotGainingMethod = builder.comment("Method of gaining modifier slots for armor.")
-                .translation("config.tinkerslevellingaddon.general.armorSlotGainingMethod")
+                .translation("config.tinkerslevellingaddon.general.armor_slot_gaining_method")
                 .defineEnum("armorSlotGainingMethod", GainingMethod.PREDEFINED_ORDER, EnumGetMethod.NAME_IGNORECASE, GainingMethod.values());
         
         staffSlotGainingMethod = builder.comment("Method of gaining modifier slots for staffs.")
@@ -174,7 +174,7 @@ public class Config {
         slotsConfig(builder);
 
         toolsStatGainingMethod = builder.comment("Method of gaining stats for tools.")
-                .translation("config.tinkerslevellingaddon.general.toolsStatGainingMethod")
+                .translation("config.tinkerslevellingaddon.general.tools_stat_gaining_method")
                 .defineEnum("toolsStatGainingMethod", GainingMethod.NONE, EnumGetMethod.NAME_IGNORECASE, GainingMethod.values());
     
         rangedStatGainingMethod = builder.comment("Method of gaining stats for tools.")
@@ -182,7 +182,7 @@ public class Config {
                 .defineEnum("rangedStatGainingMethod", GainingMethod.NONE, EnumGetMethod.NAME_IGNORECASE, GainingMethod.values());
 
         armorStatGainingMethod = builder.comment("Method of gaining stats for armor.")
-                .translation("config.tinkerslevellingaddon.general.armorStatGainingMethod")
+                .translation("config.tinkerslevellingaddon.general.armor_stat_gaining_method")
                 .defineEnum("armorStatGainingMethod", GainingMethod.NONE, EnumGetMethod.NAME_IGNORECASE, GainingMethod.values());
         
         staffStatGainingMethod = builder.comment("Method of gaining stats for staffs.")
@@ -192,19 +192,19 @@ public class Config {
         statsConfig(builder);
 
         maxLevel = builder.comment("Maximum tool level that could be achieved. If set to 0 there is no upper limit.")
-                .translation("config.tinkerslevellingaddon.general.maxLevel")
+                .translation("config.tinkerslevellingaddon.general.max_level")
                 .defineInRange("maxLevel", 5, 0, Integer.MAX_VALUE);
 
         baseExperience = builder.comment("Base amount of experience required to reach next level.")
-                .translation("config.tinkerslevellingaddon.general.baseExperience")
+                .translation("config.tinkerslevellingaddon.general.base_experience")
                 .defineInRange("baseExperience", 500, 1, Integer.MAX_VALUE);
 
         requiredXpMultiplier = builder.comment("How much the amount of experience required to reach next level will be multiplied per level.")
-                .translation("config.tinkerslevellingaddon.general.requiredXpMultiplier")
+                .translation("config.tinkerslevellingaddon.general.required_xp_multiplier")
                 .defineInRange("requiredXpMultiplier", 2D, 1D, 10D);
 
         broadToolRequiredXpMultiplier = builder.comment("Additional multiplier for broad tools for experience required to level up.")
-                .translation("config.tinkerslevellingaddon.general.broadToolRequiredXpMultiplier")
+                .translation("config.tinkerslevellingaddon.general.broad_tool_required_xp_multiplier")
                 .defineInRange("broadToolRequiredXpMultiplier", 3D, 1D, 10D);
 
         builder.pop();
@@ -216,13 +216,13 @@ public class Config {
         toolsSlotTypeRandomPool = builder.comment("Set of modifier slot types from which random slot will be awarded when leveling up tools.",
                         "If empty default pool will be used (" + String.join(", ", DEFAULT_TOOLS_SLOTS_RANDOM_POOL) + "). 80% chance for upgrade and 20% chance for ability.",
                         "Allowed values: " + String.join(", ", getToolSlotTypes()))
-                .translation("config.tinkerslevellingaddon.general.slots.toolsSlotTypeRandomPool")
+                .translation("config.tinkerslevellingaddon.general.slots.tools_slot_type_random_pool")
                 .defineList("toolsSlotTypeRandomPool", DEFAULT_TOOLS_SLOTS_RANDOM_POOL, t -> getToolSlotTypes().contains(t));
 
         toolsSlotTypeOrder = builder.comment("List of modifier slot types (in order) that will be awarded when leveling up tools. If level is higher than list size the mod will start over.",
                         "If empty default order will be used (" + String.join(", ", DEFAULT_TOOLS_SLOTS_ORDER) + ").",
                         "Allowed values: " + String.join(", ", getToolSlotTypes()))
-                .translation("config.tinkerslevellingaddon.general.slots.toolsSlotTypeOrder")
+                .translation("config.tinkerslevellingaddon.general.slots.tools_slot_type_order")
                 .defineList("toolsSlotTypeOrder", DEFAULT_TOOLS_SLOTS_ORDER, t -> getToolSlotTypes().contains(t));
     
         rangedSlotTypeRandomPool = builder.comment("Set of modifier slot types from which random slot will be awarded when leveling up ranged weapons.",
@@ -240,13 +240,13 @@ public class Config {
         armorSlotTypeRandomPool = builder.comment("Set of modifier slot types from which random slot will be awarded when leveling up armor.",
                         "If empty default pool will be used (" + String.join(", ", DEFAULT_ARMOR_SLOTS_RANDOM_POOL) + ").",
                         "Allowed values: " + String.join(", ", getArmorSlotTypes()))
-                .translation("config.tinkerslevellingaddon.general.modifiers.armorModifierTypeRandomPool")
+                .translation("config.tinkerslevellingaddon.general.modifiers.armor_slot_type_random_pool")
                 .defineList("armorSlotTypeRandomPool", DEFAULT_ARMOR_SLOTS_RANDOM_POOL, t -> getArmorSlotTypes().contains(t));
 
         armorSlotTypeOrder = builder.comment("List of modifier slot types (in order) that will be awarded when leveling up armor. If level is higher than list size the mod will start over.",
                         "If empty default order will be used (" + String.join(", ", DEFAULT_ARMOR_SLOTS_ORDER) + ").",
                         "Allowed values: " + String.join(", ", getArmorSlotTypes()))
-                .translation("config.tinkerslevellingaddon.general.slots.armorSlotTypeOrder")
+                .translation("config.tinkerslevellingaddon.general.slots.armor_slot_type_order")
                 .defineList("armorSlotTypeOrder", DEFAULT_ARMOR_SLOTS_ORDER, t -> getArmorSlotTypes().contains(t));
         
         staffSlotTypeRandomPool = builder.comment("Set of modifier slot types from which random slot will be awarded when leveling up staffs.",
@@ -270,13 +270,13 @@ public class Config {
         toolsStatTypeRandomPool = builder.comment("Set of stat types from which random stat will be awarded when leveling up tools.",
                         "If empty default pool will be used (" + String.join(", ", DEFAULT_TOOLS_STATS_RANDOM_POOL) + "). 25% chance for every stat.",
                         "Allowed values: " + String.join(", ", getToolStatTypes()))
-                .translation("config.tinkerslevellingaddon.general.stats.toolsStatTypeRandomPool")
+                .translation("config.tinkerslevellingaddon.general.stats.tools_stat_type_random_pool")
                 .defineList("toolsStatTypeRandomPool", DEFAULT_TOOLS_STATS_RANDOM_POOL, t -> getToolStatTypes().contains(t));
 
         toolsStatTypeOrder = builder.comment("List of stat types (in order) that will be awarded when leveling up tools. If level is higher than list size the mod will start over.",
                         "If empty default order will be used (" + String.join(", ", DEFAULT_TOOLS_STATS_ORDER) + ").",
                         "Allowed values: " + String.join(", ", getToolStatTypes()))
-                .translation("config.tinkerslevellingaddon.general.stats.toolsStatTypeOrder")
+                .translation("config.tinkerslevellingaddon.general.stats.tools_stat_type_order")
                 .defineList("toolsStatTypeOrder", DEFAULT_TOOLS_STATS_ORDER, t -> getToolStatTypes().contains(t));
 
         toolStatsValuesConfig(builder);
@@ -299,13 +299,13 @@ public class Config {
         armorStatTypeRandomPool = builder.comment("Set of stat types from which random stat will be awarded when leveling up armor.",
                         "If empty default pool will be used (" + String.join(", ", DEFAULT_ARMOR_STATS_RANDOM_POOL) + ").",
                         "Allowed values: " + String.join(", ", getArmorStatTypes()))
-                .translation("config.tinkerslevellingaddon.general.stats.armorStatTypeRandomPool")
+                .translation("config.tinkerslevellingaddon.general.stats.armor_stat_type_random_pool")
                 .defineList("armorStatTypeRandomPool", DEFAULT_ARMOR_STATS_RANDOM_POOL, t -> getArmorStatTypes().contains(t));
 
         armorStatTypeOrder = builder.comment("List of stat types (in order) that will be awarded when leveling up armor. If level is higher than list size the mod will start over.",
                         "If empty default order will be used (" + String.join(", ", DEFAULT_ARMOR_STATS_ORDER) + ").",
                         "Allowed values: " + String.join(", ", getArmorStatTypes()))
-                .translation("config.tinkerslevellingaddon.general.stats.armorStatTypeOrder")
+                .translation("config.tinkerslevellingaddon.general.stats.armor_stat_type_order")
                 .defineList("armorStatTypeOrder", DEFAULT_ARMOR_STATS_ORDER, t -> getArmorStatTypes().contains(t));
 
         armorStatsValuesConfig(builder);
@@ -330,16 +330,16 @@ public class Config {
     private static void toolStatsValuesConfig(ForgeConfigSpec.Builder builder) {
         builder.comment("Tool stat values rewarded on level ups").push("toolValues");
 
-        toolDurabilityValue = builder.translation("config.tinkerslevellingaddon.general.stats.toolValues.durability")
+        toolDurabilityValue = builder.translation("tooltip.tinkerslevellingaddon.stats.durability")
                 .defineInRange(DURABILITY, 50, 1, 1000);
 
-        toolAttackDamageValue = builder.translation("config.tinkerslevellingaddon.general.stats.toolValues.attackDamage")
+        toolAttackDamageValue = builder.translation("tooltip.tinkerslevellingaddon.stats.attack_damage")
                 .defineInRange(ATTACK_DAMAGE, 0.5D, 0.1D, 10D);
 
-        toolAttackSpeedValue = builder.translation("config.tinkerslevellingaddon.general.stats.toolValues.attackSpeed")
+        toolAttackSpeedValue = builder.translation("tooltip.tinkerslevellingaddon.stats.attack_speed")
                 .defineInRange(ATTACK_SPEED, 0.25D, 0.1D, 10D);
 
-        toolMiningSpeedValue = builder.translation("config.tinkerslevellingaddon.general.stats.toolValues.miningSpeed")
+        toolMiningSpeedValue = builder.translation("tooltip.tinkerslevellingaddon.stats.mining_speed")
                 .defineInRange(MINING_SPEED, 1D, 0.1D, 10D);
 
         builder.pop();
@@ -375,16 +375,16 @@ public class Config {
     private static void armorStatsValuesConfig(ForgeConfigSpec.Builder builder) {
         builder.comment("Armor stat values rewarded on level ups").push("armorValues");
 
-        armorDurabilityValue = builder.translation("config.tinkerslevellingaddon.general.stats.armorValues.durability")
+        armorDurabilityValue = builder.translation("tooltip.tinkerslevellingaddon.stats.durability")
                 .defineInRange(DURABILITY, 50, 1, 1000);
 
-        armorArmorValue = builder.translation("config.tinkerslevellingaddon.general.stats.armorValues.armor")
+        armorArmorValue = builder.translation("tooltip.tinkerslevellingaddon.stats.armor")
                 .defineInRange(ARMOR, 0.25D, 0.1D, 10D);
 
-        armorArmorToughnessValue = builder.translation("config.tinkerslevellingaddon.general.stats.armorValues.armorToughness")
+        armorArmorToughnessValue = builder.translation("tooltip.tinkerslevellingaddon.stats.armor_toughness")
                 .defineInRange(ARMOR_TOUGHNESS, 0.1D, 0.1D, 10D);
 
-        armorKnockbackResistanceValue = builder.translation("config.tinkerslevellingaddon.general.stats.armorValues.knockbackResistance")
+        armorKnockbackResistanceValue = builder.translation("tooltip.tinkerslevellingaddon.stats.knockback_resistance")
                 .defineInRange(KNOCKBACK_RESISTANCE, 0.1D, 0.1D, 1D);
 
         builder.pop();
@@ -408,7 +408,7 @@ public class Config {
         staffProjectileDamageValue = builder.translation("tooltip.tinkerslevellingaddon.stat.projectile_damage")
                 .defineInRange(PROJECTILE_DAMAGE, 0.1D, 0.1D, 10D);
         
-        staffArmorValue = builder.translation("config.tinkerslevellingaddon.general.stats.armorValues.armor")
+        staffArmorValue = builder.translation("tooltip.tinkerslevellingaddon.stats.armor")
                 .defineInRange(ARMOR, 0.25D, 0.1D, 10D);
         
         builder.pop();
@@ -418,16 +418,16 @@ public class Config {
         builder.comment("Tool levelling settings").push("toolLevelling");
 
         damageDealt = builder.comment("Melee only!", "If true, base experience value gained for attacking is equal to damage dealt (rounded to whole number), otherwise 1.")
-                .translation("config.tinkerslevellingaddon.levelling.damageDealt")
+                .translation("config.tinkerslevellingaddon.levelling.damage_dealt")
                 .define("damageDealt", true);
         damageTaken = builder.comment("If true, base experience value gained for taking damage is equal to damage taken (rounded to whole number), otherwise 1.")
-                .translation("config.tinkerslevellingaddon.levelling.damageTaken")
+                .translation("config.tinkerslevellingaddon.levelling.damage_taken")
                 .define("damageTaken", true);
         damageBlocked = builder.comment("If true, base experience value gained for blocking damage is equal to damage blocked (rounded to whole number), otherwise 1.")
-                .translation("config.tinkerslevellingaddon.levelling.damageBlocked")
+                .translation("config.tinkerslevellingaddon.levelling.damage_blocked")
                 .define("damageBlocked", true);
         enablePvp = builder.comment("If true, allows to gain experience from dealing damage to or taking damage from other players.")
-                .translation("config.tinkerslevellingaddon.levelling.enablePvp")
+                .translation("config.tinkerslevellingaddon.levelling.enable_pvp")
                 .define("pvp", true);
 
         actionsConfig(builder);
@@ -454,13 +454,13 @@ public class Config {
         enableScrappingXp = builder.translation("config.tinkerslevellingaddon.levelling.scrapping")
                 .define("scrapping", true);
 
-        enableWaxingOffXp = builder.translation("config.tinkerslevellingaddon.levelling.waxingOff")
+        enableWaxingOffXp = builder.translation("config.tinkerslevellingaddon.levelling.waxing_off")
                 .define("waxingOff", true);
 
         enableTillingXp = builder.translation("config.tinkerslevellingaddon.levelling.tilling")
                 .define("tilling", true);
 
-        enablePathMakingXp = builder.translation("config.tinkerslevellingaddon.levelling.pathMaking")
+        enablePathMakingXp = builder.translation("config.tinkerslevellingaddon.levelling.path_making")
                 .define("pathMaking", true);
 
         enableAttackingXp = builder.translation("config.tinkerslevellingaddon.levelling.attacking")
@@ -471,10 +471,10 @@ public class Config {
                 .define("shooting", true);
 
         enableTakingDamageXp = builder.comment("Applies to armor only.")
-                .translation("config.tinkerslevellingaddon.levelling.takingDamage")
+                .translation("config.tinkerslevellingaddon.levelling.taking_damage")
                 .define("takingDamage", true);
         
-        enableBlockingDamageXp = builder.translation("config.tinkerslevellingaddon.levelling.blockingDamage")
+        enableBlockingDamageXp = builder.translation("config.tinkerslevellingaddon.levelling.blocking_damage")
                 .define("blockingDamage", true);
 
         enableThornsXp = builder.comment("Applies to armor only. Thorns modifier gives 15% chance per level to gain experience.")
@@ -502,13 +502,13 @@ public class Config {
         bonusScrappingXp = builder.translation("config.tinkerslevellingaddon.levelling.scrapping")
                 .defineInRange("scrapping", 0, 0, Integer.MAX_VALUE);
 
-        bonusWaxingOffXp = builder.translation("config.tinkerslevellingaddon.levelling.waxingOff")
+        bonusWaxingOffXp = builder.translation("config.tinkerslevellingaddon.levelling.waxing_off")
                 .defineInRange("waxingOff", 0, 0, Integer.MAX_VALUE);
 
         bonusTillingXp = builder.translation("config.tinkerslevellingaddon.levelling.tilling")
                 .defineInRange("tilling", 0, 0, Integer.MAX_VALUE);
 
-        bonusPathMakingXp = builder.translation("config.tinkerslevellingaddon.levelling.pathMaking")
+        bonusPathMakingXp = builder.translation("config.tinkerslevellingaddon.levelling.path_making")
                 .defineInRange("pathMaking", 0, 0, Integer.MAX_VALUE);
 
         bonusAttackingXp = builder.translation("config.tinkerslevellingaddon.levelling.attacking")
@@ -517,10 +517,10 @@ public class Config {
         bonusShootingXp = builder.translation("config.tinkerslevellingaddon.levelling.shooting")
                 .defineInRange("shooting", 0, 0, Integer.MAX_VALUE);
 
-        bonusTakingDamageXp = builder.translation("config.tinkerslevellingaddon.levelling.takingDamage")
+        bonusTakingDamageXp = builder.translation("config.tinkerslevellingaddon.levelling.taking_damage")
                 .defineInRange("takingDamage", 0, 0, Integer.MAX_VALUE);
         
-        bonusBlockingDamageXp = builder.translation("config.tinkerslevellingaddon.levelling.blockingDamage")
+        bonusBlockingDamageXp = builder.translation("config.tinkerslevellingaddon.levelling.blocking_damage")
                 .defineInRange("blockingDamage", 0, 0, Integer.MAX_VALUE);
 
         bonusThornsXp = builder.comment("As with Thorns damage calculations, this is the upper bound of the bonus experience that could be granted.",
@@ -540,7 +540,7 @@ public class Config {
 
         squashLevelPluses = builder.comment("If true, uses alternative level name suffix for high level tools.",
                 "Instead of appending '+' signs for each consecutive level appearance, +1, +2, +3, etc. notation will be used.")
-                .translation("config.tinkerslevellingaddon.client.squashPluses")
+                .translation("config.tinkerslevellingaddon.client.squash_pluses")
                 .define("squashPluses", false);
 
         levelUpSound = builder.comment("")
