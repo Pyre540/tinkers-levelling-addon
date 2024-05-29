@@ -34,6 +34,7 @@ import slimeknights.tconstruct.common.TinkerTags;
 import slimeknights.tconstruct.library.modifiers.Modifier;
 import slimeknights.tconstruct.library.modifiers.ModifierEntry;
 import slimeknights.tconstruct.library.modifiers.ModifierHooks;
+import slimeknights.tconstruct.library.modifiers.hook.armor.ElytraFlightModifierHook;
 import slimeknights.tconstruct.library.modifiers.hook.armor.OnAttackedModifierHook;
 import slimeknights.tconstruct.library.modifiers.hook.build.ConditionalStatModifierHook;
 import slimeknights.tconstruct.library.modifiers.hook.build.ModifierRemovalHook;
@@ -65,7 +66,7 @@ import static pyre.tinkerslevellingaddon.util.ToolLevellingUtil.addExperience;
 @Mod.EventBusSubscriber(modid = TinkersLevellingAddon.MOD_ID, bus = Mod.EventBusSubscriber.Bus.FORGE)
 public class ImprovableModifier extends NoLevelsModifier implements PlantHarvestModifierHook, ShearsModifierHook,
         BlockBreakModifierHook, BlockTransformModifierHook, ProjectileLaunchModifierHook, OnAttackedModifierHook,
-        MeleeHitModifierHook, ModifierRemovalHook, VolatileDataModifierHook, ToolStatsModifierHook {
+        MeleeHitModifierHook, ElytraFlightModifierHook, ModifierRemovalHook, VolatileDataModifierHook, ToolStatsModifierHook {
     
     public static final TextColor IMPROVABLE_MODIFIER_COLOR = TextColor.fromRgb(9337340);
     
@@ -79,8 +80,8 @@ public class ImprovableModifier extends NoLevelsModifier implements PlantHarvest
         super.registerHooks(hookBuilder);
         hookBuilder.addHook(this, ModifierHooks.PLANT_HARVEST, ModifierHooks.SHEAR_ENTITY,
                 ModifierHooks.BLOCK_TRANSFORM, ModifierHooks.PROJECTILE_LAUNCH, ModifierHooks.BLOCK_BREAK,
-                ModifierHooks.ON_ATTACKED, ModifierHooks.MELEE_HIT, ModifierHooks.VOLATILE_DATA,
-                ModifierHooks.TOOL_STATS, ModifierHooks.REMOVE);
+                ModifierHooks.ON_ATTACKED, ModifierHooks.MELEE_HIT, ModifierHooks.ELYTRA_FLIGHT,
+                ModifierHooks.VOLATILE_DATA, ModifierHooks.TOOL_STATS, ModifierHooks.REMOVE);
     }
 
     @Override
@@ -213,6 +214,17 @@ public class ImprovableModifier extends NoLevelsModifier implements PlantHarvest
         } else if(Config.enablePathMakingXp.get() && action.equals(ToolActions.SHOVEL_FLATTEN)) {
             addExperience(toolStack, 1 + Config.bonusPathMakingXp.get(), player);
         }
+    }
+    
+    @Override
+    public boolean elytraFlightTick(IToolStackView tool, ModifierEntry modifier, LivingEntity entity, int flightTicks) {
+        if (!Config.enableFlyingXp.get() || !(entity instanceof ServerPlayer player)) {
+            return false;
+        }
+        if (flightTicks > 0 && (flightTicks % Config.flyingTime.get()) == 0) {
+            addExperience(getHeldTool(player, EquipmentSlot.CHEST), 1 + Config.bonusFlyingXp.get(), player);
+        }
+        return false;
     }
     
     @SubscribeEvent

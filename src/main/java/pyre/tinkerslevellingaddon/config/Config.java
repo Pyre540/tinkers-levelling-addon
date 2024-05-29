@@ -116,6 +116,7 @@ public class Config {
     public static ForgeConfigSpec.BooleanValue damageTaken;
     public static ForgeConfigSpec.BooleanValue damageBlocked;
     public static ForgeConfigSpec.BooleanValue enablePvp;
+    public static ForgeConfigSpec.IntValue flyingTime;
 
     //toolLevelling.actions
     public static ForgeConfigSpec.BooleanValue enableMiningXp;
@@ -131,6 +132,7 @@ public class Config {
     public static ForgeConfigSpec.BooleanValue enableTakingDamageXp;
     public static ForgeConfigSpec.BooleanValue enableBlockingDamageXp;
     public static ForgeConfigSpec.BooleanValue enableThornsXp;
+    public static ForgeConfigSpec.BooleanValue enableFlyingXp;
 
     //toolLevelling.bonuses
     public static ForgeConfigSpec.IntValue bonusMiningXp;
@@ -146,6 +148,7 @@ public class Config {
     public static ForgeConfigSpec.IntValue bonusTakingDamageXp;
     public static ForgeConfigSpec.IntValue bonusBlockingDamageXp;
     public static ForgeConfigSpec.IntValue bonusThornsXp;
+    public static ForgeConfigSpec.IntValue bonusFlyingXp;
 
     //CLIENT
     public static ForgeConfigSpec.BooleanValue enableLevelUpMessage;
@@ -429,6 +432,10 @@ public class Config {
         enablePvp = builder.comment("If true, allows to gain experience from dealing damage to or taking damage from other players.")
                 .translation("config.tinkerslevellingaddon.levelling.enable_pvp")
                 .define("pvp", true);
+        flyingTime = builder.comment("The time (in ticks) of continuous flight using an elytra after which experience points will be awarded.",
+                        "20 ticks = 1 second")
+                .translation("config.tinkerslevellingaddon.levelling.flying_time")
+                .defineInRange("flyingTime", 300, 1, 1200);
 
         actionsConfig(builder);
         bonusesConfig(builder);
@@ -480,6 +487,9 @@ public class Config {
         enableThornsXp = builder.comment("Applies to armor only. Thorns modifier gives 15% chance per level to gain experience.")
                 .translation("config.tinkerslevellingaddon.levelling.thorns")
                 .define("thorns", true);
+        
+        enableFlyingXp = builder.translation("config.tinkerslevellingaddon.levelling.flying")
+                .define("flying", true);
 
         builder.pop();
     }
@@ -527,6 +537,9 @@ public class Config {
                         "For example, for the value of 3 (default), we get: 1 (base xp) + 0 to 3 (bonus xp) = 1 to 4 (result xp)")
                 .translation("config.tinkerslevellingaddon.levelling.thorns")
                 .defineInRange("thorns", 3, 0, Integer.MAX_VALUE);
+        
+        bonusFlyingXp = builder.translation("config.tinkerslevellingaddon.levelling.flying")
+                .defineInRange("flying", 0, 0, Integer.MAX_VALUE);
 
         builder.pop();
     }

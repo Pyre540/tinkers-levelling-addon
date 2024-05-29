@@ -126,6 +126,7 @@
   "config.tinkerslevellingaddon.levelling.damage_taken": "Damage taken",
   "config.tinkerslevellingaddon.levelling.damage_blocked": "Damage blocked",
   "config.tinkerslevellingaddon.levelling.enable_pvp": "Enable PvP",
+  "config.tinkerslevellingaddon.levelling.flying_time": "Flying time",
 
   "config.tinkerslevellingaddon.levelling.mining": "Mining",
   "config.tinkerslevellingaddon.levelling.harvesting": "Harvesting",
@@ -140,6 +141,7 @@
   "config.tinkerslevellingaddon.levelling.taking_damage": "Taking damage",
   "config.tinkerslevellingaddon.levelling.blocking_damage": "Blocking damage",
   "config.tinkerslevellingaddon.levelling.thorns": "Thorns",
+  "config.tinkerslevellingaddon.levelling.flying": "Flying",
 
   "config.tinkerslevellingaddon.client.messages": "Messages",
   "config.tinkerslevellingaddon.client.squash_pluses": "Alternative suffix for level names",
