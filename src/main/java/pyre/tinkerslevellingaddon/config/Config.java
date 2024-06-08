@@ -133,6 +133,11 @@ public class Config {
     public static ForgeConfigSpec.BooleanValue enableBlockingDamageXp;
     public static ForgeConfigSpec.BooleanValue enableThornsXp;
     public static ForgeConfigSpec.BooleanValue enableFlyingXp;
+    public static ForgeConfigSpec.BooleanValue enablePlowingXp;
+    public static ForgeConfigSpec.BooleanValue enablePathMakerXp;
+    public static ForgeConfigSpec.BooleanValue enableSnowdriftXp;
+    public static ForgeConfigSpec.BooleanValue enableFlamewakeXp;
+    public static ForgeConfigSpec.BooleanValue enableFrostWalkerXp;
 
     //toolLevelling.bonuses
     public static ForgeConfigSpec.IntValue bonusMiningXp;
@@ -149,6 +154,11 @@ public class Config {
     public static ForgeConfigSpec.IntValue bonusBlockingDamageXp;
     public static ForgeConfigSpec.IntValue bonusThornsXp;
     public static ForgeConfigSpec.IntValue bonusFlyingXp;
+    public static ForgeConfigSpec.IntValue bonusPlowingXp;
+    public static ForgeConfigSpec.IntValue bonusPathMakerXp;
+    public static ForgeConfigSpec.IntValue bonusSnowdriftXp;
+    public static ForgeConfigSpec.IntValue bonusFlamewakeXp;
+    public static ForgeConfigSpec.IntValue bonusFrostWalkerXp;
 
     //CLIENT
     public static ForgeConfigSpec.BooleanValue enableLevelUpMessage;
@@ -490,6 +500,21 @@ public class Config {
         
         enableFlyingXp = builder.translation("config.tinkerslevellingaddon.levelling.flying")
                 .define("flying", true);
+        
+        enablePlowingXp = builder.translation("config.tinkerslevellingaddon.levelling.plowing")
+                .define("plowing", true);
+        
+        enablePathMakerXp = builder.translation("config.tinkerslevellingaddon.levelling.path_maker")
+                .define("path_maker", true);
+        
+        enableSnowdriftXp = builder.translation("config.tinkerslevellingaddon.levelling.snowdrift")
+                .define("snowdrift", true);
+        
+        enableFlamewakeXp = builder.translation("config.tinkerslevellingaddon.levelling.flamewake")
+                .define("flamewake", true);
+        
+        enableFrostWalkerXp = builder.translation("config.tinkerslevellingaddon.levelling.frost_walker")
+                .define("frost_walker", true);
 
         builder.pop();
     }
@@ -540,6 +565,21 @@ public class Config {
         
         bonusFlyingXp = builder.translation("config.tinkerslevellingaddon.levelling.flying")
                 .defineInRange("flying", 0, 0, Integer.MAX_VALUE);
+        
+        bonusPlowingXp = builder.translation("config.tinkerslevellingaddon.levelling.plowing")
+                .defineInRange("plowing", 0, 0, Integer.MAX_VALUE);
+        
+        bonusPathMakerXp = builder.translation("config.tinkerslevellingaddon.levelling.path_maker")
+                .defineInRange("path_maker", 0, 0, Integer.MAX_VALUE);
+        
+        bonusSnowdriftXp = builder.translation("config.tinkerslevellingaddon.levelling.snowdrift")
+                .defineInRange("snowdrift", 0, 0, Integer.MAX_VALUE);
+        
+        bonusFlamewakeXp = builder.translation("config.tinkerslevellingaddon.levelling.flamewake")
+                .defineInRange("flamewake", 0, 0, Integer.MAX_VALUE);
+        
+        bonusFrostWalkerXp = builder.translation("config.tinkerslevellingaddon.levelling.frost_walker")
+                .defineInRange("frost_walker", 0, 0, Integer.MAX_VALUE);
 
         builder.pop();
     }

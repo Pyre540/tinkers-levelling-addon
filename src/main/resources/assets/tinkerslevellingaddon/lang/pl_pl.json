@@ -142,6 +142,11 @@
   "config.tinkerslevellingaddon.levelling.blocking_damage": "Blokowanie obrażeń",
   "config.tinkerslevellingaddon.levelling.thorns": "Ciernie",
   "config.tinkerslevellingaddon.levelling.flying": "Latanie",
+  "config.tinkerslevellingaddon.levelling.plowing": "Oranie (buty)",
+  "config.tinkerslevellingaddon.levelling.path_maker": "Twórca ścieżek",
+  "config.tinkerslevellingaddon.levelling.snowdrift": "Zaspa",
+  "config.tinkerslevellingaddon.levelling.flamewake": "Płomienie",
+  "config.tinkerslevellingaddon.levelling.frost_walker": "Mroźny Piechur",
 
   "config.tinkerslevellingaddon.client.messages": "Wiadomości",
   "config.tinkerslevellingaddon.client.squash_pluses": "Alternatywny przyrostek dla nazw poziomów",

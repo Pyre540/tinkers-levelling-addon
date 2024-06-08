@@ -142,6 +142,11 @@
   "config.tinkerslevellingaddon.levelling.blocking_damage": "Blocking damage",
   "config.tinkerslevellingaddon.levelling.thorns": "Thorns",
   "config.tinkerslevellingaddon.levelling.flying": "Flying",
+  "config.tinkerslevellingaddon.levelling.plowing": "Plowing",
+  "config.tinkerslevellingaddon.levelling.path_maker": "Path Maker",
+  "config.tinkerslevellingaddon.levelling.snowdrift": "Snowdrift",
+  "config.tinkerslevellingaddon.levelling.flamewake": "Flamewake",
+  "config.tinkerslevellingaddon.levelling.frost_walker": "Frost Walker",
 
   "config.tinkerslevellingaddon.client.messages": "Messages",
   "config.tinkerslevellingaddon.client.squash_pluses": "Alternative suffix for level names",

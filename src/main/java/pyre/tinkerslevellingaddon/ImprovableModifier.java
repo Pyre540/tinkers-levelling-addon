@@ -1,6 +1,7 @@
 package pyre.tinkerslevellingaddon;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextColor;
 import net.minecraft.resources.ResourceLocation;
@@ -19,10 +20,17 @@ import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ShieldItem;
 import net.minecraft.world.item.context.UseOnContext;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.BaseFireBlock;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.material.Material;
 import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraftforge.common.ToolAction;
 import net.minecraftforge.common.ToolActions;
+import net.minecraftforge.common.util.BlockSnapshot;
+import net.minecraftforge.event.ForgeEventFactory;
 import net.minecraftforge.event.entity.living.ShieldBlockEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -35,6 +43,7 @@ import slimeknights.tconstruct.common.TinkerTags;
 import slimeknights.tconstruct.library.modifiers.Modifier;
 import slimeknights.tconstruct.library.modifiers.ModifierEntry;
 import slimeknights.tconstruct.library.modifiers.ModifierHooks;
+import slimeknights.tconstruct.library.modifiers.hook.armor.ArmorWalkModifierHook;
 import slimeknights.tconstruct.library.modifiers.hook.armor.ElytraFlightModifierHook;
 import slimeknights.tconstruct.library.modifiers.hook.armor.OnAttackedModifierHook;
 import slimeknights.tconstruct.library.modifiers.hook.build.ConditionalStatModifierHook;
@@ -48,6 +57,9 @@ import slimeknights.tconstruct.library.modifiers.hook.special.BlockTransformModi
 import slimeknights.tconstruct.library.modifiers.hook.special.PlantHarvestModifierHook;
 import slimeknights.tconstruct.library.modifiers.hook.special.ShearsModifierHook;
 import slimeknights.tconstruct.library.modifiers.impl.NoLevelsModifier;
+import slimeknights.tconstruct.library.modifiers.modules.armor.CoverGroundWalkerModule;
+import slimeknights.tconstruct.library.modifiers.modules.armor.ReplaceBlockWalkerModule;
+import slimeknights.tconstruct.library.modifiers.modules.armor.ToolActionWalkerTransformModule;
 import slimeknights.tconstruct.library.module.ModuleHookMap;
 import slimeknights.tconstruct.library.tools.SlotType;
 import slimeknights.tconstruct.library.tools.context.EquipmentContext;
@@ -62,7 +74,10 @@ import slimeknights.tconstruct.library.tools.nbt.*;
 import slimeknights.tconstruct.library.tools.stat.FloatToolStat;
 import slimeknights.tconstruct.library.tools.stat.ModifierStatsBuilder;
 import slimeknights.tconstruct.library.tools.stat.ToolStats;
+import slimeknights.tconstruct.library.utils.MutableUseOnContext;
 import slimeknights.tconstruct.tools.TinkerModifiers;
+import slimeknights.tconstruct.tools.data.ModifierIds;
+import slimeknights.tconstruct.tools.modifiers.ability.armor.walker.FlamewakeModifier;
 
 import java.util.List;
 
@@ -71,7 +86,7 @@ import static pyre.tinkerslevellingaddon.util.ToolLevellingUtil.addExperience;
 @Mod.EventBusSubscriber(modid = TinkersLevellingAddon.MOD_ID, bus = Mod.EventBusSubscriber.Bus.FORGE)
 public class ImprovableModifier extends NoLevelsModifier implements PlantHarvestModifierHook, ShearsModifierHook,
         BlockBreakModifierHook, BlockTransformModifierHook, ProjectileLaunchModifierHook, OnAttackedModifierHook,
-        MeleeHitModifierHook, ElytraFlightModifierHook, ModifierRemovalHook, VolatileDataModifierHook, ToolStatsModifierHook {
+        MeleeHitModifierHook, ElytraFlightModifierHook, ModifierRemovalHook, VolatileDataModifierHook, ToolStatsModifierHook, ArmorWalkModifierHook {
     
     public static final TextColor IMPROVABLE_MODIFIER_COLOR = TextColor.fromRgb(9337340);
     
@@ -86,7 +101,7 @@ public class ImprovableModifier extends NoLevelsModifier implements PlantHarvest
         hookBuilder.addHook(this, ModifierHooks.PLANT_HARVEST, ModifierHooks.SHEAR_ENTITY,
                 ModifierHooks.BLOCK_TRANSFORM, ModifierHooks.PROJECTILE_LAUNCH, ModifierHooks.BLOCK_BREAK,
                 ModifierHooks.ON_ATTACKED, ModifierHooks.MELEE_HIT, ModifierHooks.ELYTRA_FLIGHT,
-                ModifierHooks.VOLATILE_DATA, ModifierHooks.TOOL_STATS, ModifierHooks.REMOVE);
+                ModifierHooks.VOLATILE_DATA, ModifierHooks.TOOL_STATS, ModifierHooks.REMOVE, ModifierHooks.BOOT_WALK);
     }
 
     @Override
@@ -262,19 +277,68 @@ public class ImprovableModifier extends NoLevelsModifier implements PlantHarvest
             }
         }
     }
-
+    
+    //boots modifiers do not use blockTransform hook, so instead we check if modifier is present and validate, using
+    //given modifier logic, if it will be applied
+    @Override
+    public void onWalk(IToolStackView tool, ModifierEntry modifier, LivingEntity living, BlockPos prevPos,
+                       BlockPos newPos) {
+        if (!(living instanceof ServerPlayer player) || !player.isOnGround() || tool.isBroken()) {
+            return;
+        }
+        int xp = 0;
+        for (ModifierEntry entry : tool.getModifierList()) {
+            ArmorWalkModifierHook hook = entry.getHook(ModifierHooks.BOOT_WALK);
+            if (hook instanceof ToolActionWalkerTransformModule toolAction) {
+                if (Config.enablePlowingXp.get() && entry.getId().equals(ModifierIds.plowing)) {
+                    xp = 1 + Config.bonusPlowingXp.get();
+                }
+                if (Config.enablePathMakerXp.get() && entry.getId().equals(ModifierIds.pathMaker)) {
+                    xp = 1 + Config.bonusPathMakerXp.get();
+                }
+                if (xp > 0) {
+                    handleWalkerTransform(tool, player, entry, toolAction, xp);
+                }
+                return;
+            }
+            if (hook instanceof CoverGroundWalkerModule coverGround) {
+                if (Config.enableSnowdriftXp.get() && entry.getId().equals(ModifierIds.snowdrift)) {
+                    xp = 1 + Config.bonusSnowdriftXp.get();
+                }
+                if (xp > 0) {
+                    handleWalkerCoverGround(tool, player, entry, coverGround, xp);
+                }
+                return;
+            }
+            if (hook instanceof ReplaceBlockWalkerModule replaceBlock) {
+                if (Config.enableFrostWalkerXp.get() && entry.getId().equals(ModifierIds.frostWalker)) {
+                    xp = 1 + Config.bonusFrostWalkerXp.get();
+                }
+                if (xp > 0) {
+                    handleWalkerReplaceBlock(tool, player, entry, replaceBlock, xp);
+                }
+                return;
+            }
+            if (hook instanceof FlamewakeModifier && Config.enableFlamewakeXp.get()) {
+                xp = 1 + Config.bonusFlamewakeXp.get();
+                handleFlamewake(tool, player, xp);
+                return;
+            }
+        }
+    }
+    
     private boolean isEqualTinkersItem(IToolStackView item1, IToolStackView item2) {
         if(item1 == null || item2 == null || item1.getItem() != item2.getItem()) {
             return false;
         }
         return item1.getModifiers().equals(item2.getModifiers()) && item1.getMaterials().equals(item2.getMaterials());
     }
-
+    
     private boolean isValidDamageSource(DamageSource source, Player player) {
         return !source.isBypassArmor() && source.getEntity() instanceof LivingEntity attacker &&
                 !attacker.equals(player) && (Config.enablePvp.get() || !(attacker instanceof Player));
     }
-
+    
     private int getThornsBonus(IToolStackView tool) {
         int thornsLevel = tool.getModifierLevel(TinkerModifiers.thorns.getId());
         if (!Config.enableThornsXp.get() || thornsLevel == 0) {
@@ -316,7 +380,7 @@ public class ImprovableModifier extends NoLevelsModifier implements PlantHarvest
         double angle = Math.abs(180 - Math.acos(direction.dot(viewVector) / length) * Mth.RAD_TO_DEG);
         return blockAngle >= angle;
     }
-
+    
     private void handleSweepAttack(ToolAttackContext context, ToolStack toolStack, ServerPlayer player,
                                    float damageDealt, float baseRange) {
         //code based on SweepWeaponAttack.afterMeleeHit
@@ -329,7 +393,7 @@ public class ImprovableModifier extends NoLevelsModifier implements PlantHarvest
         float sweepDamage = TinkerModifiers.sweeping.get().getSweepingDamage(toolStack, damageDealt);
         handleAOETargets(toolStack, player, context.getTarget(), sweepDamage, range);
     }
-
+    
     private void handleCircleAttack(ToolAttackContext context, ToolStack toolStack, ServerPlayer player,
                                     float damageDealt, float baseDiameter) {
         //code based on SweepWeaponAttack.afterMeleeHit
@@ -342,7 +406,7 @@ public class ImprovableModifier extends NoLevelsModifier implements PlantHarvest
         }
         handleAOETargets(toolStack, player, context.getTarget(), damageDealt, range);
     }
-
+    
     private void handleAOETargets(ToolStack toolStack, ServerPlayer player, Entity target, float damage, double range) {
         for (LivingEntity aoeTarget : player.level.getEntitiesOfClass(LivingEntity.class,
                 target.getBoundingBox().inflate(range, 0.25D, range))) {
@@ -350,6 +414,84 @@ public class ImprovableModifier extends NoLevelsModifier implements PlantHarvest
                     && !(aoeTarget instanceof ArmorStand) && target.distanceToSqr(aoeTarget) < range * range) {
                 int xp = (Config.damageDealt.get() ? Math.round(damage) : 1) + Config.bonusAttackingXp.get();
                 addExperience(toolStack, xp, player);
+            }
+        }
+    }
+    
+    private void handleWalkerTransform(IToolStackView tool, ServerPlayer player, ModifierEntry entry,
+                                       ToolActionWalkerTransformModule module, int xp) {
+        //code based on ArmorWalkRadiusModule.onWalk and ToolActionWalkerTransformModule.onWalk
+        float radius = Math.min(16, module.getRadius(tool, entry));
+        BlockPos.MutableBlockPos mutable = new BlockPos.MutableBlockPos();
+        Vec3 posVec = player.position();
+        BlockPos center = new BlockPos(posVec.x, posVec.y + 0.5, posVec.z);
+        for (BlockPos pos : BlockPos.betweenClosed(center.offset(-radius, 0, -radius), center.offset(radius, 0, radius))) {
+            if (pos.closerToCenterThan(player.position(), radius)) {
+                Material material = player.getLevel().getBlockState(pos).getMaterial();
+                if (material.isReplaceable() || material == Material.PLANT) {
+                    mutable.set(pos.getX(), pos.getY() - 1, pos.getZ());
+                    MutableUseOnContext context = module.getContext(tool, entry, player, pos, mutable);
+                    context.setOffsetPos(mutable);
+                    BlockState original = player.getLevel().getBlockState(mutable);
+                    BlockState transformed = original.getToolModifiedState(context, module.action(), true);
+                    if (transformed != null) {
+                        addExperience(getHeldTool(player, EquipmentSlot.FEET), xp, player);
+                    }
+                }
+            }
+        }
+    }
+    
+    private void handleWalkerCoverGround(IToolStackView tool, ServerPlayer player, ModifierEntry entry,
+                                       CoverGroundWalkerModule module, int xp) {
+        //code based on ArmorWalkRadiusModule.onWalk and CoverGroundWalkerModule.onWalk
+        float radius = Math.min(16, module.getRadius(tool, entry));
+        Vec3 posVec = player.position();
+        ServerLevel world = player.getLevel();
+        BlockPos center = new BlockPos(posVec.x, posVec.y + 0.5, posVec.z);
+        for (BlockPos pos : BlockPos.betweenClosed(center.offset(-radius, 0, -radius), center.offset(radius, 0, radius))) {
+            if (pos.closerToCenterThan(player.position(), radius)) {
+                if (world.isEmptyBlock(pos) && module.state().canSurvive(world, pos)) {
+                    addExperience(getHeldTool(player, EquipmentSlot.FEET), xp, player);
+                }
+            }
+        }
+    }
+    
+    private void handleWalkerReplaceBlock(IToolStackView tool, ServerPlayer player, ModifierEntry entry,
+                                          ReplaceBlockWalkerModule module, int xp) {
+        //code based on ArmorWalkRadiusModule.onWalk and ReplaceBlockWalkerModule.onWalk
+        float radius = Math.min(16, module.getRadius(tool, entry));
+        BlockPos.MutableBlockPos mutable = new BlockPos.MutableBlockPos();
+        Level world = player.level;
+        Vec3 posVec = player.position();
+        BlockPos center = new BlockPos(posVec.x, posVec.y + 0.5, posVec.z);
+        for (BlockPos pos : BlockPos.betweenClosed(center.offset(-radius, 0, -radius), center.offset(radius, 0,
+                radius))) {
+            if (pos.closerToCenterThan(player.position(), radius) && world.isEmptyBlock(pos)) {
+                mutable.set(pos.getX(), pos.getY() - 1, pos.getZ());
+                //cannot access replacements, hardcoded frost walker
+                BlockState state = Blocks.FROSTED_ICE.defaultBlockState();
+                if (world.getBlockState(mutable).is(Blocks.WATER) && state.canSurvive(world, mutable) &&
+                        world.isUnobstructed(state, mutable, CollisionContext.empty()) &&
+                        !ForgeEventFactory.onBlockPlace(player, BlockSnapshot.create(world.dimension(), world, mutable), Direction.UP)) {
+                    addExperience(getHeldTool(player, EquipmentSlot.FEET), xp, player);
+                }
+            }
+        }
+    }
+    
+    private void handleFlamewake(IToolStackView tool, ServerPlayer player, int xp) {
+        //code based on AbstractWalkerModifier.onWalk and FlamewakeModifier.onWalk
+        //getRadius is protected, copied radius formula
+        float radius = Math.min(16, 1.5f + tool.getModifierLevel(TinkerModifiers.expanded.getId()));
+        Vec3 posVec = player.position();
+        BlockPos center = new BlockPos(posVec.x, posVec.y + 0.5, posVec.z);
+        for (BlockPos pos : BlockPos.betweenClosed(center.offset(-radius, 0, -radius), center.offset(radius, 0, radius))) {
+            if (pos.closerToCenterThan(player.position(), radius)) {
+                if (BaseFireBlock.canBePlacedAt(player.getLevel(), pos, player.getDirection())) {
+                    addExperience(getHeldTool(player, EquipmentSlot.FEET), xp, player);
+                }
             }
         }
     }
