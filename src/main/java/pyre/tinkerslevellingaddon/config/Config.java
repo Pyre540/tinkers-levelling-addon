@@ -138,6 +138,7 @@ public class Config {
     public static ForgeConfigSpec.BooleanValue enableSnowdriftXp;
     public static ForgeConfigSpec.BooleanValue enableFlamewakeXp;
     public static ForgeConfigSpec.BooleanValue enableFrostWalkerXp;
+    public static ForgeConfigSpec.BooleanValue enableWarpingXp;
 
     //toolLevelling.bonuses
     public static ForgeConfigSpec.IntValue bonusMiningXp;
@@ -159,6 +160,7 @@ public class Config {
     public static ForgeConfigSpec.IntValue bonusSnowdriftXp;
     public static ForgeConfigSpec.IntValue bonusFlamewakeXp;
     public static ForgeConfigSpec.IntValue bonusFrostWalkerXp;
+    public static ForgeConfigSpec.IntValue bonusWarpingXp;
 
     //CLIENT
     public static ForgeConfigSpec.BooleanValue enableLevelUpMessage;
@@ -515,6 +517,9 @@ public class Config {
         
         enableFrostWalkerXp = builder.translation("config.tinkerslevellingaddon.levelling.frost_walker")
                 .define("frost_walker", true);
+        
+        enableWarpingXp = builder.translation("config.tinkerslevellingaddon.levelling.warping")
+                .define("warping", true);
 
         builder.pop();
     }
@@ -580,6 +585,9 @@ public class Config {
         
         bonusFrostWalkerXp = builder.translation("config.tinkerslevellingaddon.levelling.frost_walker")
                 .defineInRange("frost_walker", 0, 0, Integer.MAX_VALUE);
+        
+        bonusWarpingXp = builder.translation("config.tinkerslevellingaddon.levelling.warping")
+                .defineInRange("warping", 0, 0, Integer.MAX_VALUE);
 
         builder.pop();
     }

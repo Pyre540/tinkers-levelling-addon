@@ -40,6 +40,7 @@ import pyre.tinkerslevellingaddon.setup.Registration;
 import pyre.tinkerslevellingaddon.util.ModUtil;
 import pyre.tinkerslevellingaddon.util.ToolLevellingUtil;
 import slimeknights.tconstruct.common.TinkerTags;
+import slimeknights.tconstruct.library.events.teleport.SlingModifierTeleportEvent;
 import slimeknights.tconstruct.library.modifiers.Modifier;
 import slimeknights.tconstruct.library.modifiers.ModifierEntry;
 import slimeknights.tconstruct.library.modifiers.ModifierHooks;
@@ -324,6 +325,19 @@ public class ImprovableModifier extends NoLevelsModifier implements PlantHarvest
                 handleFlamewake(tool, player, xp);
                 return;
             }
+        }
+    }
+    
+    @SubscribeEvent
+    static void onWarp(SlingModifierTeleportEvent event) {
+        if (event.isCanceled()) {
+            return;
+        }
+        IToolStackView tool = event.getTool();
+        if (Config.enableWarpingXp.get() && event.getEntity() instanceof ServerPlayer player &&
+                event.getEntry().getId().equals(TinkerModifiers.warping.getId()) &&
+                tool.getModifierLevel(Registration.IMPROVABLE.get().getId()) > 0) {
+            addExperience((ToolStack) tool, 1 + Config.bonusWarpingXp.get(), player);
         }
     }
     
