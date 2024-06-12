@@ -148,6 +148,9 @@
   "config.tinkerslevellingaddon.levelling.flamewake": "Płomienie",
   "config.tinkerslevellingaddon.levelling.frost_walker": "Mroźny Piechur",
   "config.tinkerslevellingaddon.levelling.warping": "Wypaczanie",
+  "config.tinkerslevellingaddon.levelling.flinging": "Rzucanie",
+  "config.tinkerslevellingaddon.levelling.springing": "Skakanie",
+  "config.tinkerslevellingaddon.levelling.bonking": "Uderzanie",
 
   "config.tinkerslevellingaddon.client.messages": "Wiadomości",
   "config.tinkerslevellingaddon.client.squash_pluses": "Alternatywny przyrostek dla nazw poziomów",

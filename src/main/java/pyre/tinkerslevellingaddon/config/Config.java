@@ -139,6 +139,9 @@ public class Config {
     public static ForgeConfigSpec.BooleanValue enableFlamewakeXp;
     public static ForgeConfigSpec.BooleanValue enableFrostWalkerXp;
     public static ForgeConfigSpec.BooleanValue enableWarpingXp;
+    public static ForgeConfigSpec.BooleanValue enableFlingingXp;
+    public static ForgeConfigSpec.BooleanValue enableSpringingXp;
+    public static ForgeConfigSpec.BooleanValue enableBonkingXp;
 
     //toolLevelling.bonuses
     public static ForgeConfigSpec.IntValue bonusMiningXp;
@@ -161,6 +164,9 @@ public class Config {
     public static ForgeConfigSpec.IntValue bonusFlamewakeXp;
     public static ForgeConfigSpec.IntValue bonusFrostWalkerXp;
     public static ForgeConfigSpec.IntValue bonusWarpingXp;
+    public static ForgeConfigSpec.IntValue bonusFlingingXp;
+    public static ForgeConfigSpec.IntValue bonusSpringingXp;
+    public static ForgeConfigSpec.IntValue bonusBonkingXp;
 
     //CLIENT
     public static ForgeConfigSpec.BooleanValue enableLevelUpMessage;
@@ -520,6 +526,15 @@ public class Config {
         
         enableWarpingXp = builder.translation("config.tinkerslevellingaddon.levelling.warping")
                 .define("warping", true);
+        
+        enableFlingingXp = builder.translation("config.tinkerslevellingaddon.levelling.flinging")
+                .define("flinging", true);
+        
+        enableSpringingXp = builder.translation("config.tinkerslevellingaddon.levelling.springing")
+                .define("springing", true);
+        
+        enableBonkingXp = builder.translation("config.tinkerslevellingaddon.levelling.bonking")
+                .define("bonking", true);
 
         builder.pop();
     }
@@ -588,6 +603,15 @@ public class Config {
         
         bonusWarpingXp = builder.translation("config.tinkerslevellingaddon.levelling.warping")
                 .defineInRange("warping", 0, 0, Integer.MAX_VALUE);
+        
+        bonusFlingingXp = builder.translation("config.tinkerslevellingaddon.levelling.flinging")
+                .defineInRange("flinging", 0, 0, Integer.MAX_VALUE);
+        
+        bonusSpringingXp = builder.translation("config.tinkerslevellingaddon.levelling.springing")
+                .defineInRange("springing", 0, 0, Integer.MAX_VALUE);
+        
+        bonusBonkingXp = builder.translation("config.tinkerslevellingaddon.levelling.bonking")
+                .defineInRange("bonking", 0, 0, Integer.MAX_VALUE);
 
         builder.pop();
     }

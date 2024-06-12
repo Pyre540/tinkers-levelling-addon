@@ -17,20 +17,23 @@ import net.minecraft.world.entity.decoration.ArmorStand;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.entity.projectile.Projectile;
+import net.minecraft.world.entity.projectile.ProjectileUtil;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ShieldItem;
 import net.minecraft.world.item.context.UseOnContext;
+import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.BaseFireBlock;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Material;
-import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.phys.*;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraftforge.common.ToolAction;
 import net.minecraftforge.common.ToolActions;
 import net.minecraftforge.common.util.BlockSnapshot;
 import net.minecraftforge.event.ForgeEventFactory;
+import net.minecraftforge.event.entity.living.LivingEntityUseItemEvent;
 import net.minecraftforge.event.entity.living.ShieldBlockEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -52,6 +55,7 @@ import slimeknights.tconstruct.library.modifiers.hook.build.ModifierRemovalHook;
 import slimeknights.tconstruct.library.modifiers.hook.build.ToolStatsModifierHook;
 import slimeknights.tconstruct.library.modifiers.hook.build.VolatileDataModifierHook;
 import slimeknights.tconstruct.library.modifiers.hook.combat.MeleeHitModifierHook;
+import slimeknights.tconstruct.library.modifiers.hook.interaction.GeneralInteractionModifierHook;
 import slimeknights.tconstruct.library.modifiers.hook.mining.BlockBreakModifierHook;
 import slimeknights.tconstruct.library.modifiers.hook.ranged.ProjectileLaunchModifierHook;
 import slimeknights.tconstruct.library.modifiers.hook.special.BlockTransformModifierHook;
@@ -71,6 +75,7 @@ import slimeknights.tconstruct.library.tools.definition.module.weapon.CircleWeap
 import slimeknights.tconstruct.library.tools.definition.module.weapon.MeleeHitToolHook;
 import slimeknights.tconstruct.library.tools.definition.module.weapon.SweepWeaponAttack;
 import slimeknights.tconstruct.library.tools.helper.ModifierUtil;
+import slimeknights.tconstruct.library.tools.item.ModifiableItem;
 import slimeknights.tconstruct.library.tools.nbt.*;
 import slimeknights.tconstruct.library.tools.stat.FloatToolStat;
 import slimeknights.tconstruct.library.tools.stat.ModifierStatsBuilder;
@@ -87,7 +92,8 @@ import static pyre.tinkerslevellingaddon.util.ToolLevellingUtil.addExperience;
 @Mod.EventBusSubscriber(modid = TinkersLevellingAddon.MOD_ID, bus = Mod.EventBusSubscriber.Bus.FORGE)
 public class ImprovableModifier extends NoLevelsModifier implements PlantHarvestModifierHook, ShearsModifierHook,
         BlockBreakModifierHook, BlockTransformModifierHook, ProjectileLaunchModifierHook, OnAttackedModifierHook,
-        MeleeHitModifierHook, ElytraFlightModifierHook, ModifierRemovalHook, VolatileDataModifierHook, ToolStatsModifierHook, ArmorWalkModifierHook {
+        MeleeHitModifierHook, ElytraFlightModifierHook, ArmorWalkModifierHook, ModifierRemovalHook,
+        VolatileDataModifierHook, ToolStatsModifierHook {
     
     public static final TextColor IMPROVABLE_MODIFIER_COLOR = TextColor.fromRgb(9337340);
     
@@ -102,7 +108,7 @@ public class ImprovableModifier extends NoLevelsModifier implements PlantHarvest
         hookBuilder.addHook(this, ModifierHooks.PLANT_HARVEST, ModifierHooks.SHEAR_ENTITY,
                 ModifierHooks.BLOCK_TRANSFORM, ModifierHooks.PROJECTILE_LAUNCH, ModifierHooks.BLOCK_BREAK,
                 ModifierHooks.ON_ATTACKED, ModifierHooks.MELEE_HIT, ModifierHooks.ELYTRA_FLIGHT,
-                ModifierHooks.VOLATILE_DATA, ModifierHooks.TOOL_STATS, ModifierHooks.REMOVE, ModifierHooks.BOOT_WALK);
+                ModifierHooks.BOOT_WALK, ModifierHooks.VOLATILE_DATA, ModifierHooks.TOOL_STATS, ModifierHooks.REMOVE);
     }
 
     @Override
@@ -175,7 +181,7 @@ public class ImprovableModifier extends NoLevelsModifier implements PlantHarvest
     @Override
     public void afterMeleeHit(IToolStackView tool, ModifierEntry modifier, ToolAttackContext context, float damageDealt) {
         if (!Config.enableAttackingXp.get() || !(context.getPlayerAttacker() instanceof ServerPlayer player) ||
-                context.isExtraAttack() || (!Config.enablePvp.get() && context.getLivingTarget() instanceof Player) ||
+                !isAttackAllowed(context, tool) || (!Config.enablePvp.get() && context.getLivingTarget() instanceof Player) ||
                 context.getLivingTarget() == null || context.getTarget() instanceof ArmorStand) {
             return;
         }
@@ -341,11 +347,44 @@ public class ImprovableModifier extends NoLevelsModifier implements PlantHarvest
         }
     }
     
+    @SubscribeEvent
+    static void onStopUsing(LivingEntityUseItemEvent.Stop event) {
+        ItemStack item = event.getItem();
+        if (event.isCanceled() || !(event.getEntity() instanceof ServerPlayer player) || item.isEmpty()
+                || !item.is(TinkerTags.Items.MODIFIABLE)) {
+            return;
+        }
+        ToolStack tool = ToolStack.from(item);
+        ModifierEntry activeModifier = GeneralInteractionModifierHook.getActiveModifier(tool);
+        if (activeModifier == ModifierEntry.EMPTY) {
+            return;
+        }
+        if (Config.enableFlingingXp.get() && TinkerModifiers.flinging.getId().equals(activeModifier.getId())
+                && player.isOnGround()) {
+            handleFlinging(player, tool);
+            return;
+        }
+        if (Config.enableSpringingXp.get() && TinkerModifiers.springing.getId().equals(activeModifier.getId())
+                && !player.isFallFlying()) {
+            handleSpringing(player, tool);
+            return;
+        }
+        if (Config.enableBonkingXp.get() && TinkerModifiers.bonking.getId().equals(activeModifier.getId())) {
+            handleBonking(player, tool);
+        }
+    }
+    
     private boolean isEqualTinkersItem(IToolStackView item1, IToolStackView item2) {
         if(item1 == null || item2 == null || item1.getItem() != item2.getItem()) {
             return false;
         }
         return item1.getModifiers().equals(item2.getModifiers()) && item1.getMaterials().equals(item2.getMaterials());
+    }
+    
+    private boolean isAttackAllowed(ToolAttackContext context, IToolStackView tool) {
+        ModifierEntry activeModifier = GeneralInteractionModifierHook.getActiveModifier(tool);
+        return !context.isExtraAttack() || activeModifier == ModifierEntry.EMPTY ||
+                TinkerModifiers.bonking.getId().equals(activeModifier.getId());
     }
     
     private boolean isValidDamageSource(DamageSource source, Player player) {
@@ -506,6 +545,42 @@ public class ImprovableModifier extends NoLevelsModifier implements PlantHarvest
                 if (BaseFireBlock.canBePlacedAt(player.getLevel(), pos, player.getDirection())) {
                     addExperience(getHeldTool(player, EquipmentSlot.FEET), xp, player);
                 }
+            }
+        }
+    }
+    
+    private static void handleFlinging(ServerPlayer player, ToolStack tool) {
+        //code based on FlingingModifier.onStoppedUsing
+        BlockHitResult mop = ModifiableItem.blockRayTrace(player.getLevel(), player, ClipContext.Fluid.NONE);
+        if (mop.getType() == HitResult.Type.BLOCK) {
+            //ignoring 'force' check since we cannot access it
+            addExperience(tool, 1 + Config.bonusFlingingXp.get(), player);
+        }
+    }
+    
+    private static void handleSpringing(ServerPlayer player, ToolStack tool) {
+        //code based on SpringingModifier.onStoppedUsing
+        //ignoring 'force' check since we cannot access it
+        addExperience(tool, 1 + Config.bonusSpringingXp.get(), player);
+    }
+    
+    private static void handleBonking(ServerPlayer player, ToolStack tool) {
+        //code based on BonkingModifier.onStoppedUsing
+        //ignoring 'force' check since we cannot access it
+        float range = 5F;
+        Vec3 start = player.getEyePosition(1F);
+        Vec3 look = player.getLookAngle();
+        Vec3 direction = start.add(look.x * range, look.y * range, look.z * range);
+        AABB bb = player.getBoundingBox().expandTowards(look.x * range, look.y * range, look.z * range)
+                .expandTowards(1, 1, 1);
+        EntityHitResult hit = ProjectileUtil.getEntityHitResult(player.level, player, start, direction, bb,
+                (e) -> e instanceof LivingEntity);
+        if (hit != null) {
+            LivingEntity target = (LivingEntity) hit.getEntity();
+            double targetDist = start.distanceToSqr(target.getEyePosition(1F));
+            BlockHitResult mop = ModifiableItem.blockRayTrace(player.level, player, ClipContext.Fluid.NONE);
+            if (mop.getType() != HitResult.Type.BLOCK || targetDist < mop.getBlockPos().distToCenterSqr(start)) {
+                addExperience(tool, 1 + Config.bonusBonkingXp.get(), player);
             }
         }
     }

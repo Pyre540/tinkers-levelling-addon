@@ -148,6 +148,9 @@
   "config.tinkerslevellingaddon.levelling.flamewake": "Flamewake",
   "config.tinkerslevellingaddon.levelling.frost_walker": "Frost Walker",
   "config.tinkerslevellingaddon.levelling.warping": "Warping",
+  "config.tinkerslevellingaddon.levelling.flinging": "Flinging",
+  "config.tinkerslevellingaddon.levelling.springing": "Springing",
+  "config.tinkerslevellingaddon.levelling.bonking": "Bonking",
 
   "config.tinkerslevellingaddon.client.messages": "Messages",
   "config.tinkerslevellingaddon.client.squash_pluses": "Alternative suffix for level names",
