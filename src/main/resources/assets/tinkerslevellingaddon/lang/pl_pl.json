@@ -151,6 +151,8 @@
   "config.tinkerslevellingaddon.levelling.flinging": "Rzucanie",
   "config.tinkerslevellingaddon.levelling.springing": "Skakanie",
   "config.tinkerslevellingaddon.levelling.bonking": "Uderzanie",
+  "config.tinkerslevellingaddon.levelling.glowing": "Świecenie",
+  "config.tinkerslevellingaddon.levelling.firestarter": "Podpalacz",
 
   "config.tinkerslevellingaddon.client.messages": "Wiadomości",
   "config.tinkerslevellingaddon.client.squash_pluses": "Alternatywny przyrostek dla nazw poziomów",

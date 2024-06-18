@@ -142,6 +142,8 @@ public class Config {
     public static ForgeConfigSpec.BooleanValue enableFlingingXp;
     public static ForgeConfigSpec.BooleanValue enableSpringingXp;
     public static ForgeConfigSpec.BooleanValue enableBonkingXp;
+    public static ForgeConfigSpec.BooleanValue enableGlowingXp;
+    public static ForgeConfigSpec.BooleanValue enableFirestarterXp;
 
     //toolLevelling.bonuses
     public static ForgeConfigSpec.IntValue bonusMiningXp;
@@ -167,6 +169,8 @@ public class Config {
     public static ForgeConfigSpec.IntValue bonusFlingingXp;
     public static ForgeConfigSpec.IntValue bonusSpringingXp;
     public static ForgeConfigSpec.IntValue bonusBonkingXp;
+    public static ForgeConfigSpec.IntValue bonusGlowingXp;
+    public static ForgeConfigSpec.IntValue bonusFirestarterXp;
 
     //CLIENT
     public static ForgeConfigSpec.BooleanValue enableLevelUpMessage;
@@ -535,6 +539,12 @@ public class Config {
         
         enableBonkingXp = builder.translation("config.tinkerslevellingaddon.levelling.bonking")
                 .define("bonking", true);
+        
+        enableGlowingXp = builder.translation("config.tinkerslevellingaddon.levelling.glowing")
+                .define("glowing", true);
+        
+        enableFirestarterXp = builder.translation("config.tinkerslevellingaddon.levelling.firestarter")
+                .define("firestarter", true);
 
         builder.pop();
     }
@@ -612,6 +622,12 @@ public class Config {
         
         bonusBonkingXp = builder.translation("config.tinkerslevellingaddon.levelling.bonking")
                 .defineInRange("bonking", 0, 0, Integer.MAX_VALUE);
+        
+        bonusGlowingXp = builder.translation("config.tinkerslevellingaddon.levelling.glowing")
+                .defineInRange("glowing", 0, 0, Integer.MAX_VALUE);
+        
+        bonusFirestarterXp = builder.translation("config.tinkerslevellingaddon.levelling.firestarter")
+                .defineInRange("firestarter", 0, 0, Integer.MAX_VALUE);
 
         builder.pop();
     }

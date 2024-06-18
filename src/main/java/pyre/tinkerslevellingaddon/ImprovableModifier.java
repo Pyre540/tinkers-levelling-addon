@@ -7,6 +7,7 @@ import net.minecraft.network.chat.TextColor;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.tags.BlockTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.damagesource.DamageSource;
@@ -14,6 +15,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.decoration.ArmorStand;
+import net.minecraft.world.entity.monster.Creeper;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.entity.projectile.Projectile;
@@ -23,8 +25,7 @@ import net.minecraft.world.item.ShieldItem;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.BaseFireBlock;
-import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Material;
 import net.minecraft.world.phys.*;
@@ -35,6 +36,9 @@ import net.minecraftforge.common.util.BlockSnapshot;
 import net.minecraftforge.event.ForgeEventFactory;
 import net.minecraftforge.event.entity.living.LivingEntityUseItemEvent;
 import net.minecraftforge.event.entity.living.ShieldBlockEvent;
+import net.minecraftforge.event.entity.player.AttackEntityEvent;
+import net.minecraftforge.event.entity.player.PlayerInteractEvent;
+import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import org.jetbrains.annotations.Nullable;
@@ -56,6 +60,7 @@ import slimeknights.tconstruct.library.modifiers.hook.build.ToolStatsModifierHoo
 import slimeknights.tconstruct.library.modifiers.hook.build.VolatileDataModifierHook;
 import slimeknights.tconstruct.library.modifiers.hook.combat.MeleeHitModifierHook;
 import slimeknights.tconstruct.library.modifiers.hook.interaction.GeneralInteractionModifierHook;
+import slimeknights.tconstruct.library.modifiers.hook.interaction.InteractionSource;
 import slimeknights.tconstruct.library.modifiers.hook.mining.BlockBreakModifierHook;
 import slimeknights.tconstruct.library.modifiers.hook.ranged.ProjectileLaunchModifierHook;
 import slimeknights.tconstruct.library.modifiers.hook.special.BlockTransformModifierHook;
@@ -71,6 +76,8 @@ import slimeknights.tconstruct.library.tools.context.EquipmentContext;
 import slimeknights.tconstruct.library.tools.context.ToolAttackContext;
 import slimeknights.tconstruct.library.tools.context.ToolHarvestContext;
 import slimeknights.tconstruct.library.tools.definition.module.ToolHooks;
+import slimeknights.tconstruct.library.tools.definition.module.aoe.AreaOfEffectIterator;
+import slimeknights.tconstruct.library.tools.definition.module.aoe.CircleAOEIterator;
 import slimeknights.tconstruct.library.tools.definition.module.weapon.CircleWeaponAttack;
 import slimeknights.tconstruct.library.tools.definition.module.weapon.MeleeHitToolHook;
 import slimeknights.tconstruct.library.tools.definition.module.weapon.SweepWeaponAttack;
@@ -81,10 +88,13 @@ import slimeknights.tconstruct.library.tools.stat.FloatToolStat;
 import slimeknights.tconstruct.library.tools.stat.ModifierStatsBuilder;
 import slimeknights.tconstruct.library.tools.stat.ToolStats;
 import slimeknights.tconstruct.library.utils.MutableUseOnContext;
+import slimeknights.tconstruct.shared.TinkerCommons;
+import slimeknights.tconstruct.shared.block.GlowBlock;
 import slimeknights.tconstruct.tools.TinkerModifiers;
 import slimeknights.tconstruct.tools.data.ModifierIds;
 import slimeknights.tconstruct.tools.modifiers.ability.armor.walker.FlamewakeModifier;
 
+import java.util.Collections;
 import java.util.List;
 
 import static pyre.tinkerslevellingaddon.util.ToolLevellingUtil.addExperience;
@@ -229,8 +239,7 @@ public class ImprovableModifier extends NoLevelsModifier implements PlantHarvest
         }
         addExperience(toolStack, 1 + Config.bonusShootingXp.get(), player);
     }
-
-    //todo currently flint and brick and boots modifiers do not use blockTransform hook
+    
     @Override
     public void afterTransformBlock(IToolStackView tool, ModifierEntry modifier, UseOnContext context,
                                     BlockState state, BlockPos pos, ToolAction action) {
@@ -347,6 +356,7 @@ public class ImprovableModifier extends NoLevelsModifier implements PlantHarvest
         }
     }
     
+    //many interaction modifiers do not use blockTransform hook, so we need to use other methods
     @SubscribeEvent
     static void onStopUsing(LivingEntityUseItemEvent.Stop event) {
         ItemStack item = event.getItem();
@@ -372,6 +382,67 @@ public class ImprovableModifier extends NoLevelsModifier implements PlantHarvest
         if (Config.enableBonkingXp.get() && TinkerModifiers.bonking.getId().equals(activeModifier.getId())) {
             handleBonking(player, tool);
         }
+    }
+    
+    @SubscribeEvent(priority = EventPriority.LOWEST)
+    static void onClickEntity(PlayerInteractEvent.EntityInteract event) {
+        //right click entity
+        ItemStack item = event.getItemStack();
+        if (event.isCanceled() || !(event.getEntity() instanceof ServerPlayer player) || item.isEmpty()
+                || !item.is(TinkerTags.Items.MODIFIABLE)) {
+            return;
+        }
+        ToolStack tool = ToolStack.from(item);
+        
+        if (Config.enableFirestarterXp.get() && !tool.isBroken() && event.getTarget() instanceof Creeper
+                && tool.getModifier(TinkerModifiers.firestarter.getId()) != ModifierEntry.EMPTY
+                && tool.getHook(ToolHooks.INTERACTION).canInteract(tool, TinkerModifiers.firestarter.getId(),
+                InteractionSource.RIGHT_CLICK)) {
+            addExperience(tool, 1 + Config.bonusFirestarterXp.get(), player);
+        }
+    }
+    
+    @SubscribeEvent(priority = EventPriority.LOWEST)
+    static void onAttackEntity(AttackEntityEvent event) {
+        //left click entity
+        if (event.isCanceled() || !(event.getEntity() instanceof ServerPlayer player) || player.isSpectator()) {
+            return;
+        }
+        ItemStack item = player.getMainHandItem();
+        if (item.isEmpty() || !item.is(TinkerTags.Items.MODIFIABLE) || !item.is(TinkerTags.Items.INTERACTABLE_LEFT)
+                || player.getCooldowns().isOnCooldown(item.getItem())) {
+            return;
+        }
+        ToolStack tool = ToolStack.from(item);
+        
+        if (Config.enableFirestarterXp.get() && !tool.isBroken() && event.getTarget() instanceof Creeper
+                && tool.getModifier(TinkerModifiers.firestarter.getId()) != ModifierEntry.EMPTY
+                && tool.getHook(ToolHooks.INTERACTION).canInteract(tool, TinkerModifiers.firestarter.getId(),
+                InteractionSource.LEFT_CLICK)) {
+            addExperience(tool, 1 + Config.bonusFirestarterXp.get(), player);
+        }
+    }
+    
+    @SubscribeEvent(priority = EventPriority.LOWEST)
+    static void onRightClickBlock(PlayerInteractEvent.RightClickBlock event) {
+        ItemStack item = event.getItemStack();
+        if (event.isCanceled() || !(event.getEntity() instanceof ServerPlayer player) || item.isEmpty()
+                || !item.is(TinkerTags.Items.MODIFIABLE)) {
+            return;
+        }
+        
+        handleBlockClick(event, player, ToolStack.from(item), InteractionSource.RIGHT_CLICK);
+    }
+    
+    @SubscribeEvent(priority = EventPriority.LOWEST)
+    static void onLeftClickBlock(PlayerInteractEvent.LeftClickBlock event) {
+        ItemStack item = event.getItemStack();
+        if (event.isCanceled() || !(event.getEntity() instanceof ServerPlayer player) || item.isEmpty()
+                || !item.is(TinkerTags.Items.MODIFIABLE) || !item.is(TinkerTags.Items.INTERACTABLE_LEFT)) {
+            return;
+        }
+        
+        handleBlockClick(event, player, ToolStack.from(item), InteractionSource.LEFT_CLICK);
     }
     
     private boolean isEqualTinkersItem(IToolStackView item1, IToolStackView item2) {
@@ -583,5 +654,92 @@ public class ImprovableModifier extends NoLevelsModifier implements PlantHarvest
                 addExperience(tool, 1 + Config.bonusBonkingXp.get(), player);
             }
         }
+    }
+    
+    private static void handleBlockClick(PlayerInteractEvent event, ServerPlayer player, ToolStack tool, InteractionSource clickSource) {
+        if (Config.enableGlowingXp.get() && tool.getCurrentDurability() >= 10 && event.getFace() != null
+                && tool.getModifier(TinkerModifiers.glowing.getId()) != ModifierEntry.EMPTY
+                && tool.getHook(ToolHooks.INTERACTION).canInteract(tool, TinkerModifiers.glowing.getId(),
+                clickSource)) {
+            handleGlowing(event, player, tool);
+            return;
+        }
+        if (Config.enableFirestarterXp.get() && !tool.isBroken() && event.getFace() != null
+                && tool.getModifier(TinkerModifiers.firestarter.getId()) != ModifierEntry.EMPTY
+                && tool.getHook(ToolHooks.INTERACTION).canInteract(tool, TinkerModifiers.firestarter.getId(),
+                clickSource)) {
+            handleFirestarter(event, player, tool);
+        }
+    }
+    
+    private static void handleGlowing(PlayerInteractEvent event, ServerPlayer player, ToolStack tool) {
+        Level world = event.getLevel();
+        Direction face = event.getFace();
+        BlockPos pos = event.getPos().relative(face);
+        if (canPlaceGlow(world, pos, face.getOpposite())) {
+            addExperience(tool, 1 + Config.bonusGlowingXp.get(), player);
+        }
+    }
+    
+    private static boolean canPlaceGlow(Level world, BlockPos pos, Direction direction) {
+        BlockState state = world.getBlockState(pos);
+        GlowBlock glowBlock = TinkerCommons.glow.get();
+        if (state.getBlock() != glowBlock && state.getMaterial().isReplaceable()) {
+            if (canGlowBlockStay(world, pos, direction)) {
+                return true;
+            } else {
+                for (Direction direction1 : Direction.values()) {
+                    if (canGlowBlockStay(world, pos, direction1)) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+    
+    private static boolean canGlowBlockStay(Level world, BlockPos pos, Direction facing) {
+        BlockPos placedOn = pos.relative(facing);
+        
+        boolean isSolidSide = Block.isFaceFull(world.getBlockState(placedOn)
+                .getOcclusionShape(world, pos), facing.getOpposite());
+        boolean isLiquid = world.getBlockState(pos).getBlock() instanceof LiquidBlock;
+        
+        return !isLiquid && isSolidSide;
+    }
+    
+    private static void handleFirestarter(PlayerInteractEvent event, ServerPlayer player, ToolStack tool) {
+        Level world = event.getLevel();
+        BlockPos pos = event.getPos();
+        Direction sideHit = event.getFace();
+        BlockState state = world.getBlockState(pos);
+        
+        boolean targetingFire = false;
+        if (state.is(BlockTags.FIRE)) {
+            pos = pos.relative(sideHit.getOpposite());
+            targetingFire = true;
+        }
+        
+        int range = tool.getModifierLevel(TinkerModifiers.fireprimer.getId()) + tool.getModifierLevel(TinkerModifiers.expanded.getId());
+        Iterable<BlockPos> targets = Collections.emptyList();
+        if (range > 0) {
+            targets = CircleAOEIterator.calculate(tool, ItemStack.EMPTY, world, player, pos, sideHit, 1 + range,
+                    true, AreaOfEffectIterator.AOEMatchType.TRANSFORM);
+        }
+        
+        Direction horizontalFacing = player.getDirection();
+        if (!targetingFire && canIgnite(world, pos, state, sideHit, horizontalFacing)) {
+            addExperience(tool, 1 + Config.bonusFirestarterXp.get(), player);
+        }
+        for (BlockPos target : targets) {
+            if (canIgnite(world, target, world.getBlockState(target), sideHit, horizontalFacing)) {
+                addExperience(tool, 1 + Config.bonusFirestarterXp.get(), player);
+            }
+        }
+    }
+    
+    private static boolean canIgnite(Level world, BlockPos pos, BlockState state, Direction sideHit, Direction facing) {
+        return CampfireBlock.canLight(state) || CandleBlock.canLight(state) || CandleCakeBlock.canLight(state)
+                || state.getBlock() instanceof TntBlock || BaseFireBlock.canBePlacedAt(world, pos.relative(sideHit), facing);
     }
 }

@@ -151,6 +151,8 @@
   "config.tinkerslevellingaddon.levelling.flinging": "Flinging",
   "config.tinkerslevellingaddon.levelling.springing": "Springing",
   "config.tinkerslevellingaddon.levelling.bonking": "Bonking",
+  "config.tinkerslevellingaddon.levelling.glowing": "Glowinging",
+  "config.tinkerslevellingaddon.levelling.firestarter": "Firestarter",
 
   "config.tinkerslevellingaddon.client.messages": "Messages",
   "config.tinkerslevellingaddon.client.squash_pluses": "Alternative suffix for level names",
