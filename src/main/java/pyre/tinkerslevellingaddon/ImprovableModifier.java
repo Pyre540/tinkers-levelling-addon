@@ -38,7 +38,6 @@ import net.minecraftforge.event.entity.living.LivingEntityUseItemEvent;
 import net.minecraftforge.event.entity.living.ShieldBlockEvent;
 import net.minecraftforge.event.entity.player.AttackEntityEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
-import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import org.jetbrains.annotations.Nullable;
@@ -384,7 +383,7 @@ public class ImprovableModifier extends NoLevelsModifier implements PlantHarvest
         }
     }
     
-    @SubscribeEvent(priority = EventPriority.LOWEST)
+    @SubscribeEvent
     static void onClickEntity(PlayerInteractEvent.EntityInteract event) {
         //right click entity
         ItemStack item = event.getItemStack();
@@ -402,7 +401,7 @@ public class ImprovableModifier extends NoLevelsModifier implements PlantHarvest
         }
     }
     
-    @SubscribeEvent(priority = EventPriority.LOWEST)
+    @SubscribeEvent
     static void onAttackEntity(AttackEntityEvent event) {
         //left click entity
         if (event.isCanceled() || !(event.getEntity() instanceof ServerPlayer player) || player.isSpectator()) {
@@ -423,7 +422,7 @@ public class ImprovableModifier extends NoLevelsModifier implements PlantHarvest
         }
     }
     
-    @SubscribeEvent(priority = EventPriority.LOWEST)
+    @SubscribeEvent
     static void onRightClickBlock(PlayerInteractEvent.RightClickBlock event) {
         ItemStack item = event.getItemStack();
         if (event.isCanceled() || !(event.getEntity() instanceof ServerPlayer player) || item.isEmpty()
@@ -434,7 +433,7 @@ public class ImprovableModifier extends NoLevelsModifier implements PlantHarvest
         handleBlockClick(event, player, ToolStack.from(item), InteractionSource.RIGHT_CLICK);
     }
     
-    @SubscribeEvent(priority = EventPriority.LOWEST)
+    @SubscribeEvent
     static void onLeftClickBlock(PlayerInteractEvent.LeftClickBlock event) {
         ItemStack item = event.getItemStack();
         if (event.isCanceled() || !(event.getEntity() instanceof ServerPlayer player) || item.isEmpty()
