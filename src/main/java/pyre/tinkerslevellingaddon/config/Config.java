@@ -5,8 +5,7 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.config.ModConfig;
-import net.minecraftforge.registries.RegistryObject;
-import pyre.tinkerslevellingaddon.setup.Registration;
+import pyre.tinkerslevellingaddon.setup.Sounds;
 import slimeknights.tconstruct.library.tools.stat.FloatToolStat;
 import slimeknights.tconstruct.library.tools.stat.ToolStats;
 
@@ -863,18 +862,18 @@ public class Config {
 
     public enum LevelUpSound {
         NONE(null),
-        CHIME(Registration.SOUND_TOOL_LEVEL_UP_CHIME),
-        SNARE_DRUM(Registration.SOUND_TOOL_LEVEL_UP_SNARE_DRUM),
-        YAY(Registration.SOUND_TOOL_LEVEL_UP_YAY);
+        CHIME(Sounds.CHIME.getSound()),
+        SNARE_DRUM(Sounds.SNARE_DRUM.getSound()),
+        YAY(Sounds.YAY.getSound());
 
-        RegistryObject<SoundEvent> soundEvent;
+        private final SoundEvent soundEvent;
 
-        LevelUpSound(RegistryObject<SoundEvent> soundEvent) {
+        LevelUpSound(SoundEvent soundEvent) {
             this.soundEvent = soundEvent;
         }
 
         public SoundEvent getSoundEvent() {
-            return soundEvent == null ? null : soundEvent.get();
+            return soundEvent;
         }
     }
 
