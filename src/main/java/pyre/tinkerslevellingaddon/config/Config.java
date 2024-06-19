@@ -864,7 +864,8 @@ public class Config {
         NONE(null),
         CHIME(Sounds.CHIME.getSound()),
         SNARE_DRUM(Sounds.SNARE_DRUM.getSound()),
-        YAY(Sounds.YAY.getSound());
+        YAY(Sounds.YAY.getSound()),
+        BONK(slimeknights.tconstruct.common.Sounds.BONK.getSound());
 
         private final SoundEvent soundEvent;
 
