@@ -1,4 +1,23 @@
 # CHANGELOG
+## 1.4.0
+**Requires Tinkers' Construct 3.8.3.39+**
+
+Updated mod to 1.19.2
+### Changed
+- Disabled XP for "extra attacks" as they allowed certain tools to be upgraded too quickly.
+### Added
+- Separate config settings for staff.
+- Book entries for Improvable modifier (Encyclopedia and Mighty Smelting).
+- Support for flying (Wings chestplate modifier and Slimelytra). XP is awarded for continuous flight (default 1 XP / 15 seconds). Added corresponding settings in server config.
+- Support for sweeping and circle weapon attacks.
+- Support for boots walker modifiers (plowing, path maker, snowdrift, flamewake, frost walker). Added corresponding settings in server config.
+- Support for interaction modifiers (warping, flinging, springing, bonking, glowing, firestarter). Added corresponding settings in server config.
+- New level up sound - Tinkers' 'Bonk' sound.
+- Modifier texture for staffs.
+### Fixed
+- Config comments translations.
+- Attacking armor stand gives XP.
+
 ## 1.3.0
 **Requires Tinkers' Construct 3.6.3.113+**
 ### Changed
