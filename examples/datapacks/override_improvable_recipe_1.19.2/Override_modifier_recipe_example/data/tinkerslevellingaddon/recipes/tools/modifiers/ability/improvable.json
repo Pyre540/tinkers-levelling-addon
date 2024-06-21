@@ -10,8 +10,5 @@
     "tag": "tconstruct:modifiable"
   },
   "level": 1,
-  "result": {
-    "name": "tinkerslevellingaddon:improvable"
-  },
-  "max_level": 1
+  "result": "tinkerslevellingaddon:improvable"
 }
