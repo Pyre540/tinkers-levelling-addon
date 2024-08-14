@@ -1,4 +1,10 @@
 # CHANGELOG
+## 1.4.1
+### Added
+- Modifier texture for [Tinkers Reforged](https://www.curseforge.com/minecraft/mc-mods/tinkers-reforged) Longsword.
+### Fixed
+- Client crash when displaying [Tinkers Reforged](https://www.curseforge.com/minecraft/mc-mods/tinkers-reforged) Greatsword with Improvable modifier.
+
 ## 1.4.0
 **Requires Tinkers' Construct 3.8.3.39+**
 
