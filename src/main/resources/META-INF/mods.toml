@@ -5,7 +5,7 @@ issueTrackerURL="https://github.com/Pyre540/tinkers-levelling-addon/issues"
 
 [[mods]]
 modId="tinkerslevellingaddon"
-version="${file.jarVersion}"
+version="${version}"
 displayName="Tinkers' Levelling Addon"
 displayURL="https://www.curseforge.com/minecraft/mc-mods/tinkers-levelling-addon/"
 logoFile="logo.png"
