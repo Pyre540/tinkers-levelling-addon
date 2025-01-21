@@ -89,17 +89,19 @@ public class LevelsCommand {
         int size = successes.size();
         if (op == ModCommands.Operation.ADD) {
             if (size == 1) {
-                source.sendSuccess(ModUtil.makeTranslation("command", "levels.success.add.single", count,
+                source.sendSuccess(() -> ModUtil.makeTranslation("command", "levels.success.add.single", count,
                         successes.get(0).getDisplayName()), true);
             } else {
-                source.sendSuccess(ModUtil.makeTranslation("command", "levels.success.add.multiple", count, size), true);
+                source.sendSuccess(() -> ModUtil.makeTranslation("command", "levels.success.add.multiple", count,
+                        size), true);
             }
         } else {
             if (size == 1) {
-                source.sendSuccess(ModUtil.makeTranslation("command", "levels.success.set.single", count,
+                source.sendSuccess(() -> ModUtil.makeTranslation("command", "levels.success.set.single", count,
                         successes.get(0).getDisplayName()), true);
             } else {
-                source.sendSuccess(ModUtil.makeTranslation("command", "levels.success.set.multiple", count, size), true);
+                source.sendSuccess(() -> ModUtil.makeTranslation("command", "levels.success.set.multiple", count,
+                        size), true);
             }
         }
         return size;

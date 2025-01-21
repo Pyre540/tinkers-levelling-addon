@@ -30,7 +30,7 @@ public class ClientPacketHandler {
         }
         SoundEvent soundEvent = Config.levelUpSound.get().getSoundEvent();
         if (soundEvent != null) {
-            player.getLevel().playSound(player, player.getX(), player.getY(), player.getZ(),
+            player.level().playSound(player, player.getX(), player.getY(), player.getZ(),
                     soundEvent, player.getSoundSource(), 1, 1);
         }
     }

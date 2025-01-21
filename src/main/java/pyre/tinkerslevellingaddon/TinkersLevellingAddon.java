@@ -2,6 +2,7 @@ package pyre.tinkerslevellingaddon;
 
 import com.mojang.logging.LogUtils;
 import net.minecraft.data.DataGenerator;
+import net.minecraft.data.PackOutput;
 import net.minecraftforge.data.event.GatherDataEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -30,6 +31,7 @@ public class TinkersLevellingAddon {
     @SubscribeEvent
     static void gatherData(final GatherDataEvent event) {
         DataGenerator generator = event.getGenerator();
-        generator.addProvider(event.includeServer(), new ModifierRecipeProvider(generator));
+        PackOutput packOutput = generator.getPackOutput();
+        generator.addProvider(event.includeServer(), new ModifierRecipeProvider(packOutput));
     }
 }

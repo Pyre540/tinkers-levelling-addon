@@ -1,6 +1,6 @@
 package pyre.tinkerslevellingaddon.data;
 
-import net.minecraft.data.DataGenerator;
+import net.minecraft.data.PackOutput;
 import net.minecraft.data.recipes.FinishedRecipe;
 import net.minecraft.data.recipes.RecipeProvider;
 import net.minecraft.world.item.Items;
@@ -16,17 +16,17 @@ import java.util.function.Consumer;
 
 public class ModifierRecipeProvider extends RecipeProvider implements IConditionBuilder, IRecipeHelper {
 
-    public ModifierRecipeProvider(DataGenerator generator) {
+    public ModifierRecipeProvider(PackOutput generator) {
         super(generator);
     }
 
-    @Override
+    /*@Override
     public String getName() {
         return "Tinkers' Levelling Addon Modifier Recipes";
-    }
+    }*/
 
     @Override
-    protected void buildCraftingRecipes(Consumer<FinishedRecipe> consumer) {
+    protected void buildRecipes(Consumer<FinishedRecipe> consumer) {
         String abilityFolder = "tools/modifiers/ability/";
         String abilitySalvage = "tools/modifiers/salvage/ability/";
 

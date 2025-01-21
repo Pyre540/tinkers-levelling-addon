@@ -1,7 +1,6 @@
 package pyre.tinkerslevellingaddon.setup;
 
-import net.minecraft.core.Registry;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -19,13 +18,12 @@ public enum Sounds {
     private final SoundEvent sound;
     
     Sounds(String name) {
-        ResourceLocation registryName = ModUtil.getResource(name);
-        sound = new SoundEvent(registryName);
+        sound = SoundEvent.createVariableRangeEvent(ModUtil.getResource(name));
     }
     
     @SubscribeEvent
     public static void registerSounds(RegisterEvent event) {
-        if (event.getRegistryKey() == Registry.SOUND_EVENT_REGISTRY) {
+        if (event.getRegistryKey() == Registries.SOUND_EVENT) {
             for (Sounds sound : values()) {
                 ForgeRegistries.SOUND_EVENTS.register(sound.sound.getLocation(), sound.getSound());
             }

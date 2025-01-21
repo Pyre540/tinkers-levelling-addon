@@ -78,17 +78,19 @@ public class ExperienceCommand {
         int size = successes.size();
         if (op == ModCommands.Operation.ADD) {
             if (size == 1) {
-                source.sendSuccess(ModUtil.makeTranslation("command", "xp.success.add.single", count,
+                source.sendSuccess(() -> ModUtil.makeTranslation("command", "xp.success.add.single", count,
                         successes.get(0).getDisplayName()), true);
             } else {
-                source.sendSuccess(ModUtil.makeTranslation("command", "xp.success.add.multiple", count, size), true);
+                source.sendSuccess(() -> ModUtil.makeTranslation("command", "xp.success.add.multiple", count, size),
+                        true);
             }
         } else {
             if (size == 1) {
-                source.sendSuccess(ModUtil.makeTranslation("command", "xp.success.set.single", count,
+                source.sendSuccess(() -> ModUtil.makeTranslation("command", "xp.success.set.single", count,
                         successes.get(0).getDisplayName()), true);
             } else {
-                source.sendSuccess(ModUtil.makeTranslation("command", "xp.success.set.multiple", count, size), true);
+                source.sendSuccess(() -> ModUtil.makeTranslation("command", "xp.success.set.multiple", count, size),
+                        true);
             }
         }
         return size;

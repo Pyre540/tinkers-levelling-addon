@@ -8,6 +8,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.BlockTags;
+import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.damagesource.DamageSource;
@@ -27,7 +28,6 @@ import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.material.Material;
 import net.minecraft.world.phys.*;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraftforge.common.ToolAction;
@@ -91,7 +91,7 @@ import slimeknights.tconstruct.shared.TinkerCommons;
 import slimeknights.tconstruct.shared.block.GlowBlock;
 import slimeknights.tconstruct.tools.TinkerModifiers;
 import slimeknights.tconstruct.tools.data.ModifierIds;
-import slimeknights.tconstruct.tools.modifiers.ability.armor.walker.FlamewakeModifier;
+import slimeknights.tconstruct.tools.modifiers.ability.armor.FlamewakeModifier;
 
 import java.util.Collections;
 import java.util.List;
@@ -130,7 +130,7 @@ public class ImprovableModifier extends NoLevelsModifier implements PlantHarvest
     }
 
     @Override
-    public void addVolatileData(IToolContext context, ModifierEntry modifier, ModDataNBT volatileData) {
+    public void addVolatileData(IToolContext context, ModifierEntry modifier, ToolDataNBT volatileData) {
         if (ToolLevellingUtil.isSlotsLevellingEnabled(context)) {
             List<SlotType> slots =
                     ToolLevellingUtil.parseSlotsHistory(context.getPersistentData().getString(SLOT_HISTORY_KEY));
@@ -226,7 +226,7 @@ public class ImprovableModifier extends NoLevelsModifier implements PlantHarvest
 
     @Override
     public void onProjectileLaunch(IToolStackView tool, ModifierEntry modifier, LivingEntity shooter,
-                                   Projectile projectile, @Nullable AbstractArrow arrow, NamespacedNBT persistentData,
+                                   Projectile projectile, @Nullable AbstractArrow arrow, ModDataNBT persistentData,
                                    boolean primary) {
         //no way to get tool context when the arrow lands, so reward xp on launch instead
         if (!Config.enableShootingXp.get() || !(shooter instanceof ServerPlayer player)) {
@@ -298,7 +298,7 @@ public class ImprovableModifier extends NoLevelsModifier implements PlantHarvest
     @Override
     public void onWalk(IToolStackView tool, ModifierEntry modifier, LivingEntity living, BlockPos prevPos,
                        BlockPos newPos) {
-        if (!(living instanceof ServerPlayer player) || !player.isOnGround() || tool.isBroken()) {
+        if (!(living instanceof ServerPlayer player) || !player.onGround() || tool.isBroken()) {
             return;
         }
         int xp = 0;
@@ -369,7 +369,7 @@ public class ImprovableModifier extends NoLevelsModifier implements PlantHarvest
             return;
         }
         if (Config.enableFlingingXp.get() && TinkerModifiers.flinging.getId().equals(activeModifier.getId())
-                && player.isOnGround()) {
+                && player.onGround()) {
             handleFlinging(player, tool);
             return;
         }
@@ -458,7 +458,7 @@ public class ImprovableModifier extends NoLevelsModifier implements PlantHarvest
     }
     
     private boolean isValidDamageSource(DamageSource source, Player player) {
-        return !source.isBypassArmor() && source.getEntity() instanceof LivingEntity attacker &&
+        return !source.is(DamageTypeTags.BYPASSES_ARMOR) && source.getEntity() instanceof LivingEntity attacker &&
                 !attacker.equals(player) && (Config.enablePvp.get() || !(attacker instanceof Player));
     }
     
@@ -507,7 +507,7 @@ public class ImprovableModifier extends NoLevelsModifier implements PlantHarvest
     private void handleSweepAttack(ToolAttackContext context, ToolStack toolStack, ServerPlayer player,
                                    float damageDealt, float baseRange) {
         //code based on SweepWeaponAttack.afterMeleeHit
-        if (!context.isFullyCharged() || player.isSprinting() || context.isCritical() || !player.isOnGround() ||
+        if (!context.isFullyCharged() || player.isSprinting() || context.isCritical() || !player.onGround() ||
                 (player.walkDist - player.walkDistO) >= player.getSpeed()) {
             return;
         }
@@ -531,7 +531,7 @@ public class ImprovableModifier extends NoLevelsModifier implements PlantHarvest
     }
     
     private void handleAOETargets(ToolStack toolStack, ServerPlayer player, Entity target, float damage, double range) {
-        for (LivingEntity aoeTarget : player.level.getEntitiesOfClass(LivingEntity.class,
+        for (LivingEntity aoeTarget : player.level().getEntitiesOfClass(LivingEntity.class,
                 target.getBoundingBox().inflate(range, 0.25D, range))) {
             if (aoeTarget != player && aoeTarget != target && !player.isAlliedTo(aoeTarget)
                     && !(aoeTarget instanceof ArmorStand) && target.distanceToSqr(aoeTarget) < range * range) {
@@ -544,18 +544,18 @@ public class ImprovableModifier extends NoLevelsModifier implements PlantHarvest
     private void handleWalkerTransform(IToolStackView tool, ServerPlayer player, ModifierEntry entry,
                                        ToolActionWalkerTransformModule module, int xp) {
         //code based on ArmorWalkRadiusModule.onWalk and ToolActionWalkerTransformModule.onWalk
-        float radius = Math.min(16, module.getRadius(tool, entry));
+        float trueRadius = Math.min(16, module.getRadius(tool, entry));
+        int radius = Mth.floor(trueRadius);
         BlockPos.MutableBlockPos mutable = new BlockPos.MutableBlockPos();
         Vec3 posVec = player.position();
-        BlockPos center = new BlockPos(posVec.x, posVec.y + 0.5, posVec.z);
+        BlockPos center =  BlockPos.containing(posVec.x, posVec.y + 0.5, posVec.z);
         for (BlockPos pos : BlockPos.betweenClosed(center.offset(-radius, 0, -radius), center.offset(radius, 0, radius))) {
-            if (pos.closerToCenterThan(player.position(), radius)) {
-                Material material = player.getLevel().getBlockState(pos).getMaterial();
-                if (material.isReplaceable() || material == Material.PLANT) {
+            if (pos.closerToCenterThan(player.position(), trueRadius)) {
+                if (player.level().getBlockState(pos).canBeReplaced()) {
                     mutable.set(pos.getX(), pos.getY() - 1, pos.getZ());
                     MutableUseOnContext context = module.getContext(tool, entry, player, pos, mutable);
                     context.setOffsetPos(mutable);
-                    BlockState original = player.getLevel().getBlockState(mutable);
+                    BlockState original = player.level().getBlockState(mutable);
                     BlockState transformed = original.getToolModifiedState(context, module.action(), true);
                     if (transformed != null) {
                         addExperience(getHeldTool(player, EquipmentSlot.FEET), xp, player);
@@ -568,12 +568,13 @@ public class ImprovableModifier extends NoLevelsModifier implements PlantHarvest
     private void handleWalkerCoverGround(IToolStackView tool, ServerPlayer player, ModifierEntry entry,
                                        CoverGroundWalkerModule module, int xp) {
         //code based on ArmorWalkRadiusModule.onWalk and CoverGroundWalkerModule.onWalk
-        float radius = Math.min(16, module.getRadius(tool, entry));
+        float trueRadius = Math.min(16, module.getRadius(tool, entry));
+        int radius = Mth.floor(trueRadius);
         Vec3 posVec = player.position();
-        ServerLevel world = player.getLevel();
-        BlockPos center = new BlockPos(posVec.x, posVec.y + 0.5, posVec.z);
+        Level world = player.level();
+        BlockPos center = BlockPos.containing(posVec.x, posVec.y + 0.5, posVec.z);
         for (BlockPos pos : BlockPos.betweenClosed(center.offset(-radius, 0, -radius), center.offset(radius, 0, radius))) {
-            if (pos.closerToCenterThan(player.position(), radius)) {
+            if (pos.closerToCenterThan(player.position(), trueRadius)) {
                 if (world.isEmptyBlock(pos) && module.state().canSurvive(world, pos)) {
                     addExperience(getHeldTool(player, EquipmentSlot.FEET), xp, player);
                 }
@@ -584,14 +585,15 @@ public class ImprovableModifier extends NoLevelsModifier implements PlantHarvest
     private void handleWalkerReplaceBlock(IToolStackView tool, ServerPlayer player, ModifierEntry entry,
                                           ReplaceBlockWalkerModule module, int xp) {
         //code based on ArmorWalkRadiusModule.onWalk and ReplaceBlockWalkerModule.onWalk
-        float radius = Math.min(16, module.getRadius(tool, entry));
+        float trueRadius = Math.min(16, module.getRadius(tool, entry));
+        int radius = Mth.floor(trueRadius);
         BlockPos.MutableBlockPos mutable = new BlockPos.MutableBlockPos();
-        Level world = player.level;
+        Level world = player.level();
         Vec3 posVec = player.position();
-        BlockPos center = new BlockPos(posVec.x, posVec.y + 0.5, posVec.z);
+        BlockPos center = BlockPos.containing(posVec.x, posVec.y + 0.5, posVec.z);
         for (BlockPos pos : BlockPos.betweenClosed(center.offset(-radius, 0, -radius), center.offset(radius, 0,
                 radius))) {
-            if (pos.closerToCenterThan(player.position(), radius) && world.isEmptyBlock(pos)) {
+            if (pos.closerToCenterThan(player.position(), trueRadius) && world.isEmptyBlock(pos)) {
                 mutable.set(pos.getX(), pos.getY() - 1, pos.getZ());
                 //cannot access replacements, hardcoded frost walker
                 BlockState state = Blocks.FROSTED_ICE.defaultBlockState();
@@ -607,12 +609,13 @@ public class ImprovableModifier extends NoLevelsModifier implements PlantHarvest
     private void handleFlamewake(IToolStackView tool, ServerPlayer player, int xp) {
         //code based on AbstractWalkerModifier.onWalk and FlamewakeModifier.onWalk
         //getRadius is protected, copied radius formula
-        float radius = Math.min(16, 1.5f + tool.getModifierLevel(TinkerModifiers.expanded.getId()));
+        float trueRadius = Math.min(16, 1.5f + tool.getModifierLevel(TinkerModifiers.expanded.getId()));
+        int radius = Mth.floor(trueRadius);
         Vec3 posVec = player.position();
-        BlockPos center = new BlockPos(posVec.x, posVec.y + 0.5, posVec.z);
+        BlockPos center = BlockPos.containing(posVec.x, posVec.y + 0.5, posVec.z);
         for (BlockPos pos : BlockPos.betweenClosed(center.offset(-radius, 0, -radius), center.offset(radius, 0, radius))) {
-            if (pos.closerToCenterThan(player.position(), radius)) {
-                if (BaseFireBlock.canBePlacedAt(player.getLevel(), pos, player.getDirection())) {
+            if (pos.closerToCenterThan(player.position(), trueRadius)) {
+                if (BaseFireBlock.canBePlacedAt(player.level(), pos, player.getDirection())) {
                     addExperience(getHeldTool(player, EquipmentSlot.FEET), xp, player);
                 }
             }
@@ -621,7 +624,7 @@ public class ImprovableModifier extends NoLevelsModifier implements PlantHarvest
     
     private static void handleFlinging(ServerPlayer player, ToolStack tool) {
         //code based on FlingingModifier.onStoppedUsing
-        BlockHitResult mop = ModifiableItem.blockRayTrace(player.getLevel(), player, ClipContext.Fluid.NONE);
+        BlockHitResult mop = ModifiableItem.blockRayTrace(player.level(), player, ClipContext.Fluid.NONE);
         if (mop.getType() == HitResult.Type.BLOCK) {
             //ignoring 'force' check since we cannot access it
             addExperience(tool, 1 + Config.bonusFlingingXp.get(), player);
@@ -643,12 +646,12 @@ public class ImprovableModifier extends NoLevelsModifier implements PlantHarvest
         Vec3 direction = start.add(look.x * range, look.y * range, look.z * range);
         AABB bb = player.getBoundingBox().expandTowards(look.x * range, look.y * range, look.z * range)
                 .expandTowards(1, 1, 1);
-        EntityHitResult hit = ProjectileUtil.getEntityHitResult(player.level, player, start, direction, bb,
+        EntityHitResult hit = ProjectileUtil.getEntityHitResult(player.level(), player, start, direction, bb,
                 (e) -> e instanceof LivingEntity);
         if (hit != null) {
             LivingEntity target = (LivingEntity) hit.getEntity();
             double targetDist = start.distanceToSqr(target.getEyePosition(1F));
-            BlockHitResult mop = ModifiableItem.blockRayTrace(player.level, player, ClipContext.Fluid.NONE);
+            BlockHitResult mop = ModifiableItem.blockRayTrace(player.level(), player, ClipContext.Fluid.NONE);
             if (mop.getType() != HitResult.Type.BLOCK || targetDist < mop.getBlockPos().distToCenterSqr(start)) {
                 addExperience(tool, 1 + Config.bonusBonkingXp.get(), player);
             }
@@ -683,7 +686,7 @@ public class ImprovableModifier extends NoLevelsModifier implements PlantHarvest
     private static boolean canPlaceGlow(Level world, BlockPos pos, Direction direction) {
         BlockState state = world.getBlockState(pos);
         GlowBlock glowBlock = TinkerCommons.glow.get();
-        if (state.getBlock() != glowBlock && state.getMaterial().isReplaceable()) {
+        if (state.getBlock() != glowBlock && state.canBeReplaced()) {
             if (canGlowBlockStay(world, pos, direction)) {
                 return true;
             } else {
