@@ -1,4 +1,9 @@
 # CHANGELOG
+## 1.4.1 - 1.20.1
+**Requires Tinkers’ Construct 3.9.1.19+**
+
+Updated mod to 1.20.1
+
 ## 1.4.1
 ### Added
 - Modifier texture for [Tinkers Reforged](https://www.curseforge.com/minecraft/mc-mods/tinkers-reforged) Longsword.
