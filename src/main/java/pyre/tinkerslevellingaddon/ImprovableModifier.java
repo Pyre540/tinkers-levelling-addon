@@ -342,6 +342,15 @@ public class ImprovableModifier extends NoLevelsModifier implements PlantHarvest
                 handleFlamewake(tool, player, xp);
                 return;
             }
+            if (hook instanceof GlowWalkerModule glowWalker) {
+                if (Config.enableGlowingXp.get() && entry.getId().equals(ModifierIds.glowing)) {
+                    xp = 1 + Config.bonusGlowingXp.get();
+                }
+                if (xp > 0) {
+                    handleWalkerGlowing(tool, player, entry, glowWalker, xp);
+                }
+                return;
+            }
         }
     }
     
@@ -684,6 +693,27 @@ public class ImprovableModifier extends NoLevelsModifier implements PlantHarvest
         BlockPos pos = event.getPos().relative(face);
         if (canPlaceGlow(world, pos, face.getOpposite())) {
             addExperience(tool, 1 + Config.bonusGlowingXp.get(), (ServerPlayer) context.getPlayer());
+        }
+    }
+
+    private static void handleWalkerGlowing(IToolStackView tool, ServerPlayer player, ModifierEntry entry,
+                                            GlowWalkerModule module, int xp) {
+        Level world = player.level();
+        if (player.onGround() && !tool.isBroken() && !world.isClientSide) {
+            float trueRadius = Math.min(16, module.getRadius(tool, entry));
+            int radius = Mth.floor(trueRadius);
+            Vec3 posVec = player.position();
+            BlockPos center = BlockPos.containing(posVec.x, posVec.y + 0.5, posVec.z);
+            for (BlockPos pos : BlockPos.betweenClosed(center.offset(-radius, 0, -radius), center.offset(radius, 0, radius))) {
+                if (pos.closerToCenterThan(player.position(), trueRadius)) {
+                    if (world.isEmptyBlock(pos) && world.getBrightness(LightLayer.BLOCK, pos) < 3) {
+                        if (canPlaceGlow(world, pos, Direction.DOWN)) {
+                            addExperience(getHeldTool(player, EquipmentSlot.FEET), xp, player);
+                            return;
+                        }
+                    }
+                }
+            }
         }
     }
     
