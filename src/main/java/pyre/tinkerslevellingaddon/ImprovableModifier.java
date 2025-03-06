@@ -26,6 +26,7 @@ import net.minecraft.world.item.ShieldItem;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.*;
@@ -87,11 +88,13 @@ import slimeknights.tconstruct.library.tools.stat.FloatToolStat;
 import slimeknights.tconstruct.library.tools.stat.ModifierStatsBuilder;
 import slimeknights.tconstruct.library.tools.stat.ToolStats;
 import slimeknights.tconstruct.library.utils.MutableUseOnContext;
+import slimeknights.tconstruct.library.utils.Util;
 import slimeknights.tconstruct.shared.TinkerCommons;
 import slimeknights.tconstruct.shared.block.GlowBlock;
 import slimeknights.tconstruct.tools.TinkerModifiers;
 import slimeknights.tconstruct.tools.data.ModifierIds;
 import slimeknights.tconstruct.tools.modifiers.ability.armor.FlamewakeModifier;
+import slimeknights.tconstruct.tools.modules.armor.GlowWalkerModule;
 
 import java.util.Collections;
 import java.util.List;
@@ -305,10 +308,10 @@ public class ImprovableModifier extends NoLevelsModifier implements PlantHarvest
         for (ModifierEntry entry : tool.getModifierList()) {
             ArmorWalkModifierHook hook = entry.getHook(ModifierHooks.BOOT_WALK);
             if (hook instanceof ToolActionWalkerTransformModule toolAction) {
-                if (Config.enablePlowingXp.get() && entry.getId().equals(ModifierIds.plowing)) {
+                if (Config.enablePlowingXp.get() && entry.getId().equals(ModifierIds.tilling)) {
                     xp = 1 + Config.bonusPlowingXp.get();
                 }
-                if (Config.enablePathMakerXp.get() && entry.getId().equals(ModifierIds.pathMaker)) {
+                if (Config.enablePathMakerXp.get() && entry.getId().equals(ModifierIds.pathing)) {
                     xp = 1 + Config.bonusPathMakerXp.get();
                 }
                 if (xp > 0) {
@@ -429,8 +432,8 @@ public class ImprovableModifier extends NoLevelsModifier implements PlantHarvest
                 || !item.is(TinkerTags.Items.MODIFIABLE)) {
             return;
         }
-        
-        handleBlockClick(event, player, ToolStack.from(item), InteractionSource.RIGHT_CLICK);
+        UseOnContext context = new UseOnContext(player, event.getHand(), event.getHitVec());
+        handleBlockClick(event, context, ToolStack.from(item), InteractionSource.RIGHT_CLICK);
     }
     
     @SubscribeEvent
@@ -440,8 +443,10 @@ public class ImprovableModifier extends NoLevelsModifier implements PlantHarvest
                 || !item.is(TinkerTags.Items.MODIFIABLE) || !item.is(TinkerTags.Items.INTERACTABLE_LEFT)) {
             return;
         }
-        
-        handleBlockClick(event, player, ToolStack.from(item), InteractionSource.LEFT_CLICK);
+
+        UseOnContext context =
+                new UseOnContext(player, event.getHand(), Util.createTraceResult(event.getPos(), event.getFace(), false));
+        handleBlockClick(event, context, ToolStack.from(item), InteractionSource.LEFT_CLICK);
     }
     
     private boolean isEqualTinkersItem(IToolStackView item1, IToolStackView item2) {
@@ -658,28 +663,27 @@ public class ImprovableModifier extends NoLevelsModifier implements PlantHarvest
         }
     }
     
-    private static void handleBlockClick(PlayerInteractEvent event, ServerPlayer player, ToolStack tool, InteractionSource clickSource) {
-        if (Config.enableGlowingXp.get() && tool.getCurrentDurability() >= 10 && event.getFace() != null
-                && tool.getModifier(TinkerModifiers.glowing.getId()) != ModifierEntry.EMPTY
-                && tool.getHook(ToolHooks.INTERACTION).canInteract(tool, TinkerModifiers.glowing.getId(),
-                clickSource)) {
-            handleGlowing(event, player, tool);
+    private static void handleBlockClick(PlayerInteractEvent event, UseOnContext context, ToolStack tool, InteractionSource clickSource) {
+        if (Config.enableGlowingXp.get() && event.getFace() != null
+                && tool.getModifier(ModifierIds.glowing) != ModifierEntry.EMPTY
+                && tool.getHook(ToolHooks.INTERACTION).canInteract(tool, ModifierIds.glowing, clickSource)) {
+            handleGlowing(event, context, tool);
             return;
         }
         if (Config.enableFirestarterXp.get() && !tool.isBroken() && event.getFace() != null
                 && tool.getModifier(TinkerModifiers.firestarter.getId()) != ModifierEntry.EMPTY
                 && tool.getHook(ToolHooks.INTERACTION).canInteract(tool, TinkerModifiers.firestarter.getId(),
                 clickSource)) {
-            handleFirestarter(event, player, tool);
+            handleFirestarter(event, context, tool);
         }
     }
-    
-    private static void handleGlowing(PlayerInteractEvent event, ServerPlayer player, ToolStack tool) {
+
+    private static void handleGlowing(PlayerInteractEvent event, UseOnContext context, ToolStack tool) {
         Level world = event.getLevel();
         Direction face = event.getFace();
         BlockPos pos = event.getPos().relative(face);
         if (canPlaceGlow(world, pos, face.getOpposite())) {
-            addExperience(tool, 1 + Config.bonusGlowingXp.get(), player);
+            addExperience(tool, 1 + Config.bonusGlowingXp.get(), (ServerPlayer) context.getPlayer());
         }
     }
     
@@ -710,8 +714,10 @@ public class ImprovableModifier extends NoLevelsModifier implements PlantHarvest
         return !isLiquid && isSolidSide;
     }
     
-    private static void handleFirestarter(PlayerInteractEvent event, ServerPlayer player, ToolStack tool) {
+    private static void handleFirestarter(PlayerInteractEvent event, UseOnContext context, ToolStack tool) {
         Level world = event.getLevel();
+        ServerPlayer player = (ServerPlayer) context.getPlayer();
+        UseOnContext targetContext = context;
         BlockPos pos = event.getPos();
         Direction sideHit = event.getFace();
         BlockState state = world.getBlockState(pos);
@@ -719,13 +725,14 @@ public class ImprovableModifier extends NoLevelsModifier implements PlantHarvest
         boolean targetingFire = false;
         if (state.is(BlockTags.FIRE)) {
             pos = pos.relative(sideHit.getOpposite());
+            targetContext = Util.offset(context, pos);
             targetingFire = true;
         }
         
         int range = tool.getModifierLevel(TinkerModifiers.fireprimer.getId()) + tool.getModifierLevel(TinkerModifiers.expanded.getId());
         Iterable<BlockPos> targets = Collections.emptyList();
         if (range > 0) {
-            targets = CircleAOEIterator.calculate(tool, ItemStack.EMPTY, world, player, pos, sideHit, 1 + range,
+            targets = CircleAOEIterator.calculate(tool, targetContext, 1 + range,
                     true, AreaOfEffectIterator.AOEMatchType.TRANSFORM);
         }
         
