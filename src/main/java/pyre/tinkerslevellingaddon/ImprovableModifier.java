@@ -124,6 +124,11 @@ public class ImprovableModifier extends NoLevelsModifier implements PlantHarvest
     }
 
     @Override
+    public int getPriority() {
+        return 300;
+    }
+
+    @Override
     public Component onRemoved(IToolStackView tool, Modifier modifier) {
         tool.getPersistentData().remove(EXPERIENCE_KEY);
         tool.getPersistentData().remove(LEVEL_KEY);
