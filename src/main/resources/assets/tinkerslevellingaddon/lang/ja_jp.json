@@ -125,7 +125,7 @@
   "config.tinkerslevellingaddon.levelling.damage_dealt": "与ダメージ",
   "config.tinkerslevellingaddon.levelling.damage_taken": "被ダメージ",
   "config.tinkerslevellingaddon.levelling.damage_blocked": "ブロック",
-  "config.tinkerslevellingaddon.levelling.enable_pvp": "PvPで友好",
+  "config.tinkerslevellingaddon.levelling.enable_pvp": "PvPで有効",
   "config.tinkerslevellingaddon.levelling.flying_time": "飛行時間",
 
   "config.tinkerslevellingaddon.levelling.mining": "採掘時",
