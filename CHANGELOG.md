@@ -1,4 +1,10 @@
 # CHANGELOG
+## 1.4.3 - 1.20.1
+**Requires Tinkers’ Construct 3.10.0.67+**
+
+### Fixed
+- Game crash related to changes in Tinkers' Construct 3.10.0.67
+
 ## 1.4.2 - 1.20.1
 **Requires Tinkers’ Construct 3.9.2.37+**
 
