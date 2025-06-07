@@ -482,7 +482,7 @@ public class ImprovableModifier extends NoLevelsModifier implements PlantHarvest
     }
     
     private int getThornsBonus(IToolStackView tool) {
-        int thornsLevel = tool.getModifierLevel(TinkerModifiers.thorns.getId());
+        int thornsLevel = tool.getModifierLevel(ModifierIds.thorns);
         if (!Config.enableThornsXp.get() || thornsLevel == 0) {
             return 0;
         }
