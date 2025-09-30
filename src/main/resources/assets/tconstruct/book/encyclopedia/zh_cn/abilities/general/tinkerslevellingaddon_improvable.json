@@ -1,0 +1,17 @@
+{
+  "modifier_id": "tinkerslevellingaddon:improvable",
+  "text": [
+    {
+      "text": "可获得经验值和升级。通过合理地使用工具进行采矿、收获或造成伤害等都可以获得经验值。"
+    },
+    {
+      "text": "升级时会奖励额外的强化槽或属性。",
+      "paragraph": true
+    }
+  ],
+  "more_text_space": true,
+  "effects": [
+    "单次使用",
+    "需要1个能力槽"
+  ]
+}
