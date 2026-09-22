@@ -83,6 +83,7 @@ import slimeknights.tconstruct.library.tools.definition.module.weapon.CircleWeap
 import slimeknights.tconstruct.library.tools.definition.module.weapon.MeleeHitToolHook;
 import slimeknights.tconstruct.library.tools.definition.module.weapon.SweepWeaponAttack;
 import slimeknights.tconstruct.library.tools.helper.ModifierUtil;
+import slimeknights.tconstruct.library.tools.item.IModifiable;
 import slimeknights.tconstruct.library.tools.item.ModifiableItem;
 import slimeknights.tconstruct.library.tools.nbt.*;
 import slimeknights.tconstruct.library.tools.stat.FloatToolStat;
@@ -101,6 +102,7 @@ import java.util.function.Function;
 
 import static pyre.tinkerslevellingaddon.util.ToolLevellingUtil.addExperience;
 import static pyre.tinkerslevellingaddon.util.ToolUtil.getWalkerTrueRadius;
+import static pyre.tinkerslevellingaddon.util.ToolUtil.isAttackAllowed;
 import static pyre.tinkerslevellingaddon.util.WorldUtil.canPlaceGlow;
 
 @Mod.EventBusSubscriber(modid = TinkersLevellingAddon.MOD_ID, bus = Mod.EventBusSubscriber.Bus.FORGE)
@@ -210,10 +212,10 @@ public class ImprovableModifier extends NoLevelsModifier implements PlantHarvest
         //handle aoe hits
         MeleeHitToolHook hook = tool.getDefinitionData().getHook(ToolHooks.MELEE_HIT);
         if (hook instanceof SweepWeaponAttack sweepHook) {
-            handleSweepAttack(context, toolStack, player, damageDealt, sweepHook.range());
+            handleSweepAttack(context, toolStack, player, damageDealt, sweepHook);
         }
         if (hook instanceof CircleWeaponAttack circleHook) {
-            handleCircleAttack(context, toolStack, player, damageDealt, circleHook.diameter());
+            handleCircleAttack(context, toolStack, player, damageDealt, circleHook);
         }
     }
 
@@ -468,12 +470,6 @@ public class ImprovableModifier extends NoLevelsModifier implements PlantHarvest
         return item1.getModifiers().equals(item2.getModifiers()) && item1.getMaterials().equals(item2.getMaterials());
     }
     
-    private boolean isAttackAllowed(ToolAttackContext context, IToolStackView tool) {
-        ModifierEntry activeModifier = GeneralInteractionModifierHook.getActiveModifier(tool);
-        return !context.isExtraAttack() || activeModifier == ModifierEntry.EMPTY ||
-                TinkerModifiers.bonking.getId().equals(activeModifier.getId());
-    }
-    
     private boolean isValidDamageSource(DamageSource source, Player player) {
         return !source.is(DamageTypeTags.BYPASSES_ARMOR) && source.getEntity() instanceof LivingEntity attacker &&
                 !attacker.equals(player) && (Config.enablePvp.get() || !(attacker instanceof Player));
@@ -522,36 +518,38 @@ public class ImprovableModifier extends NoLevelsModifier implements PlantHarvest
     }
     
     private void handleSweepAttack(ToolAttackContext context, ToolStack toolStack, ServerPlayer player,
-                                   float damageDealt, float baseRange) {
+                                   float damageDealt, SweepWeaponAttack module) {
         //code based on SweepWeaponAttack.afterMeleeHit
-        if (!context.isFullyCharged() || player.isSprinting() || context.isCritical() || !player.onGround() ||
-                (player.walkDist - player.walkDistO) >= player.getSpeed()) {
+        if (!context.isFullyCharged() || player.isSprinting() || context.isCritical() || context.isProjectile() ||
+                !player.onGround() || (player.walkDist - player.walkDistO) >= player.getSpeed()) {
             return;
         }
+        double range = module.range().compute(toolStack.getVolatileData().getInt(IModifiable.EXPANDED));
         //value - 2 - can be moved to datagen in the future
-        double range = 2 + baseRange + toolStack.getModifierLevel(TinkerModifiers.expanded.getId());
-        float sweepDamage = TinkerModifiers.sweeping.get().getSweepingDamage(toolStack, damageDealt);
-        handleAOETargets(toolStack, player, context.getTarget(), sweepDamage, range);
+        double rangeSq = (2 + range);
+        rangeSq *= rangeSq;
+        float sweepDamage = SweepWeaponAttack.getSweepingDamage(toolStack, damageDealt);
+        handleAOETargets(toolStack, player, context.getTarget(), sweepDamage, range, rangeSq);
     }
     
     private void handleCircleAttack(ToolAttackContext context, ToolStack toolStack, ServerPlayer player,
-                                    float damageDealt, float baseDiameter) {
-        //code based on SweepWeaponAttack.afterMeleeHit
-        if (!context.isFullyCharged()) {
-            return;
-        }
-        double range = baseDiameter + toolStack.getModifierLevel(TinkerModifiers.expanded.getId());
+                                    float damageDealt, CircleWeaponAttack module) {
+        //code based on CircleWeaponAttack.afterMeleeHit
+        double range = module.diameter().compute(toolStack.getVolatileData().getInt(IModifiable.EXPANDED));
         if (range <= 0) {
             return;
         }
-        handleAOETargets(toolStack, player, context.getTarget(), damageDealt, range);
+        double rangeSq = range * range;
+        handleAOETargets(toolStack, player, context.getTarget(), damageDealt, range, rangeSq);
     }
     
-    private void handleAOETargets(ToolStack toolStack, ServerPlayer player, Entity target, float damage, double range) {
+    private void handleAOETargets(ToolStack toolStack, ServerPlayer player, Entity target, float damage, double range,
+                                  double rangeSq) {
         for (LivingEntity aoeTarget : player.level().getEntitiesOfClass(LivingEntity.class,
                 target.getBoundingBox().inflate(range, 0.25D, range))) {
             if (aoeTarget != player && aoeTarget != target && !player.isAlliedTo(aoeTarget)
-                    && !(aoeTarget instanceof ArmorStand) && target.distanceToSqr(aoeTarget) < range * range) {
+                    && !(aoeTarget instanceof ArmorStand armorStand && armorStand.isMarker())
+                    && player.distanceToSqr(aoeTarget) < rangeSq) {
                 int xp = (Config.damageDealt.get() ? Math.round(damage) : 1) + Config.bonusAttackingXp.get();
                 addExperience(toolStack, xp, player);
             }
