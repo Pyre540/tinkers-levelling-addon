@@ -67,6 +67,7 @@ import slimeknights.tconstruct.library.modifiers.hook.special.BlockTransformModi
 import slimeknights.tconstruct.library.modifiers.hook.special.PlantHarvestModifierHook;
 import slimeknights.tconstruct.library.modifiers.hook.special.ShearsModifierHook;
 import slimeknights.tconstruct.library.modifiers.impl.NoLevelsModifier;
+import slimeknights.tconstruct.library.modifiers.modules.armor.ArmorWalkRadiusModule;
 import slimeknights.tconstruct.library.modifiers.modules.armor.CoverGroundWalkerModule;
 import slimeknights.tconstruct.library.modifiers.modules.armor.ReplaceBlockWalkerModule;
 import slimeknights.tconstruct.library.modifiers.modules.armor.ToolActionWalkerTransformModule;
@@ -89,17 +90,18 @@ import slimeknights.tconstruct.library.tools.stat.ModifierStatsBuilder;
 import slimeknights.tconstruct.library.tools.stat.ToolStats;
 import slimeknights.tconstruct.library.utils.MutableUseOnContext;
 import slimeknights.tconstruct.library.utils.Util;
-import slimeknights.tconstruct.shared.TinkerCommons;
-import slimeknights.tconstruct.shared.block.GlowBlock;
 import slimeknights.tconstruct.tools.TinkerModifiers;
 import slimeknights.tconstruct.tools.data.ModifierIds;
-import slimeknights.tconstruct.tools.modifiers.ability.armor.FlamewakeModifier;
+import slimeknights.tconstruct.tools.modules.armor.FireWalkerModule;
 import slimeknights.tconstruct.tools.modules.armor.GlowWalkerModule;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Function;
 
 import static pyre.tinkerslevellingaddon.util.ToolLevellingUtil.addExperience;
+import static pyre.tinkerslevellingaddon.util.ToolUtil.getWalkerTrueRadius;
+import static pyre.tinkerslevellingaddon.util.WorldUtil.canPlaceGlow;
 
 @Mod.EventBusSubscriber(modid = TinkersLevellingAddon.MOD_ID, bus = Mod.EventBusSubscriber.Bus.FORGE)
 public class ImprovableModifier extends NoLevelsModifier implements PlantHarvestModifierHook, ShearsModifierHook,
@@ -327,34 +329,30 @@ public class ImprovableModifier extends NoLevelsModifier implements PlantHarvest
             if (hook instanceof CoverGroundWalkerModule coverGround) {
                 if (Config.enableSnowdriftXp.get() && entry.getId().equals(ModifierIds.snowdrift)) {
                     xp = 1 + Config.bonusSnowdriftXp.get();
-                }
-                if (xp > 0) {
                     handleWalkerCoverGround(tool, player, entry, coverGround, xp);
+                    return;
                 }
-                return;
             }
             if (hook instanceof ReplaceBlockWalkerModule replaceBlock) {
                 if (Config.enableFrostWalkerXp.get() && entry.getId().equals(ModifierIds.frostWalker)) {
                     xp = 1 + Config.bonusFrostWalkerXp.get();
-                }
-                if (xp > 0) {
                     handleWalkerReplaceBlock(tool, player, entry, replaceBlock, xp);
+                    return;
                 }
-                return;
             }
-            if (hook instanceof FlamewakeModifier && Config.enableFlamewakeXp.get()) {
-                xp = 1 + Config.bonusFlamewakeXp.get();
-                handleFlamewake(tool, player, xp);
-                return;
+            if (hook instanceof FireWalkerModule fireWalker) {
+                if (Config.enableFlamewakeXp.get() && entry.getId().equals(ModifierIds.flamewake)) {
+                    xp = 1 + Config.bonusFlamewakeXp.get();
+                    handleWalkerFire(tool, player, entry, fireWalker, xp);
+                    return;
+                }
             }
             if (hook instanceof GlowWalkerModule glowWalker) {
                 if (Config.enableGlowingXp.get() && entry.getId().equals(ModifierIds.glowing)) {
                     xp = 1 + Config.bonusGlowingXp.get();
-                }
-                if (xp > 0) {
                     handleWalkerGlowing(tool, player, entry, glowWalker, xp);
+                    return;
                 }
-                return;
             }
         }
     }
@@ -562,85 +560,104 @@ public class ImprovableModifier extends NoLevelsModifier implements PlantHarvest
     
     private void handleWalkerTransform(IToolStackView tool, ServerPlayer player, ModifierEntry entry,
                                        ToolActionWalkerTransformModule module, int xp) {
-        //code based on ArmorWalkRadiusModule.onWalk and ToolActionWalkerTransformModule.onWalk
-        float trueRadius = Math.min(16, module.getRadius(tool, entry));
-        int radius = Mth.floor(trueRadius);
+        //code based on ArmorWalkRadiusModule.onWalk and ToolActionWalkerTransformModule.walkOn
+        if (!module.condition().matches(tool, entry)) {
+            return;
+        }
         BlockPos.MutableBlockPos mutable = new BlockPos.MutableBlockPos();
-        Vec3 posVec = player.position();
-        BlockPos center =  BlockPos.containing(posVec.x, posVec.y + 0.5, posVec.z);
-        for (BlockPos pos : BlockPos.betweenClosed(center.offset(-radius, 0, -radius), center.offset(radius, 0, radius))) {
-            if (pos.closerToCenterThan(player.position(), trueRadius)) {
-                if (player.level().getBlockState(pos).canBeReplaced()) {
-                    mutable.set(pos.getX(), pos.getY() - 1, pos.getZ());
-                    MutableUseOnContext context = module.getContext(tool, entry, player, pos, mutable);
-                    context.setOffsetPos(mutable);
-                    BlockState original = player.level().getBlockState(mutable);
-                    BlockState transformed = original.getToolModifiedState(context, module.action(), true);
-                    if (transformed != null) {
-                        addExperience(getHeldTool(player, EquipmentSlot.FEET), xp, player);
-                    }
+        handleWalker(tool, player, entry, module, pos -> {
+            if (player.level().getBlockState(pos).canBeReplaced()) {
+                mutable.set(pos.getX(), pos.getY() - 1, pos.getZ());
+                MutableUseOnContext context = module.getContext(tool, entry, player, pos, mutable);
+                context.setOffsetPos(mutable);
+                BlockState original = player.level().getBlockState(mutable);
+                BlockState transformed = original.getToolModifiedState(context, module.action(), true);
+                if (transformed != null) {
+                    addExperience(getHeldTool(player, EquipmentSlot.FEET), xp, player);
                 }
             }
-        }
+            return false;
+        });
     }
     
     private void handleWalkerCoverGround(IToolStackView tool, ServerPlayer player, ModifierEntry entry,
                                        CoverGroundWalkerModule module, int xp) {
-        //code based on ArmorWalkRadiusModule.onWalk and CoverGroundWalkerModule.onWalk
-        float trueRadius = Math.min(16, module.getRadius(tool, entry));
-        int radius = Mth.floor(trueRadius);
-        Vec3 posVec = player.position();
-        Level world = player.level();
-        BlockPos center = BlockPos.containing(posVec.x, posVec.y + 0.5, posVec.z);
-        for (BlockPos pos : BlockPos.betweenClosed(center.offset(-radius, 0, -radius), center.offset(radius, 0, radius))) {
-            if (pos.closerToCenterThan(player.position(), trueRadius)) {
-                if (world.isEmptyBlock(pos) && module.state().canSurvive(world, pos)) {
-                    addExperience(getHeldTool(player, EquipmentSlot.FEET), xp, player);
-                }
-            }
+        //code based on ArmorWalkRadiusModule.onWalk and CoverGroundWalkerModule.walkOn
+        if (!module.condition().matches(tool, entry)) {
+            return;
         }
+        Level world = player.level();
+        handleWalker(tool, player, entry, module, pos -> {
+            if (world.isEmptyBlock(pos) && module.state().canSurvive(world, pos)) {
+                addExperience(getHeldTool(player, EquipmentSlot.FEET), xp, player);
+            }
+            return false;
+        });
     }
     
     private void handleWalkerReplaceBlock(IToolStackView tool, ServerPlayer player, ModifierEntry entry,
                                           ReplaceBlockWalkerModule module, int xp) {
         //code based on ArmorWalkRadiusModule.onWalk and ReplaceBlockWalkerModule.onWalk
-        float trueRadius = Math.min(16, module.getRadius(tool, entry));
-        int radius = Mth.floor(trueRadius);
-        BlockPos.MutableBlockPos mutable = new BlockPos.MutableBlockPos();
-        Level world = player.level();
-        Vec3 posVec = player.position();
-        BlockPos center = BlockPos.containing(posVec.x, posVec.y + 0.5, posVec.z);
-        for (BlockPos pos : BlockPos.betweenClosed(center.offset(-radius, 0, -radius), center.offset(radius, 0,
-                radius))) {
-            if (pos.closerToCenterThan(player.position(), trueRadius) && world.isEmptyBlock(pos)) {
-                mutable.set(pos.getX(), pos.getY() - 1, pos.getZ());
-                //cannot access replacements, hardcoded frost walker
-                BlockState state = Blocks.FROSTED_ICE.defaultBlockState();
-                if (world.getBlockState(mutable).is(Blocks.WATER) && state.canSurvive(world, mutable) &&
-                        world.isUnobstructed(state, mutable, CollisionContext.empty()) &&
-                        !ForgeEventFactory.onBlockPlace(player, BlockSnapshot.create(world.dimension(), world, mutable), Direction.UP)) {
-                    addExperience(getHeldTool(player, EquipmentSlot.FEET), xp, player);
-                }
-            }
+        if (!module.tool().matches(tool)) {
+            return;
         }
+        Level world = player.level();
+        BlockPos.MutableBlockPos mutable = new BlockPos.MutableBlockPos();
+        handleWalker(tool, player, entry, module, pos -> {
+            mutable.set(pos.getX(), pos.getY() - 1, pos.getZ());
+            //cannot access replacements, hardcoded frost walker
+            BlockState state = Blocks.FROSTED_ICE.defaultBlockState();
+            if (world.getBlockState(mutable).is(Blocks.WATER) && state.canSurvive(world, mutable) &&
+                    world.isUnobstructed(state, mutable, CollisionContext.empty()) &&
+                    !ForgeEventFactory.onBlockPlace(player, BlockSnapshot.create(world.dimension(), world, mutable), Direction.UP)) {
+                addExperience(getHeldTool(player, EquipmentSlot.FEET), xp, player);
+            }
+            return false;
+        });
     }
     
-    private void handleFlamewake(IToolStackView tool, ServerPlayer player, int xp) {
-        //code based on AbstractWalkerModifier.onWalk and FlamewakeModifier.onWalk
-        //getRadius is protected, copied radius formula
-        float trueRadius = Math.min(16, 1.5f + tool.getModifierLevel(TinkerModifiers.expanded.getId()));
+    private void handleWalkerFire(IToolStackView tool, ServerPlayer player, ModifierEntry entry, FireWalkerModule module,
+                                  int xp) {
+        //code based on ArmorWalkRadiusModule.onWalk and FireWalkerModule.walkOn
+        handleWalker(tool, player, entry, module, pos -> {
+            if (BaseFireBlock.canBePlacedAt(player.level(), pos, player.getDirection())) {
+                addExperience(getHeldTool(player, EquipmentSlot.FEET), xp, player);
+            }
+            return false;
+        });
+    }
+
+    private void handleWalkerGlowing(IToolStackView tool, ServerPlayer player, ModifierEntry entry,
+                                            GlowWalkerModule module, int xp) {
+        //code based on ArmorWalkRadiusModule.onWalk and GlowWalkerModule.walkOn
+        Level world = player.level();
+        handleWalker(tool, player, entry, module, pos -> {
+            if (world.isEmptyBlock(pos) && world.getBrightness(LightLayer.BLOCK, pos) < module.minLight()) {
+                if (canPlaceGlow(world, pos, Direction.DOWN)) {
+                    addExperience(getHeldTool(player, EquipmentSlot.FEET), xp, player);
+                    return true;
+                }
+            }
+            return false;
+        });
+    }
+
+    private void handleWalker(IToolStackView tool, ServerPlayer player, ModifierEntry entry,
+                              ArmorWalkRadiusModule<?> module, Function<BlockPos, Boolean> walkOn) {
+        float trueRadius = getWalkerTrueRadius(tool, entry, module);
         int radius = Mth.floor(trueRadius);
         Vec3 posVec = player.position();
         BlockPos center = BlockPos.containing(posVec.x, posVec.y + 0.5, posVec.z);
         for (BlockPos pos : BlockPos.betweenClosed(center.offset(-radius, 0, -radius), center.offset(radius, 0, radius))) {
             if (pos.closerToCenterThan(player.position(), trueRadius)) {
-                if (BaseFireBlock.canBePlacedAt(player.level(), pos, player.getDirection())) {
-                    addExperience(getHeldTool(player, EquipmentSlot.FEET), xp, player);
+                boolean doBreak = walkOn.apply(pos);
+                if (doBreak) {
+                    return;
                 }
             }
         }
     }
-    
+
     private static void handleFlinging(ServerPlayer player, ToolStack tool) {
         //code based on FlingingModifier.onStoppedUsing
         BlockHitResult mop = ModifiableItem.blockRayTrace(player.level(), player, ClipContext.Fluid.NONE);
@@ -649,13 +666,13 @@ public class ImprovableModifier extends NoLevelsModifier implements PlantHarvest
             addExperience(tool, 1 + Config.bonusFlingingXp.get(), player);
         }
     }
-    
+
     private static void handleSpringing(ServerPlayer player, ToolStack tool) {
         //code based on SpringingModifier.onStoppedUsing
         //ignoring 'force' check since we cannot access it
         addExperience(tool, 1 + Config.bonusSpringingXp.get(), player);
     }
-    
+
     private static void handleBonking(ServerPlayer player, ToolStack tool) {
         //code based on BonkingModifier.onStoppedUsing
         //ignoring 'force' check since we cannot access it
@@ -676,7 +693,7 @@ public class ImprovableModifier extends NoLevelsModifier implements PlantHarvest
             }
         }
     }
-    
+
     private static void handleBlockClick(PlayerInteractEvent event, UseOnContext context, ToolStack tool, InteractionSource clickSource) {
         if (Config.enableGlowingXp.get() && event.getFace() != null
                 && tool.getModifier(ModifierIds.glowing) != ModifierEntry.EMPTY
@@ -701,54 +718,6 @@ public class ImprovableModifier extends NoLevelsModifier implements PlantHarvest
         }
     }
 
-    private static void handleWalkerGlowing(IToolStackView tool, ServerPlayer player, ModifierEntry entry,
-                                            GlowWalkerModule module, int xp) {
-        Level world = player.level();
-        if (player.onGround() && !tool.isBroken() && !world.isClientSide) {
-            float trueRadius = Math.min(16, module.getRadius(tool, entry));
-            int radius = Mth.floor(trueRadius);
-            Vec3 posVec = player.position();
-            BlockPos center = BlockPos.containing(posVec.x, posVec.y + 0.5, posVec.z);
-            for (BlockPos pos : BlockPos.betweenClosed(center.offset(-radius, 0, -radius), center.offset(radius, 0, radius))) {
-                if (pos.closerToCenterThan(player.position(), trueRadius)) {
-                    if (world.isEmptyBlock(pos) && world.getBrightness(LightLayer.BLOCK, pos) < 3) {
-                        if (canPlaceGlow(world, pos, Direction.DOWN)) {
-                            addExperience(getHeldTool(player, EquipmentSlot.FEET), xp, player);
-                            return;
-                        }
-                    }
-                }
-            }
-        }
-    }
-    
-    private static boolean canPlaceGlow(Level world, BlockPos pos, Direction direction) {
-        BlockState state = world.getBlockState(pos);
-        GlowBlock glowBlock = TinkerCommons.glow.get();
-        if (state.getBlock() != glowBlock && state.canBeReplaced()) {
-            if (canGlowBlockStay(world, pos, direction)) {
-                return true;
-            } else {
-                for (Direction direction1 : Direction.values()) {
-                    if (canGlowBlockStay(world, pos, direction1)) {
-                        return true;
-                    }
-                }
-            }
-        }
-        return false;
-    }
-    
-    private static boolean canGlowBlockStay(Level world, BlockPos pos, Direction facing) {
-        BlockPos placedOn = pos.relative(facing);
-        
-        boolean isSolidSide = Block.isFaceFull(world.getBlockState(placedOn)
-                .getOcclusionShape(world, pos), facing.getOpposite());
-        boolean isLiquid = world.getBlockState(pos).getBlock() instanceof LiquidBlock;
-        
-        return !isLiquid && isSolidSide;
-    }
-    
     private static void handleFirestarter(PlayerInteractEvent event, UseOnContext context, ToolStack tool) {
         Level world = event.getLevel();
         ServerPlayer player = (ServerPlayer) context.getPlayer();
