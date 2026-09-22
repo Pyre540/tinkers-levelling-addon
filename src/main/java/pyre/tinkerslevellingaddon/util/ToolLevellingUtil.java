@@ -15,6 +15,7 @@ import slimeknights.tconstruct.library.tools.nbt.ModDataNBT;
 import slimeknights.tconstruct.library.tools.nbt.ToolStack;
 import slimeknights.tconstruct.library.tools.stat.FloatToolStat;
 import slimeknights.tconstruct.library.tools.stat.ToolStats;
+import slimeknights.tconstruct.tools.data.ModifierIds;
 
 import java.util.*;
 
@@ -358,6 +359,14 @@ public class ToolLevellingUtil {
             }
         }
         data.putInt(EXPERIENCE_KEY, currentExperience);
+    }
+
+    public static int getThornsBonus(IToolStackView tool) {
+        int thornsLevel = tool.getModifierLevel(ModifierIds.thorns);
+        if (!Config.enableThornsXp.get() || thornsLevel == 0) {
+            return 0;
+        }
+        return RANDOM.nextFloat() < (thornsLevel * 0.15f) ? 1 + RANDOM.nextInt(Config.bonusThornsXp.get() + 1) : 0;
     }
     
     public static boolean isStaff(IToolContext tool) {
