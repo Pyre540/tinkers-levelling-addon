@@ -48,6 +48,7 @@ import pyre.tinkerslevellingaddon.util.ModUtil;
 import pyre.tinkerslevellingaddon.util.ToolLevellingUtil;
 import slimeknights.tconstruct.common.TinkerTags;
 import slimeknights.tconstruct.library.events.teleport.SlingModifierTeleportEvent;
+import slimeknights.tconstruct.library.json.LevelingValue;
 import slimeknights.tconstruct.library.modifiers.Modifier;
 import slimeknights.tconstruct.library.modifiers.ModifierEntry;
 import slimeknights.tconstruct.library.modifiers.ModifierHooks;
@@ -82,6 +83,7 @@ import slimeknights.tconstruct.library.tools.definition.module.weapon.CircleWeap
 import slimeknights.tconstruct.library.tools.definition.module.weapon.MeleeHitToolHook;
 import slimeknights.tconstruct.library.tools.definition.module.weapon.SweepWeaponAttack;
 import slimeknights.tconstruct.library.tools.helper.ModifierUtil;
+import slimeknights.tconstruct.library.tools.item.IModifiable;
 import slimeknights.tconstruct.library.tools.item.ModifiableItem;
 import slimeknights.tconstruct.library.tools.nbt.*;
 import slimeknights.tconstruct.library.tools.stat.FloatToolStat;
@@ -524,25 +526,25 @@ public class ImprovableModifier extends NoLevelsModifier implements PlantHarvest
     }
     
     private void handleSweepAttack(ToolAttackContext context, ToolStack toolStack, ServerPlayer player,
-                                   float damageDealt, float baseRange) {
+                                   float damageDealt, LevelingValue baseRange) {
         //code based on SweepWeaponAttack.afterMeleeHit
         if (!context.isFullyCharged() || player.isSprinting() || context.isCritical() || !player.onGround() ||
                 (player.walkDist - player.walkDistO) >= player.getSpeed()) {
             return;
         }
         //value - 2 - can be moved to datagen in the future
-        double range = 2 + baseRange + toolStack.getModifierLevel(TinkerModifiers.expanded.getId());
+        double range = 2 + baseRange.compute(toolStack.getVolatileData().getInt(IModifiable.EXPANDED));
         float sweepDamage = TinkerModifiers.sweeping.get().getSweepingDamage(toolStack, damageDealt);
         handleAOETargets(toolStack, player, context.getTarget(), sweepDamage, range);
     }
     
     private void handleCircleAttack(ToolAttackContext context, ToolStack toolStack, ServerPlayer player,
-                                    float damageDealt, float baseDiameter) {
+                                    float damageDealt, LevelingValue baseDiameter) {
         //code based on SweepWeaponAttack.afterMeleeHit
         if (!context.isFullyCharged()) {
             return;
         }
-        double range = baseDiameter + toolStack.getModifierLevel(TinkerModifiers.expanded.getId());
+        double range = baseDiameter.compute(toolStack.getVolatileData().getInt(IModifiable.EXPANDED));
         if (range <= 0) {
             return;
         }
