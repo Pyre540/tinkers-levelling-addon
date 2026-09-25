@@ -10,6 +10,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -25,7 +26,8 @@ import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LightLayer;
-import net.minecraft.world.level.block.*;
+import net.minecraft.world.level.block.BaseFireBlock;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.*;
 import net.minecraft.world.phys.shapes.CollisionContext;
@@ -33,6 +35,7 @@ import net.minecraftforge.common.ToolAction;
 import net.minecraftforge.common.ToolActions;
 import net.minecraftforge.common.util.BlockSnapshot;
 import net.minecraftforge.event.ForgeEventFactory;
+import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.living.LivingEntityUseItemEvent;
 import net.minecraftforge.event.entity.living.ShieldBlockEvent;
 import net.minecraftforge.event.entity.player.AttackEntityEvent;
@@ -112,7 +115,8 @@ public class ImprovableModifier extends NoLevelsModifier implements PlantHarvest
     public static final ResourceLocation LEVEL_KEY = ModUtil.getResource("level");
     public static final ResourceLocation SLOT_HISTORY_KEY = ModUtil.getResource("slot_history");
     public static final ResourceLocation STAT_HISTORY_KEY = ModUtil.getResource("stat_history");
-    
+    public static final ResourceLocation PENDING_LEVEL_UP_KEY = ModUtil.getResource("pending_level_up");
+
     @Override
     protected void registerHooks(ModuleHookMap.Builder hookBuilder) {
         super.registerHooks(hookBuilder);
@@ -133,6 +137,7 @@ public class ImprovableModifier extends NoLevelsModifier implements PlantHarvest
         tool.getPersistentData().remove(LEVEL_KEY);
         tool.getPersistentData().remove(SLOT_HISTORY_KEY);
         tool.getPersistentData().remove(STAT_HISTORY_KEY);
+        tool.getPersistentData().remove(PENDING_LEVEL_UP_KEY);
         return null;
     }
 
@@ -156,59 +161,60 @@ public class ImprovableModifier extends NoLevelsModifier implements PlantHarvest
         }
     }
 
-    @Override
-    public void afterBlockBreak(IToolStackView tool, ModifierEntry modifier, ToolHarvestContext context) {
-        ServerPlayer player = context.getPlayer();
-        if (!Config.enableMiningXp.get() || !context.isEffective() || player == null) {
+    @SubscribeEvent
+    static void onPlayerTick(TickEvent.PlayerTickEvent event) {
+        if (event.phase != TickEvent.Phase.END || !(event.player instanceof ServerPlayer player)) {
             return;
         }
-        ToolStack toolStack = getHeldTool(player, InteractionHand.MAIN_HAND);
-        if (isDifferentTinkersItem(tool, toolStack)) {
-            toolStack = getHeldTool(player, InteractionHand.OFF_HAND);
+        for (ItemStack itemStack : player.getInventory().armor) {
+            processPendingLevelUp(player, itemStack);
         }
-        addExperience(toolStack, 1 + Config.bonusMiningXp.get(), player);
+        for (ItemStack itemStack : player.getInventory().items) {
+            processPendingLevelUp(player, itemStack);
+        }
+        for (ItemStack itemStack : player.getInventory().offhand) {
+            processPendingLevelUp(player, itemStack);
+        }
+    }
+
+    @Override
+    public void afterBlockBreak(IToolStackView tool, ModifierEntry modifier, ToolHarvestContext context) {
+        if (Config.enableMiningXp.get() && context.isEffective()) {
+            addExperience(tool, 1 + Config.bonusMiningXp.get());
+        }
     }
 
     @Override
     public void afterHarvest(IToolStackView tool, ModifierEntry modifier, UseOnContext context, ServerLevel world,
                              BlockState state, BlockPos pos) {
-        if (!Config.enableHarvestingXp.get() || !(context.getPlayer() instanceof ServerPlayer player)) {
-            return;
+        if (Config.enableHarvestingXp.get()) {
+            addExperience(tool, 1 + Config.bonusHarvestingXp.get());
         }
-        ToolStack toolStack = getHeldTool(player, context.getHand());
-        addExperience(toolStack, 1 + Config.bonusHarvestingXp.get(), player);
     }
 
     @Override
     public void afterShearEntity(IToolStackView tool, ModifierEntry modifier, Player player, Entity entity,
                                  boolean isTarget) {
-        if (!Config.enableShearingXp.get() || !(player instanceof ServerPlayer)) {
-            return;
+        if (Config.enableShearingXp.get()) {
+            addExperience(tool, 1 + Config.bonusShearingXp.get());
         }
-        ToolStack toolStack = getHeldTool(player, InteractionHand.MAIN_HAND);
-        if (isDifferentTinkersItem(tool, toolStack)) {
-            toolStack = getHeldTool(player, InteractionHand.OFF_HAND);
-        }
-        addExperience(toolStack, 1 + Config.bonusShearingXp.get(), (ServerPlayer) player);
     }
 
     @Override
     public void afterMeleeHit(IToolStackView tool, ModifierEntry modifier, ToolAttackContext context, float damageDealt) {
         if (!Config.enableAttackingXp.get() || !(context.getPlayerAttacker() instanceof ServerPlayer player) ||
-                !isAttackAllowed(context, tool) || (!Config.enablePvp.get() && context.getLivingTarget() instanceof Player) ||
-                context.getLivingTarget() == null || context.getTarget() instanceof ArmorStand) {
+                !isAttackAllowed(context, tool) || !isValidMeleeTarget(player, context)) {
             return;
         }
         int xp = (Config.damageDealt.get() ? Math.round(damageDealt) : 1) + Config.bonusAttackingXp.get();
-        ToolStack toolStack = getHeldTool(context.getPlayerAttacker(), context.getSlotType());
-        addExperience(toolStack, xp, player);
+        addExperience(tool, xp);
         //handle aoe hits
         MeleeHitToolHook hook = tool.getDefinitionData().getHook(ToolHooks.MELEE_HIT);
         if (hook instanceof SweepWeaponAttack sweepHook) {
-            handleSweepAttack(context, toolStack, player, damageDealt, sweepHook);
+            handleSweepAttack(context, tool, player, damageDealt, sweepHook);
         }
         if (hook instanceof CircleWeaponAttack circleHook) {
-            handleCircleAttack(context, toolStack, player, damageDealt, circleHook);
+            handleCircleAttack(context, tool, player, damageDealt, circleHook);
         }
     }
 
@@ -226,7 +232,7 @@ public class ImprovableModifier extends NoLevelsModifier implements PlantHarvest
         }
         int xp = (Config.damageTaken.get() ? Math.round(amount - damageBlocked) : 1) + Config.bonusTakingDamageXp.get()
                 + getThornsBonus(tool);
-        addExperience(getHeldTool(player, slotType), xp, player);
+        addExperience(tool, xp);
     }
 
     @Override
@@ -234,44 +240,38 @@ public class ImprovableModifier extends NoLevelsModifier implements PlantHarvest
                                    Projectile projectile, @Nullable AbstractArrow arrow, ModDataNBT persistentData,
                                    boolean primary) {
         //no way to get tool context when the arrow lands, so reward xp on launch instead
-        if (!Config.enableShootingXp.get() || !(shooter instanceof ServerPlayer player)) {
-            return;
+        if (Config.enableShootingXp.get() && shooter instanceof ServerPlayer) {
+            addExperience(tool, 1 + Config.bonusShootingXp.get());
         }
-        ToolStack toolStack = getHeldTool(player, InteractionHand.MAIN_HAND);
-        if (isDifferentTinkersItem(tool, toolStack)) {
-            toolStack = getHeldTool(player, InteractionHand.OFF_HAND);
-        }
-        addExperience(toolStack, 1 + Config.bonusShootingXp.get(), player);
     }
     
     @Override
     public void afterTransformBlock(IToolStackView tool, ModifierEntry modifier, UseOnContext context,
                                     BlockState state, BlockPos pos, ToolAction action) {
-        if (!(context.getPlayer() instanceof ServerPlayer player)) {
+        if (!(context.getPlayer() instanceof ServerPlayer)) {
             return;
         }
 
-        ToolStack toolStack = getHeldTool(player, context.getHand());
         if (Config.enableStrippingXp.get() && action.equals(ToolActions.AXE_STRIP)) {
-            addExperience(toolStack, 1 + Config.bonusStrippingXp.get(), player);
+            addExperience(tool, 1 + Config.bonusStrippingXp.get());
         } else if(Config.enableScrappingXp.get() && action.equals(ToolActions.AXE_SCRAPE)) {
-            addExperience(toolStack, 1 + Config.bonusScrappingXp.get(), player);
+            addExperience(tool, 1 + Config.bonusScrappingXp.get());
         } else if(Config.enableWaxingOffXp.get() && action.equals(ToolActions.AXE_WAX_OFF)) {
-            addExperience(toolStack, 1 + Config.bonusWaxingOffXp.get(), player);
+            addExperience(tool, 1 + Config.bonusWaxingOffXp.get());
         } else if(Config.enableTillingXp.get() && action.equals(ToolActions.HOE_TILL)) {
-            addExperience(toolStack, 1 + Config.bonusTillingXp.get(), player);
+            addExperience(tool, 1 + Config.bonusTillingXp.get());
         } else if(Config.enablePathMakingXp.get() && action.equals(ToolActions.SHOVEL_FLATTEN)) {
-            addExperience(toolStack, 1 + Config.bonusPathMakingXp.get(), player);
+            addExperience(tool, 1 + Config.bonusPathMakingXp.get());
         }
     }
     
     @Override
     public boolean elytraFlightTick(IToolStackView tool, ModifierEntry modifier, LivingEntity entity, int flightTicks) {
-        if (!Config.enableFlyingXp.get() || !(entity instanceof ServerPlayer player)) {
+        if (!Config.enableFlyingXp.get() || !(entity instanceof ServerPlayer)) {
             return false;
         }
         if (flightTicks > 0 && (flightTicks % Config.flyingTime.get()) == 0) {
-            addExperience(getHeldTool(player, EquipmentSlot.CHEST), 1 + Config.bonusFlyingXp.get(), player);
+            addExperience(tool, 1 + Config.bonusFlyingXp.get());
         }
         return false;
     }
@@ -291,7 +291,7 @@ public class ImprovableModifier extends NoLevelsModifier implements PlantHarvest
         if (!tool.isBroken() && canBlock(player, event.getDamageSource().getSourcePosition(), blockAngle)) {
             int xp = (int) ((Config.damageBlocked.get() ? Math.min(event.getBlockedDamage(),
                     tool.getStats().get(ToolStats.BLOCK_AMOUNT)) : 1) + Config.bonusBlockingDamageXp.get());
-            addExperience(tool, xp, player);
+            addExperience(tool, xp);
         }
     }
     
@@ -355,10 +355,10 @@ public class ImprovableModifier extends NoLevelsModifier implements PlantHarvest
             return;
         }
         IToolStackView tool = event.getTool();
-        if (Config.enableWarpingXp.get() && event.getEntity() instanceof ServerPlayer player &&
+        if (Config.enableWarpingXp.get() && event.getEntity() instanceof ServerPlayer &&
                 event.getEntry().getId().equals(ModifierIds.warping) &&
                 tool.getModifierLevel(Registration.IMPROVABLE.get().getId()) > 0) {
-            addExperience((ToolStack) tool, 1 + Config.bonusWarpingXp.get(), player);
+            addExperience(tool, 1 + Config.bonusWarpingXp.get());
         }
     }
     
@@ -402,7 +402,7 @@ public class ImprovableModifier extends NoLevelsModifier implements PlantHarvest
                 && tool.getModifier(ModifierIds.firestarter) != ModifierEntry.EMPTY
                 && tool.getHook(ToolHooks.INTERACTION).canInteract(tool, ModifierIds.firestarter,
                 InteractionSource.RIGHT_CLICK)) {
-            addExperience(tool, 1 + Config.bonusFirestarterXp.get(), player);
+            addExperience(tool, 1 + Config.bonusFirestarterXp.get());
         }
     }
     
@@ -423,7 +423,7 @@ public class ImprovableModifier extends NoLevelsModifier implements PlantHarvest
                 && tool.getModifier(ModifierIds.firestarter) != ModifierEntry.EMPTY
                 && tool.getHook(ToolHooks.INTERACTION).canInteract(tool, ModifierIds.firestarter,
                 InteractionSource.LEFT_CLICK)) {
-            addExperience(tool, 1 + Config.bonusFirestarterXp.get(), player);
+            addExperience(tool, 1 + Config.bonusFirestarterXp.get());
         }
     }
     
@@ -450,7 +450,7 @@ public class ImprovableModifier extends NoLevelsModifier implements PlantHarvest
         handleBlockClick(event, context, ToolStack.from(item), InteractionSource.LEFT_CLICK);
     }
     
-    private void handleSweepAttack(ToolAttackContext context, ToolStack toolStack, ServerPlayer player,
+    private void handleSweepAttack(ToolAttackContext context, IToolStackView toolStack, ServerPlayer player,
                                    float damageDealt, SweepWeaponAttack module) {
         //code based on SweepWeaponAttack.afterMeleeHit
         if (!context.isFullyCharged() || player.isSprinting() || context.isCritical() || context.isProjectile() ||
@@ -465,7 +465,7 @@ public class ImprovableModifier extends NoLevelsModifier implements PlantHarvest
         handleAOETargets(toolStack, player, context.getTarget(), sweepDamage, range, rangeSq);
     }
     
-    private void handleCircleAttack(ToolAttackContext context, ToolStack toolStack, ServerPlayer player,
+    private void handleCircleAttack(ToolAttackContext context, IToolStackView toolStack, ServerPlayer player,
                                     float damageDealt, CircleWeaponAttack module) {
         //code based on CircleWeaponAttack.afterMeleeHit
         double range = module.diameter().compute(toolStack.getVolatileData().getInt(IModifiable.EXPANDED));
@@ -476,7 +476,7 @@ public class ImprovableModifier extends NoLevelsModifier implements PlantHarvest
         handleAOETargets(toolStack, player, context.getTarget(), damageDealt, range, rangeSq);
     }
     
-    private void handleAOETargets(ToolStack toolStack, ServerPlayer player, Entity target, float damage, double range,
+    private void handleAOETargets(IToolStackView toolStack, ServerPlayer player, Entity target, float damage, double range,
                                   double rangeSq) {
         for (LivingEntity aoeTarget : player.level().getEntitiesOfClass(LivingEntity.class,
                 target.getBoundingBox().inflate(range, 0.25D, range))) {
@@ -484,7 +484,7 @@ public class ImprovableModifier extends NoLevelsModifier implements PlantHarvest
                     && !(aoeTarget instanceof ArmorStand armorStand && armorStand.isMarker())
                     && player.distanceToSqr(aoeTarget) < rangeSq) {
                 int xp = (Config.damageDealt.get() ? Math.round(damage) : 1) + Config.bonusAttackingXp.get();
-                addExperience(toolStack, xp, player);
+                addExperience(toolStack, xp);
             }
         }
     }
@@ -504,7 +504,7 @@ public class ImprovableModifier extends NoLevelsModifier implements PlantHarvest
                 BlockState original = player.level().getBlockState(mutable);
                 BlockState transformed = original.getToolModifiedState(context, module.action(), true);
                 if (transformed != null) {
-                    addExperience(getHeldTool(player, EquipmentSlot.FEET), xp, player);
+                    addExperience(tool, xp);
                 }
             }
             return false;
@@ -520,7 +520,7 @@ public class ImprovableModifier extends NoLevelsModifier implements PlantHarvest
         Level world = player.level();
         handleWalker(tool, player, entry, module, pos -> {
             if (world.isEmptyBlock(pos) && module.state().canSurvive(world, pos)) {
-                addExperience(getHeldTool(player, EquipmentSlot.FEET), xp, player);
+                addExperience(tool, xp);
             }
             return false;
         });
@@ -541,7 +541,7 @@ public class ImprovableModifier extends NoLevelsModifier implements PlantHarvest
             if (world.getBlockState(mutable).is(Blocks.WATER) && state.canSurvive(world, mutable) &&
                     world.isUnobstructed(state, mutable, CollisionContext.empty()) &&
                     !ForgeEventFactory.onBlockPlace(player, BlockSnapshot.create(world.dimension(), world, mutable), Direction.UP)) {
-                addExperience(getHeldTool(player, EquipmentSlot.FEET), xp, player);
+                addExperience(tool, xp);
             }
             return false;
         });
@@ -552,7 +552,7 @@ public class ImprovableModifier extends NoLevelsModifier implements PlantHarvest
         //code based on ArmorWalkRadiusModule.onWalk and FireWalkerModule.walkOn
         handleWalker(tool, player, entry, module, pos -> {
             if (BaseFireBlock.canBePlacedAt(player.level(), pos, player.getDirection())) {
-                addExperience(getHeldTool(player, EquipmentSlot.FEET), xp, player);
+                addExperience(tool, xp);
             }
             return false;
         });
@@ -565,7 +565,7 @@ public class ImprovableModifier extends NoLevelsModifier implements PlantHarvest
         handleWalker(tool, player, entry, module, pos -> {
             if (world.isEmptyBlock(pos) && world.getBrightness(LightLayer.BLOCK, pos) < module.minLight()) {
                 if (canPlaceGlow(world, pos, Direction.DOWN)) {
-                    addExperience(getHeldTool(player, EquipmentSlot.FEET), xp, player);
+                    addExperience(tool, xp);
                     return true;
                 }
             }
@@ -594,14 +594,14 @@ public class ImprovableModifier extends NoLevelsModifier implements PlantHarvest
         BlockHitResult mop = ModifiableItem.blockRayTrace(player.level(), player, ClipContext.Fluid.NONE);
         if (mop.getType() == HitResult.Type.BLOCK) {
             //ignoring 'force' check since we cannot access it
-            addExperience(tool, 1 + Config.bonusFlingingXp.get(), player);
+            addExperience(tool, 1 + Config.bonusFlingingXp.get());
         }
     }
 
     private static void handleSpringing(ServerPlayer player, ToolStack tool) {
         //code based on SpringingModifier.onStoppedUsing
         //ignoring 'force' check since we cannot access it
-        addExperience(tool, 1 + Config.bonusSpringingXp.get(), player);
+        addExperience(tool, 1 + Config.bonusSpringingXp.get());
     }
 
     private static void handleBonking(ServerPlayer player, ToolStack tool) {
@@ -620,7 +620,7 @@ public class ImprovableModifier extends NoLevelsModifier implements PlantHarvest
             double targetDist = start.distanceToSqr(target.getEyePosition(1F));
             BlockHitResult mop = ModifiableItem.blockRayTrace(player.level(), player, ClipContext.Fluid.NONE);
             if (mop.getType() != HitResult.Type.BLOCK || targetDist < mop.getBlockPos().distToCenterSqr(start)) {
-                addExperience(tool, 1 + Config.bonusBonkingXp.get(), player);
+                addExperience(tool, 1 + Config.bonusBonkingXp.get());
             }
         }
     }
@@ -645,7 +645,7 @@ public class ImprovableModifier extends NoLevelsModifier implements PlantHarvest
         Direction face = event.getFace();
         BlockPos pos = event.getPos().relative(face);
         if (canPlaceGlow(world, pos, face.getOpposite())) {
-            addExperience(tool, 1 + Config.bonusGlowingXp.get(), (ServerPlayer) context.getPlayer());
+            addExperience(tool, 1 + Config.bonusGlowingXp.get());
         }
     }
 
@@ -656,28 +656,31 @@ public class ImprovableModifier extends NoLevelsModifier implements PlantHarvest
         BlockPos pos = event.getPos();
         Direction sideHit = event.getFace();
         BlockState state = world.getBlockState(pos);
-        
+
         boolean targetingFire = false;
         if (state.is(BlockTags.FIRE)) {
             pos = pos.relative(sideHit.getOpposite());
             targetContext = Util.offset(context, pos);
             targetingFire = true;
         }
-        
+
         int range = tool.getModifierLevel(ModifierIds.fireprimer) + tool.getModifierLevel(ModifierIds.expanded);
         Iterable<BlockPos> targets = Collections.emptyList();
         if (range > 0) {
             targets = CircleAOEIterator.calculate(tool, targetContext, 1 + range,
                     true, AreaOfEffectIterator.AOEMatchType.TRANSFORM);
         }
-        
+
         Direction horizontalFacing = player.getDirection();
         if (!targetingFire && canIgnite(world, pos, state, sideHit, horizontalFacing)) {
-            addExperience(tool, 1 + Config.bonusFirestarterXp.get(), player);
+            addExperience(tool, 1 + Config.bonusFirestarterXp.get());
         }
         for (BlockPos target : targets) {
             if (canIgnite(world, target, world.getBlockState(target), sideHit, horizontalFacing)) {
                 addExperience(tool, 1 + Config.bonusFirestarterXp.get(), player);
+            }
+        }
+                addExperience(tool, 1 + Config.bonusFirestarterXp.get());
             }
         }
     }

@@ -5,6 +5,7 @@ import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.decoration.ArmorStand;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ShieldItem;
@@ -33,6 +34,12 @@ public class ToolUtil {
         ModifierEntry activeModifier = GeneralInteractionModifierHook.getActiveModifier(tool);
         return !context.isExtraAttack() || activeModifier == ModifierEntry.EMPTY ||
                 ModifierIds.bonking.equals(activeModifier.getId());
+    }
+
+    public static boolean isValidMeleeTarget(ServerPlayer attacker, ToolAttackContext context) {
+        return context.getLivingTarget() != null && !(context.getTarget() instanceof ArmorStand) &&
+                (Config.enablePvp.get() || !(context.getLivingTarget() instanceof Player)) &&
+                !context.getLivingTarget().equals(attacker);
     }
 
     public static boolean isValidDamageSource(DamageSource source, Player player) {

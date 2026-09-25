@@ -9,7 +9,6 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.network.chat.Component;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.LivingEntity;
 import pyre.tinkerslevellingaddon.setup.Registration;
@@ -55,11 +54,11 @@ public class ExperienceCommand {
             
             ToolStack tool = ToolStack.copyFrom(stack);
             if (op == ModCommands.Operation.ADD) {
-                if(!addXp(tool, count, living)) {
+                if(!addXp(tool, count)) {
                     throw new SimpleCommandExceptionType(ModUtil.makeTranslation("command", "xp.failure.add.already_max_level", stack.getDisplayName())).create();
                 }
             } else {
-                if (!setXp(tool, count, living)) {
+                if (!setXp(tool, count)) {
                     throw new SimpleCommandExceptionType(ModUtil.makeTranslation("command", "xp.failure.set.already_max_level", stack.getDisplayName())).create();
                 }
             }
@@ -96,26 +95,23 @@ public class ExperienceCommand {
         return size;
     }
     
-    private static boolean addXp(ToolStack tool, int count, LivingEntity living) {
-        ServerPlayer player = living instanceof ServerPlayer p ? p : null;
-    
+    private static boolean addXp(ToolStack tool, int count) {
         if (ToolLevellingUtil.canLevelUp(tool.getPersistentData().getInt(LEVEL_KEY))) {
-            ToolLevellingUtil.addExperience(tool, count, player);
+            ToolLevellingUtil.addExperience(tool, count);
             return true;
         }
         return false;
     }
     
-    private static boolean setXp(ToolStack tool, int count, LivingEntity living) {
+    private static boolean setXp(ToolStack tool, int count) {
         int currentLevel = tool.getPersistentData().getInt(LEVEL_KEY);
         boolean isBroad = ToolLevellingUtil.isBroadTool(tool);
-        ServerPlayer player = living instanceof ServerPlayer p ? p : null;
         
         if (ToolLevellingUtil.canLevelUp(currentLevel)) {
             int neededXp = ToolLevellingUtil.getXpNeededForLevel(currentLevel, isBroad);
             int currentXp = tool.getPersistentData().getInt(EXPERIENCE_KEY);
             int xp = Math.max(1, Math.min(count, neededXp - currentXp));
-            ToolLevellingUtil.addExperience(tool, xp, player);
+            ToolLevellingUtil.addExperience(tool, xp);
             return true;
         }
         return false;

@@ -10,7 +10,6 @@ import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.LivingEntity;
 import pyre.tinkerslevellingaddon.config.Config;
@@ -64,7 +63,7 @@ public class LevelsCommand {
             
             ToolStack tool = ToolStack.copyFrom(stack);
             if (op == ModCommands.Operation.ADD) {
-                int levelsAdded = addLevel(tool, count, living);
+                int levelsAdded = addLevel(tool, count);
                 if (levelsAdded == 0) {
                     throw new SimpleCommandExceptionType(ModUtil.makeTranslation("command", "levels.failure.add.already_max_level", stack.getDisplayName())).create();
                 }
@@ -107,16 +106,15 @@ public class LevelsCommand {
         return size;
     }
     
-    private static int addLevel(ToolStack tool, int count, LivingEntity living) {
+    private static int addLevel(ToolStack tool, int count) {
         int levelsAdded;
         int currentLevel = tool.getPersistentData().getInt(LEVEL_KEY);
         boolean isBroad = ToolLevellingUtil.isBroadTool(tool);
-        ServerPlayer player = living instanceof ServerPlayer p ? p : null;
     
         for (levelsAdded = 0; levelsAdded < count; levelsAdded++) {
             if (ToolLevellingUtil.canLevelUp(currentLevel)) {
                 int xp = ToolLevellingUtil.getXpNeededForLevel(currentLevel + 1, isBroad);
-                ToolLevellingUtil.addExperience(tool, xp, player);
+                ToolLevellingUtil.addExperience(tool, xp);
                 currentLevel++;
             } else {
                 break;
@@ -134,7 +132,7 @@ public class LevelsCommand {
             return false;
         }
         if (levelDiff > 0) {
-            addLevel(tool, levelDiff, null);
+            addLevel(tool, levelDiff);
         } else {
             data.putInt(LEVEL_KEY, count);
             trimHistory(SLOT_HISTORY_KEY, data, count);

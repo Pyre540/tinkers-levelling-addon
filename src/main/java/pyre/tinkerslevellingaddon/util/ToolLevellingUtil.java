@@ -1,18 +1,15 @@
 package pyre.tinkerslevellingaddon.util;
 
-import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextColor;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.item.ItemStack;
 import pyre.tinkerslevellingaddon.config.Config;
 import pyre.tinkerslevellingaddon.network.LevelUpPacket;
 import pyre.tinkerslevellingaddon.network.Messages;
 import slimeknights.tconstruct.common.TinkerTags;
 import slimeknights.tconstruct.library.tools.SlotType;
-import slimeknights.tconstruct.library.tools.nbt.IToolContext;
-import slimeknights.tconstruct.library.tools.nbt.IToolStackView;
-import slimeknights.tconstruct.library.tools.nbt.ModDataNBT;
-import slimeknights.tconstruct.library.tools.nbt.ToolStack;
+import slimeknights.tconstruct.library.tools.nbt.*;
 import slimeknights.tconstruct.library.tools.stat.FloatToolStat;
 import slimeknights.tconstruct.library.tools.stat.ToolStats;
 import slimeknights.tconstruct.tools.data.ModifierIds;
@@ -20,6 +17,7 @@ import slimeknights.tconstruct.tools.data.ModifierIds;
 import java.util.*;
 
 import static pyre.tinkerslevellingaddon.ImprovableModifier.*;
+import static pyre.tinkerslevellingaddon.util.ToolUtil.hasImprovable;
 
 public class ToolLevellingUtil {
     //slot types
@@ -195,7 +193,7 @@ public class ToolLevellingUtil {
         return Config.toolsStatGainingMethod.get() == Config.GainingMethod.PREDEFINED_ORDER;
     }
     
-    public static String getSlot(ToolStack tool, int level) {
+    public static String getSlot(IToolStackView tool, int level) {
         if (isStaff(tool)) {
             return switch (Config.staffSlotGainingMethod.get()) {
                 case NONE -> null;
@@ -227,7 +225,7 @@ public class ToolLevellingUtil {
         };
     }
     
-    public static String getStat(ToolStack tool, int level) {
+    public static String getStat(IToolStackView tool, int level) {
         if (isStaff(tool)) {
             return switch (Config.staffStatGainingMethod.get()) {
                 case NONE -> null;
@@ -322,7 +320,7 @@ public class ToolLevellingUtil {
         return experienceNeeded;
     }
     
-    public static void addExperience(ToolStack tool, int amount, ServerPlayer player) {
+    public static void addExperience(IToolStackView tool, int amount) {
         if (tool == null) {
             return;
         }
@@ -330,35 +328,44 @@ public class ToolLevellingUtil {
         ModDataNBT data = tool.getPersistentData();
         int currentLevel = data.getInt(LEVEL_KEY);
         int currentExperience = data.getInt(EXPERIENCE_KEY) + amount;
-        boolean isBroadTool = ToolLevellingUtil.isBroadTool(tool);
-        int experienceNeeded = ToolLevellingUtil.getXpNeededForLevel(currentLevel + 1, isBroadTool);
+        boolean isBroadTool = isBroadTool(tool);
+        int experienceNeeded = getXpNeededForLevel(currentLevel + 1, isBroadTool);
         
         while (currentExperience >= experienceNeeded) {
-            if (!ToolLevellingUtil.canLevelUp(currentLevel)) {
+            if (!canLevelUp(currentLevel)) {
                 return;
             }
             data.putInt(LEVEL_KEY, ++currentLevel);
             currentExperience -= experienceNeeded;
-            experienceNeeded = ToolLevellingUtil.getXpNeededForLevel(currentLevel + 1, isBroadTool);
+            experienceNeeded = getXpNeededForLevel(currentLevel + 1, isBroadTool);
             
-            String slotName = ToolLevellingUtil.getSlot(tool, currentLevel);
+            String slotName = getSlot(tool, currentLevel);
             if (slotName != null) {
                 appendHistory(SLOT_HISTORY_KEY, slotName, data);
             }
-            String statName = ToolLevellingUtil.getStat(tool, currentLevel);
+            String statName = getStat(tool, currentLevel);
             if (statName != null) {
                 appendHistory(STAT_HISTORY_KEY, statName, data);
             }
-            
-            //temporarily set xp to 0, so it displays nicely in chat message
-            data.putInt(EXPERIENCE_KEY, 0);
-            tool.rebuildStats();
-            if (player != null) {
-                Component toolName = tool.createStack().getDisplayName();
-                Messages.sendToPlayer(new LevelUpPacket(currentLevel, toolName), player);
-            }
+
+            data.putInt(PENDING_LEVEL_UP_KEY, currentLevel);
         }
         data.putInt(EXPERIENCE_KEY, currentExperience);
+    }
+
+    public static void processPendingLevelUp(ServerPlayer player, ItemStack itemStack) {
+        if (hasImprovable(itemStack)) {
+            ToolStack tool = ToolStack.from(itemStack);
+            ToolDataNBT data = tool.getPersistentData();
+            if (data.contains(PENDING_LEVEL_UP_KEY)) {
+                ToolStack toolCopy = tool.copy();
+                toolCopy.getPersistentData().putInt(EXPERIENCE_KEY, 0);
+                Messages.sendToPlayer(new LevelUpPacket(data.getInt(PENDING_LEVEL_UP_KEY),
+                        toolCopy.createStack().getDisplayName()), player);
+
+                data.remove(PENDING_LEVEL_UP_KEY);
+            }
+        }
     }
 
     public static int getThornsBonus(IToolStackView tool) {
