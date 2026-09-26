@@ -38,15 +38,12 @@ import net.minecraftforge.event.ForgeEventFactory;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.living.LivingEntityUseItemEvent;
 import net.minecraftforge.event.entity.living.ShieldBlockEvent;
-import net.minecraftforge.event.entity.player.AttackEntityEvent;
-import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import org.jetbrains.annotations.Nullable;
 import pyre.tinkerslevellingaddon.config.Config;
 import pyre.tinkerslevellingaddon.setup.Registration;
 import pyre.tinkerslevellingaddon.util.ModUtil;
-import slimeknights.tconstruct.common.TinkerTags;
 import slimeknights.tconstruct.library.events.teleport.SlingModifierTeleportEvent;
 import slimeknights.tconstruct.library.modifiers.Modifier;
 import slimeknights.tconstruct.library.modifiers.ModifierEntry;
@@ -59,6 +56,8 @@ import slimeknights.tconstruct.library.modifiers.hook.build.ModifierRemovalHook;
 import slimeknights.tconstruct.library.modifiers.hook.build.ToolStatsModifierHook;
 import slimeknights.tconstruct.library.modifiers.hook.build.VolatileDataModifierHook;
 import slimeknights.tconstruct.library.modifiers.hook.combat.MeleeHitModifierHook;
+import slimeknights.tconstruct.library.modifiers.hook.interaction.BlockInteractionModifierHook;
+import slimeknights.tconstruct.library.modifiers.hook.interaction.EntityInteractionModifierHook;
 import slimeknights.tconstruct.library.modifiers.hook.interaction.GeneralInteractionModifierHook;
 import slimeknights.tconstruct.library.modifiers.hook.interaction.InteractionSource;
 import slimeknights.tconstruct.library.modifiers.hook.mining.BlockBreakModifierHook;
@@ -106,8 +105,9 @@ import static pyre.tinkerslevellingaddon.util.WorldUtil.canPlaceGlow;
 @Mod.EventBusSubscriber(modid = TinkersLevellingAddon.MOD_ID, bus = Mod.EventBusSubscriber.Bus.FORGE)
 public class ImprovableModifier extends NoLevelsModifier implements PlantHarvestModifierHook, ShearsModifierHook,
         BlockBreakModifierHook, BlockTransformModifierHook, ProjectileLaunchModifierHook, OnAttackedModifierHook,
-        MeleeHitModifierHook, ElytraFlightModifierHook, ArmorWalkModifierHook, ModifierRemovalHook,
-        VolatileDataModifierHook, ToolStatsModifierHook {
+        MeleeHitModifierHook, ElytraFlightModifierHook, ArmorWalkModifierHook, EntityInteractionModifierHook,
+        BlockInteractionModifierHook, ModifierRemovalHook, VolatileDataModifierHook,
+        ToolStatsModifierHook {
     
     public static final TextColor IMPROVABLE_MODIFIER_COLOR = TextColor.fromRgb(9337340);
     
@@ -121,9 +121,10 @@ public class ImprovableModifier extends NoLevelsModifier implements PlantHarvest
     protected void registerHooks(ModuleHookMap.Builder hookBuilder) {
         super.registerHooks(hookBuilder);
         hookBuilder.addHook(this, ModifierHooks.PLANT_HARVEST, ModifierHooks.SHEAR_ENTITY,
-                ModifierHooks.BLOCK_TRANSFORM, ModifierHooks.PROJECTILE_LAUNCH, ModifierHooks.BLOCK_BREAK,
-                ModifierHooks.ON_ATTACKED, ModifierHooks.MELEE_HIT, ModifierHooks.ELYTRA_FLIGHT,
-                ModifierHooks.BOOT_WALK, ModifierHooks.VOLATILE_DATA, ModifierHooks.TOOL_STATS, ModifierHooks.REMOVE);
+                ModifierHooks.ENTITY_INTERACT, ModifierHooks.BLOCK_TRANSFORM, ModifierHooks.BLOCK_BREAK,
+                ModifierHooks.BLOCK_INTERACT, ModifierHooks.ON_ATTACKED, ModifierHooks.MELEE_HIT,
+                ModifierHooks.PROJECTILE_LAUNCH, ModifierHooks.ELYTRA_FLIGHT, ModifierHooks.BOOT_WALK,
+                ModifierHooks.VOLATILE_DATA, ModifierHooks.TOOL_STATS, ModifierHooks.REMOVE);
     }
 
     @Override
@@ -388,66 +389,50 @@ public class ImprovableModifier extends NoLevelsModifier implements PlantHarvest
             handleBonking(player, tool);
         }
     }
-    
-    @SubscribeEvent
-    static void onClickEntity(PlayerInteractEvent.EntityInteract event) {
-        //right click entity
-        ItemStack item = event.getItemStack();
-        if (event.isCanceled() || !(event.getEntity() instanceof ServerPlayer player) || !hasImprovable(item)) {
-            return;
+
+    //use beforeEntityUse because afterEntityUse consumes interaction and do not update tool data
+    @Override
+    public InteractionResult beforeEntityUse(IToolStackView tool, ModifierEntry modifier, Player player, Entity target, InteractionHand hand, InteractionSource source) {
+        if (tool.isBroken() || player.level().isClientSide || !(player instanceof ServerPlayer)) {
+            return InteractionResult.PASS;
         }
-        ToolStack tool = ToolStack.from(item);
-        
-        if (Config.enableFirestarterXp.get() && !tool.isBroken() && event.getTarget() instanceof Creeper
-                && tool.getModifier(ModifierIds.firestarter) != ModifierEntry.EMPTY
-                && tool.getHook(ToolHooks.INTERACTION).canInteract(tool, ModifierIds.firestarter,
-                InteractionSource.RIGHT_CLICK)) {
+        if (Config.enableFirestarterXp.get() && tool.getModifier(ModifierIds.firestarter) != ModifierEntry.EMPTY
+                && tool.getHook(ToolHooks.INTERACTION).canInteract(tool, ModifierIds.firestarter, source)
+                && target instanceof Creeper creeper && !creeper.isIgnited()) {
             addExperience(tool, 1 + Config.bonusFirestarterXp.get());
-        }
-    }
-    
-    @SubscribeEvent
-    static void onAttackEntity(AttackEntityEvent event) {
-        //left click entity
-        if (event.isCanceled() || !(event.getEntity() instanceof ServerPlayer player) || player.isSpectator()) {
-            return;
-        }
-        ItemStack item = player.getMainHandItem();
-        if (!hasImprovable(item) || !item.is(TinkerTags.Items.INTERACTABLE_LEFT)
-                || player.getCooldowns().isOnCooldown(item.getItem())) {
-            return;
-        }
-        ToolStack tool = ToolStack.from(item);
-        
-        if (Config.enableFirestarterXp.get() && !tool.isBroken() && event.getTarget() instanceof Creeper
-                && tool.getModifier(ModifierIds.firestarter) != ModifierEntry.EMPTY
-                && tool.getHook(ToolHooks.INTERACTION).canInteract(tool, ModifierIds.firestarter,
-                InteractionSource.LEFT_CLICK)) {
-            addExperience(tool, 1 + Config.bonusFirestarterXp.get());
-        }
-    }
-    
-    @SubscribeEvent
-    static void onRightClickBlock(PlayerInteractEvent.RightClickBlock event) {
-        ItemStack item = event.getItemStack();
-        if (event.isCanceled() || !(event.getEntity() instanceof ServerPlayer player) || !hasImprovable(item)) {
-            return;
-        }
-        UseOnContext context = new UseOnContext(player, event.getHand(), event.getHitVec());
-        handleBlockClick(event, context, ToolStack.from(item), InteractionSource.RIGHT_CLICK);
-    }
-    
-    @SubscribeEvent
-    static void onLeftClickBlock(PlayerInteractEvent.LeftClickBlock event) {
-        ItemStack item = event.getItemStack();
-        if (event.isCanceled() || !(event.getEntity() instanceof ServerPlayer player) || !hasImprovable(item)
-                || !item.is(TinkerTags.Items.INTERACTABLE_LEFT)) {
-            return;
         }
 
-        UseOnContext context =
-                new UseOnContext(player, event.getHand(), Util.createTraceResult(event.getPos(), event.getFace(), false));
-        handleBlockClick(event, context, ToolStack.from(item), InteractionSource.LEFT_CLICK);
+        return InteractionResult.PASS;
+    }
+
+    @Override
+    public InteractionResult beforeBlockUse(IToolStackView tool, ModifierEntry modifier, UseOnContext context,
+                                            InteractionSource source) {
+        if (tool.isBroken() || context.getLevel().isClientSide || !(context.getPlayer() instanceof ServerPlayer)) {
+            return InteractionResult.PASS;
+        }
+        if (context.getLevel().getBlockState(context.getClickedPos()).is(BlockTags.CANDLE_CAKES)) {
+            return afterBlockUse(tool, modifier, context, source);
+        }
+        return InteractionResult.PASS;
+    }
+
+    @Override
+    public InteractionResult afterBlockUse(IToolStackView tool, ModifierEntry modifier, UseOnContext context,
+                                           InteractionSource source) {
+        if (tool.isBroken() || context.getLevel().isClientSide || !(context.getPlayer() instanceof ServerPlayer)) {
+            return InteractionResult.PASS;
+        }
+        if (Config.enableGlowingXp.get() && tool.getModifier(ModifierIds.glowing) != ModifierEntry.EMPTY
+                && tool.getHook(ToolHooks.INTERACTION).canInteract(tool, ModifierIds.glowing, source)) {
+            handleGlowing(tool, context);
+        }
+        if (Config.enableFirestarterXp.get() && tool.getModifier(ModifierIds.firestarter) != ModifierEntry.EMPTY
+                && tool.getHook(ToolHooks.INTERACTION).canInteract(tool, ModifierIds.firestarter, source)) {
+            handleFirestarter(tool, context);
+        }
+
+        return InteractionResult.PASS;
     }
     
     private void handleSweepAttack(ToolAttackContext context, IToolStackView toolStack, ServerPlayer player,
@@ -625,36 +610,20 @@ public class ImprovableModifier extends NoLevelsModifier implements PlantHarvest
         }
     }
 
-    private static void handleBlockClick(PlayerInteractEvent event, UseOnContext context, ToolStack tool, InteractionSource clickSource) {
-        if (Config.enableGlowingXp.get() && event.getFace() != null
-                && tool.getModifier(ModifierIds.glowing) != ModifierEntry.EMPTY
-                && tool.getHook(ToolHooks.INTERACTION).canInteract(tool, ModifierIds.glowing, clickSource)) {
-            handleGlowing(event, context, tool);
-            return;
-        }
-        if (Config.enableFirestarterXp.get() && !tool.isBroken() && event.getFace() != null
-                && tool.getModifier(ModifierIds.firestarter) != ModifierEntry.EMPTY
-                && tool.getHook(ToolHooks.INTERACTION).canInteract(tool, ModifierIds.firestarter,
-                clickSource)) {
-            handleFirestarter(event, context, tool);
-        }
-    }
-
-    private static void handleGlowing(PlayerInteractEvent event, UseOnContext context, ToolStack tool) {
-        Level world = event.getLevel();
-        Direction face = event.getFace();
-        BlockPos pos = event.getPos().relative(face);
-        if (canPlaceGlow(world, pos, face.getOpposite())) {
+    private void handleGlowing(IToolStackView tool, UseOnContext context) {
+        Direction face = context.getClickedFace();
+        BlockPos pos = context.getClickedPos().relative(face);
+        if (canPlaceGlow(context.getLevel(), pos, face.getOpposite())) {
             addExperience(tool, 1 + Config.bonusGlowingXp.get());
         }
     }
 
-    private static void handleFirestarter(PlayerInteractEvent event, UseOnContext context, ToolStack tool) {
-        Level world = event.getLevel();
-        ServerPlayer player = (ServerPlayer) context.getPlayer();
+    private static void handleFirestarter(IToolStackView tool, UseOnContext context) {
+        //code based on PlaceFireModule::afterBlockUse
+        Level world = context.getLevel();
         UseOnContext targetContext = context;
-        BlockPos pos = event.getPos();
-        Direction sideHit = event.getFace();
+        BlockPos pos = context.getClickedPos();
+        Direction sideHit = context.getClickedFace();
         BlockState state = world.getBlockState(pos);
 
         boolean targetingFire = false;
@@ -664,22 +633,20 @@ public class ImprovableModifier extends NoLevelsModifier implements PlantHarvest
             targetingFire = true;
         }
 
-        int range = tool.getModifierLevel(ModifierIds.fireprimer) + tool.getModifierLevel(ModifierIds.expanded);
+        int range = tool.getVolatileData().getInt(IModifiable.EXPANDED);
         Iterable<BlockPos> targets = Collections.emptyList();
         if (range > 0) {
             targets = CircleAOEIterator.calculate(tool, targetContext, 1 + range,
                     true, AreaOfEffectIterator.AOEMatchType.TRANSFORM);
         }
 
-        Direction horizontalFacing = player.getDirection();
+        Direction horizontalFacing = context.getHorizontalDirection();
         if (!targetingFire && canIgnite(world, pos, state, sideHit, horizontalFacing)) {
             addExperience(tool, 1 + Config.bonusFirestarterXp.get());
+            return;
         }
         for (BlockPos target : targets) {
             if (canIgnite(world, target, world.getBlockState(target), sideHit, horizontalFacing)) {
-                addExperience(tool, 1 + Config.bonusFirestarterXp.get(), player);
-            }
-        }
                 addExperience(tool, 1 + Config.bonusFirestarterXp.get());
             }
         }
