@@ -323,14 +323,15 @@ public class ToolLevellingUtil {
     }
     
     public static int getXpNeededForLevel(int level, boolean isBroadTool) {
-        int experienceNeeded = Config.baseExperience.get();
-        if (level > 1) {
-            experienceNeeded = (int) (getXpNeededForLevel(level - 1, false) * Config.requiredXpMultiplier.get());
-        }
+        double base = Config.baseExperience.get();
+        double multiplier = Config.requiredXpMultiplier.get();
+
+        double experienceNeeded = base * Math.pow(multiplier, Math.max(1, level) - 1.0);
+
         if (isBroadTool) {
             experienceNeeded *= Config.broadToolRequiredXpMultiplier.get();
         }
-        return experienceNeeded;
+        return (int) Math.min(experienceNeeded, Integer.MAX_VALUE);
     }
     
     public static void addExperience(IToolStackView tool, int amount) {
