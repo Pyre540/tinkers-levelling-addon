@@ -20,6 +20,7 @@ import static pyre.tinkerslevellingaddon.ImprovableModifier.*;
 import static pyre.tinkerslevellingaddon.util.ToolUtil.hasImprovable;
 
 public class ToolLevellingUtil {
+    public static final String NONE = "none";
     //slot types
     public static final String UPGRADE = "upgrade";
     public static final String ABILITY = "ability";
@@ -54,12 +55,14 @@ public class ToolLevellingUtil {
     
     static {
         TOOL_SLOT_TYPES = new LinkedHashMap<>();
+        TOOL_SLOT_TYPES.put(NONE, null);
         TOOL_SLOT_TYPES.put(UPGRADE, SlotType.UPGRADE);
         TOOL_SLOT_TYPES.put(ABILITY, SlotType.ABILITY);
         TOOL_SLOT_TYPES.put(SOUL, SlotType.SOUL);
         TOOL_SLOT_TYPES.put(DEFENSE, SlotType.DEFENSE);
         
         ARMOR_SLOT_TYPES = new LinkedHashMap<>();
+        ARMOR_SLOT_TYPES.put(NONE, null);
         ARMOR_SLOT_TYPES.put(UPGRADE, SlotType.UPGRADE);
         ARMOR_SLOT_TYPES.put(ABILITY, SlotType.ABILITY);
         ARMOR_SLOT_TYPES.put(SOUL, SlotType.SOUL);
@@ -69,12 +72,14 @@ public class ToolLevellingUtil {
         ALL_SLOT_TYPES.putAll(ARMOR_SLOT_TYPES);
         
         TOOL_STAT_TYPES = new LinkedHashMap<>();
+        TOOL_STAT_TYPES.put(NONE, null);
         TOOL_STAT_TYPES.put(DURABILITY, ToolStats.DURABILITY);
         TOOL_STAT_TYPES.put(ATTACK_DAMAGE, ToolStats.ATTACK_DAMAGE);
         TOOL_STAT_TYPES.put(ATTACK_SPEED, ToolStats.ATTACK_SPEED);
         TOOL_STAT_TYPES.put(MINING_SPEED, ToolStats.MINING_SPEED);
     
         RANGED_STAT_TYPES = new LinkedHashMap<>();
+        RANGED_STAT_TYPES.put(NONE, null);
         RANGED_STAT_TYPES.put(DRAW_SPEED, ToolStats.DRAW_SPEED);
         RANGED_STAT_TYPES.put(VELOCITY, ToolStats.VELOCITY);
         RANGED_STAT_TYPES.put(ACCURACY, ToolStats.ACCURACY);
@@ -84,12 +89,14 @@ public class ToolLevellingUtil {
         RANGED_STAT_TYPES.put(ATTACK_SPEED, ToolStats.ATTACK_SPEED);
         
         ARMOR_STAT_TYPES = new LinkedHashMap<>();
+        ARMOR_STAT_TYPES.put(NONE, null);
         ARMOR_STAT_TYPES.put(DURABILITY, ToolStats.DURABILITY);
         ARMOR_STAT_TYPES.put(ARMOR, ToolStats.ARMOR);
         ARMOR_STAT_TYPES.put(ARMOR_TOUGHNESS, ToolStats.ARMOR_TOUGHNESS);
         ARMOR_STAT_TYPES.put(KNOCKBACK_RESISTANCE, ToolStats.KNOCKBACK_RESISTANCE);
         
         STAFF_STAT_TYPES = new LinkedHashMap<>();
+        STAFF_STAT_TYPES.put(NONE, null);
         STAFF_STAT_TYPES.put(DRAW_SPEED, ToolStats.DRAW_SPEED);
         STAFF_STAT_TYPES.put(VELOCITY, ToolStats.VELOCITY);
         STAFF_STAT_TYPES.put(ACCURACY, ToolStats.ACCURACY);
@@ -278,12 +285,15 @@ public class ToolLevellingUtil {
     public static List<SlotType> parseSlotsHistory(String historyString) {
         ArrayList<SlotType> result = new ArrayList<>();
         if (!historyString.isBlank()) {
-            for (String statString : historyString.split(";")) {
-                SlotType stat = ALL_SLOT_TYPES.get(statString);
-                if (stat != null) {
-                    result.add(stat);
+            for (String slotString : historyString.split(";")) {
+                if (slotString.equals(NONE)) {
+                    continue;
+                }
+                SlotType slot = ALL_SLOT_TYPES.get(slotString);
+                if (slot != null) {
+                    result.add(slot);
                 } else {
-                    throw new UnsupportedOperationException("Unsupported slot type " + statString);
+                    throw new UnsupportedOperationException("Unsupported slot type " + slotString);
                 }
             }
         }
@@ -294,6 +304,9 @@ public class ToolLevellingUtil {
         ArrayList<FloatToolStat> result = new ArrayList<>();
         if (!historyString.isBlank()) {
             for (String statString : historyString.split(";")) {
+                if (statString.equals(NONE)) {
+                    continue;
+                }
                 FloatToolStat stat = ALL_STAT_TYPES.get(statString);
                 if (stat != null) {
                     result.add(stat);

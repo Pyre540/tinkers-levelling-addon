@@ -26,7 +26,9 @@
   "tooltip.tinkerslevellingaddon.info.stats.projectile_damage": "Projectile Damage: %s",
   "tooltip.tinkerslevellingaddon.info.next_level": "Next level",
   "tooltip.tinkerslevellingaddon.info.next_level.slot": "+1 %s slot",
+  "tooltip.tinkerslevellingaddon.info.next_level.slot_none": "no slot",
   "tooltip.tinkerslevellingaddon.info.next_level.stat": "+%s %s",
+  "tooltip.tinkerslevellingaddon.info.next_level.stat_none": "no stat",
 
   "tooltip.tinkerslevellingaddon.slot.ability": "Ability",
   "tooltip.tinkerslevellingaddon.slot.defense": "Defense",

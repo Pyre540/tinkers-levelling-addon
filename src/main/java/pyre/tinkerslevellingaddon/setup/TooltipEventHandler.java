@@ -25,6 +25,8 @@ import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import static pyre.tinkerslevellingaddon.util.ToolLevellingUtil.NONE;
+
 @Mod.EventBusSubscriber(modid = TinkersLevellingAddon.MOD_ID, value = Dist.CLIENT, bus = Mod.EventBusSubscriber.Bus.FORGE)
 public class TooltipEventHandler {
     
@@ -100,6 +102,7 @@ public class TooltipEventHandler {
         String modifierHistory = tool.getPersistentData().getString(ImprovableModifier.SLOT_HISTORY_KEY);
         if (!modifierHistory.isBlank()) {
             Map<String, Long> gainedModifiers = Arrays.stream(modifierHistory.split(";"))
+                    .filter(s -> !s.equals(NONE))
                     .sorted(Comparator.reverseOrder())
                     .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
             infoEntries.add(TOOLTIP_MODIFIERS_GAINED);
@@ -116,6 +119,7 @@ public class TooltipEventHandler {
             }
             Map<String, Double> gainedStats = new LinkedHashMap<>();
             Arrays.stream(statHistory.split(";"))
+                    .filter(s -> !s.equals(NONE))
                     .sorted()
                     .forEach(s -> gainedStats.merge(s, ToolLevellingUtil.getStatValue(tool, s), Double::sum));
             //vanilla multiplies knockback resistance by 10
@@ -148,21 +152,29 @@ public class TooltipEventHandler {
             infoEntries.add(TOOLTIP_NEXT_LEVEL);
             if (knowNextSlot) {
                 String nextSlot = ToolLevellingUtil.getSlot(tool, level + 1);
-                MutableComponent slot = ModUtil.makeTranslation("tooltip", "slot." + nextSlot,
-                        ToolLevellingUtil.getSlotColor(nextSlot));
-                infoEntries.add(ModUtil.makeTranslation("tooltip", "info.next_level.slot", slot));
+                if (nextSlot.equals(NONE)) {
+                    infoEntries.add(ModUtil.makeTranslation("tooltip", "info.next_level.slot_none"));
+                } else {
+                    MutableComponent slot = ModUtil.makeTranslation("tooltip", "slot." + nextSlot,
+                            ToolLevellingUtil.getSlotColor(nextSlot));
+                    infoEntries.add(ModUtil.makeTranslation("tooltip", "info.next_level.slot", slot));
+                }
             }
             if (knowNextStat) {
                 String nextStat = ToolLevellingUtil.getStat(tool, level + 1);
-                double statValue = ToolLevellingUtil.getStatValue(tool, nextStat);
-                //vanilla multiplies knockback resistance by 10
-                if (nextStat.equals(ToolLevellingUtil.KNOCKBACK_RESISTANCE)) {
-                    statValue *= 10;
+                if (nextStat.equals(NONE)) {
+                    infoEntries.add(ModUtil.makeTranslation("tooltip", "info.next_level.stat_none"));
+                } else {
+                    double statValue = ToolLevellingUtil.getStatValue(tool, nextStat);
+                    //vanilla multiplies knockback resistance by 10
+                    if (nextStat.equals(ToolLevellingUtil.KNOCKBACK_RESISTANCE)) {
+                        statValue *= 10;
+                    }
+                    MutableComponent value = ModUtil.makeText(ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(statValue),
+                            ToolLevellingUtil.getStatColor(nextStat));
+                    MutableComponent name = ModUtil.makeTranslation("tooltip", "stat." + nextStat);
+                    infoEntries.add(ModUtil.makeTranslation("tooltip", "info.next_level.stat", value, name));
                 }
-                MutableComponent value = ModUtil.makeText(ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(statValue),
-                        ToolLevellingUtil.getStatColor(nextStat));
-                MutableComponent name = ModUtil.makeTranslation("tooltip", "stat." + nextStat);
-                infoEntries.add(ModUtil.makeTranslation("tooltip", "info.next_level.stat", value, name));
             }
         }
 
