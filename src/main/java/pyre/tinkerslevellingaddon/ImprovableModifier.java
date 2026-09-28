@@ -27,6 +27,8 @@ import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.block.BaseFireBlock;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraftforge.common.ToolAction;
@@ -54,6 +56,7 @@ import slimeknights.tconstruct.library.modifiers.hook.combat.MeleeHitModifierHoo
 import slimeknights.tconstruct.library.modifiers.hook.interaction.BlockInteractionModifierHook;
 import slimeknights.tconstruct.library.modifiers.hook.interaction.EntityInteractionModifierHook;
 import slimeknights.tconstruct.library.modifiers.hook.interaction.InteractionSource;
+import slimeknights.tconstruct.library.modifiers.hook.interaction.UsingToolModifierHook;
 import slimeknights.tconstruct.library.modifiers.hook.mining.BlockBreakModifierHook;
 import slimeknights.tconstruct.library.modifiers.hook.ranged.ProjectileLaunchModifierHook;
 import slimeknights.tconstruct.library.modifiers.hook.special.BlockTransformModifierHook;
@@ -93,15 +96,14 @@ import java.util.function.Function;
 
 import static pyre.tinkerslevellingaddon.util.ToolLevellingUtil.*;
 import static pyre.tinkerslevellingaddon.util.ToolUtil.*;
-import static pyre.tinkerslevellingaddon.util.WorldUtil.canIgnite;
-import static pyre.tinkerslevellingaddon.util.WorldUtil.canPlaceGlow;
+import static pyre.tinkerslevellingaddon.util.WorldUtil.*;
 
 @Mod.EventBusSubscriber(modid = TinkersLevellingAddon.MOD_ID, bus = Mod.EventBusSubscriber.Bus.FORGE)
 public class ImprovableModifier extends NoLevelsModifier implements PlantHarvestModifierHook, ShearsModifierHook,
         BlockBreakModifierHook, BlockTransformModifierHook, ProjectileLaunchModifierHook, OnAttackedModifierHook,
-        MeleeHitModifierHook, ElytraFlightModifierHook, ArmorWalkModifierHook, EntityInteractionModifierHook,
-        SlingLaunchModifierHook, BlockInteractionModifierHook, ModifierRemovalHook, VolatileDataModifierHook,
-        ToolStatsModifierHook {
+        MeleeHitModifierHook, ElytraFlightModifierHook, ArmorWalkModifierHook, UsingToolModifierHook,
+        EntityInteractionModifierHook, SlingLaunchModifierHook, BlockInteractionModifierHook, ModifierRemovalHook,
+        VolatileDataModifierHook, ToolStatsModifierHook {
     
     public static final TextColor IMPROVABLE_MODIFIER_COLOR = TextColor.fromRgb(9337340);
     
@@ -115,10 +117,11 @@ public class ImprovableModifier extends NoLevelsModifier implements PlantHarvest
     protected void registerHooks(ModuleHookMap.Builder hookBuilder) {
         super.registerHooks(hookBuilder);
         hookBuilder.addHook(this, ModifierHooks.PLANT_HARVEST, ModifierHooks.SHEAR_ENTITY,
-                ModifierHooks.ENTITY_INTERACT, ModifierHooks.BLOCK_TRANSFORM, ModifierHooks.BLOCK_BREAK,
-                ModifierHooks.BLOCK_INTERACT, ModifierHooks.ON_ATTACKED, ModifierHooks.MELEE_HIT,
-                ModifierHooks.PROJECTILE_LAUNCH, ModifierHooks.ELYTRA_FLIGHT, ModifierHooks.BOOT_WALK,
-                ModifierHooks.SLING_LAUNCH, ModifierHooks.VOLATILE_DATA, ModifierHooks.TOOL_STATS, ModifierHooks.REMOVE);
+                ModifierHooks.TOOL_USING, ModifierHooks.ENTITY_INTERACT, ModifierHooks.BLOCK_TRANSFORM,
+                ModifierHooks.BLOCK_BREAK, ModifierHooks.BLOCK_INTERACT, ModifierHooks.ON_ATTACKED,
+                ModifierHooks.MELEE_HIT, ModifierHooks.PROJECTILE_LAUNCH, ModifierHooks.ELYTRA_FLIGHT,
+                ModifierHooks.BOOT_WALK, ModifierHooks.SLING_LAUNCH, ModifierHooks.VOLATILE_DATA,
+                ModifierHooks.TOOL_STATS, ModifierHooks.REMOVE);
     }
 
     @Override
@@ -406,7 +409,20 @@ public class ImprovableModifier extends NoLevelsModifier implements PlantHarvest
 
         return InteractionResult.PASS;
     }
-    
+
+    @Override
+    public void onUsingTick(IToolStackView tool, ModifierEntry modifier, LivingEntity entity, int useDuration,
+                            int timeLeft, ModifierEntry activeModifier) {
+        if (tool.isBroken() || timeLeft < 0 || !(entity instanceof ServerPlayer player) ||
+                activeModifier == ModifierEntry.EMPTY) {
+            return;
+        }
+
+        if (Config.enableBrushingXp.get() && activeModifier.getId().equals(ModifierIds.brushing)) {
+            handleBrushing(tool, entity, timeLeft, player, activeModifier);
+        }
+    }
+
     private void handleSweepAttack(ToolAttackContext context, IToolStackView toolStack, ServerPlayer player,
                                    float damageDealt, SweepWeaponAttack module) {
         //code based on SweepWeaponAttack.afterMeleeHit
@@ -421,7 +437,7 @@ public class ImprovableModifier extends NoLevelsModifier implements PlantHarvest
         float sweepDamage = SweepWeaponAttack.getSweepingDamage(toolStack, damageDealt);
         handleAOETargets(toolStack, player, context.getTarget(), sweepDamage, range, rangeSq);
     }
-    
+
     private void handleCircleAttack(ToolAttackContext context, IToolStackView toolStack, ServerPlayer player,
                                     float damageDealt, CircleWeaponAttack module) {
         //code based on CircleWeaponAttack.afterMeleeHit
@@ -432,7 +448,7 @@ public class ImprovableModifier extends NoLevelsModifier implements PlantHarvest
         double rangeSq = range * range;
         handleAOETargets(toolStack, player, context.getTarget(), damageDealt, range, rangeSq);
     }
-    
+
     private void handleAOETargets(IToolStackView toolStack, ServerPlayer player, Entity target, float damage, double range,
                                   double rangeSq) {
         for (LivingEntity aoeTarget : player.level().getEntitiesOfClass(LivingEntity.class,
@@ -445,7 +461,7 @@ public class ImprovableModifier extends NoLevelsModifier implements PlantHarvest
             }
         }
     }
-    
+
     private void handleWalkerTransform(IToolStackView tool, ServerPlayer player, ModifierEntry entry,
                                        ToolActionWalkerTransformModule module, int xp) {
         //code based on ArmorWalkRadiusModule.onWalk and ToolActionWalkerTransformModule.walkOn
@@ -467,7 +483,7 @@ public class ImprovableModifier extends NoLevelsModifier implements PlantHarvest
             return false;
         });
     }
-    
+
     private void handleWalkerCoverGround(IToolStackView tool, ServerPlayer player, ModifierEntry entry,
                                        CoverGroundWalkerModule module, int xp) {
         //code based on ArmorWalkRadiusModule.onWalk and CoverGroundWalkerModule.walkOn
@@ -482,7 +498,7 @@ public class ImprovableModifier extends NoLevelsModifier implements PlantHarvest
             return false;
         });
     }
-    
+
     private void handleWalkerReplaceBlock(IToolStackView tool, ServerPlayer player, ModifierEntry entry,
                                           ReplaceBlockWalkerModule module, int xp) {
         //code based on ArmorWalkRadiusModule.onWalk and ReplaceBlockWalkerModule.onWalk
@@ -503,7 +519,7 @@ public class ImprovableModifier extends NoLevelsModifier implements PlantHarvest
             return false;
         });
     }
-    
+
     private void handleWalkerFire(IToolStackView tool, ServerPlayer player, ModifierEntry entry, FireWalkerModule module,
                                   int xp) {
         //code based on ArmorWalkRadiusModule.onWalk and FireWalkerModule.walkOn
@@ -584,6 +600,33 @@ public class ImprovableModifier extends NoLevelsModifier implements PlantHarvest
         for (BlockPos target : targets) {
             if (canIgnite(world, target, world.getBlockState(target), sideHit, horizontalFacing)) {
                 addExperience(tool, 1 + Config.bonusFirestarterXp.get());
+            }
+        }
+    }
+
+    private void handleBrushing(IToolStackView tool, LivingEntity entity, int timeLeft, ServerPlayer player, ModifierEntry activeModifier) {
+        //code based on BrushModule.onUsingTick
+        HitResult hit = calculateHitResult(entity);
+        if (hit.getType() == HitResult.Type.BLOCK && hit instanceof BlockHitResult blockHit) {
+            if ((activeModifier.getHook(ModifierHooks.GENERAL_INTERACT).getUseDuration(tool, activeModifier) - timeLeft + 1) % 10 == 5) {
+                Level level = entity.level();
+                BlockPos pos = blockHit.getBlockPos();
+                BlockState state = level.getBlockState(pos);
+                InteractionHand hand = entity.getUsedItemHand();
+
+                // we can only check if block is brushable
+                if (isBrushable(blockHit, level)) {
+                    addExperience(tool, 1 + Config.bonusBrushingXp.get());
+                }
+
+                // brush AOE blocks
+                UseOnContext context = new UseOnContext(level, player, hand, player.getItemInHand(hand), blockHit);
+                for (BlockPos extraPos : tool.getDefinition().getHook(ToolHooks.AOE_ITERATOR)
+                        .getBlocks(tool, context, state, AreaOfEffectIterator.AOEMatchType.TRANSFORM)) {
+                    if (isBrushable(Util.offset(blockHit, extraPos), level)) {
+                        addExperience(tool, 1 + Config.bonusBrushingXp.get());
+                    }
+                }
             }
         }
     }

@@ -7,9 +7,12 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.decoration.ArmorStand;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.projectile.ProjectileUtil;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ShieldItem;
+import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
+import net.minecraftforge.common.ForgeMod;
 import org.jetbrains.annotations.Nullable;
 import pyre.tinkerslevellingaddon.config.Config;
 import pyre.tinkerslevellingaddon.setup.Registration;
@@ -87,6 +90,11 @@ public class ToolUtil {
 
     public static boolean hasImprovable(ItemStack activeStack) {
         return ModifierUtil.getModifierLevel(activeStack, Registration.IMPROVABLE.get().getId()) > 0;
+    }
+
+    public static HitResult calculateHitResult(LivingEntity living) {
+        return ProjectileUtil.getHitResultOnViewVector(living, entity -> !entity.isSpectator() && entity.isPickable(),
+                living.getAttributeValue(ForgeMod.BLOCK_REACH.get()));
     }
 
     private ToolUtil() {

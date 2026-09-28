@@ -143,6 +143,7 @@ public class Config {
     public static ForgeConfigSpec.BooleanValue enableBonkingXp;
     public static ForgeConfigSpec.BooleanValue enableGlowingXp;
     public static ForgeConfigSpec.BooleanValue enableFirestarterXp;
+    public static ForgeConfigSpec.BooleanValue enableBrushingXp;
 
     //toolLevelling.bonuses
     public static ForgeConfigSpec.IntValue bonusMiningXp;
@@ -170,6 +171,7 @@ public class Config {
     public static ForgeConfigSpec.IntValue bonusBonkingXp;
     public static ForgeConfigSpec.IntValue bonusGlowingXp;
     public static ForgeConfigSpec.IntValue bonusFirestarterXp;
+    public static ForgeConfigSpec.IntValue bonusBrushingXp;
 
     //CLIENT
     public static ForgeConfigSpec.BooleanValue enableLevelUpMessage;
@@ -545,6 +547,9 @@ public class Config {
         enableFirestarterXp = builder.translation("config.tinkerslevellingaddon.levelling.firestarter")
                 .define("firestarter", true);
 
+        enableBrushingXp = builder.translation("config.tinkerslevellingaddon.levelling.brushing")
+                .define("brushing", true);
+
         builder.pop();
     }
 
@@ -627,6 +632,9 @@ public class Config {
         
         bonusFirestarterXp = builder.translation("config.tinkerslevellingaddon.levelling.firestarter")
                 .defineInRange("firestarter", 0, 0, Integer.MAX_VALUE);
+
+        bonusBrushingXp = builder.translation("config.tinkerslevellingaddon.levelling.brushing")
+                .defineInRange("brushing", 0, 0, Integer.MAX_VALUE);
 
         builder.pop();
     }
