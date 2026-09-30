@@ -15,23 +15,23 @@ import static pyre.tinkerslevellingaddon.util.ToolLevellingUtil.*;
 
 public class Config {
 
-    private static final List<String> DEFAULT_TOOLS_SLOTS_ORDER = List.of(UPGRADE, UPGRADE, UPGRADE, ABILITY, UPGRADE);
-    private static final List<String> DEFAULT_TOOLS_SLOTS_RANDOM_POOL = List.of(UPGRADE, UPGRADE, UPGRADE, UPGRADE, ABILITY);
-    private static final List<String> DEFAULT_RANGED_SLOTS_ORDER = List.of(UPGRADE, UPGRADE, UPGRADE, ABILITY, UPGRADE);
-    private static final List<String> DEFAULT_RANGED_SLOTS_RANDOM_POOL = List.of(UPGRADE, UPGRADE, UPGRADE, UPGRADE, ABILITY);
     private static final List<String> DEFAULT_ARMOR_SLOTS_ORDER = List.of(UPGRADE, DEFENSE, UPGRADE, ABILITY, DEFENSE);
     private static final List<String> DEFAULT_ARMOR_SLOTS_RANDOM_POOL = List.of(UPGRADE, UPGRADE, DEFENSE, DEFENSE, ABILITY);
+    private static final List<String> DEFAULT_RANGED_SLOTS_ORDER = List.of(UPGRADE, UPGRADE, UPGRADE, ABILITY, UPGRADE);
+    private static final List<String> DEFAULT_RANGED_SLOTS_RANDOM_POOL = List.of(UPGRADE, UPGRADE, UPGRADE, UPGRADE, ABILITY);
     private static final List<String> DEFAULT_STAFF_SLOTS_ORDER = List.of(UPGRADE, UPGRADE, UPGRADE, DEFENSE, ABILITY);
     private static final List<String> DEFAULT_STAFF_SLOTS_RANDOM_POOL = List.of(UPGRADE, UPGRADE, UPGRADE, DEFENSE, ABILITY);
+    private static final List<String> DEFAULT_TOOLS_SLOTS_ORDER = List.of(UPGRADE, UPGRADE, UPGRADE, ABILITY, UPGRADE);
+    private static final List<String> DEFAULT_TOOLS_SLOTS_RANDOM_POOL = List.of(UPGRADE, UPGRADE, UPGRADE, UPGRADE, ABILITY);
 
-    private static final List<String> DEFAULT_TOOLS_STATS_ORDER = List.of(DURABILITY, ATTACK_DAMAGE, ATTACK_SPEED, MINING_SPEED);
-    private static final List<String> DEFAULT_TOOLS_STATS_RANDOM_POOL = List.of(DURABILITY, ATTACK_DAMAGE, ATTACK_SPEED, MINING_SPEED);
-    private static final List<String> DEFAULT_RANGED_STATS_ORDER = List.of(DURABILITY, DRAW_SPEED, VELOCITY, ACCURACY, PROJECTILE_DAMAGE);
-    private static final List<String> DEFAULT_RANGED_STATS_RANDOM_POOL = List.of(DURABILITY, DRAW_SPEED, VELOCITY, ACCURACY, PROJECTILE_DAMAGE);
     private static final List<String> DEFAULT_ARMOR_STATS_ORDER = List.of(DURABILITY, ARMOR, ARMOR_TOUGHNESS, KNOCKBACK_RESISTANCE);
     private static final List<String> DEFAULT_ARMOR_STATS_RANDOM_POOL = List.of(DURABILITY, ARMOR, ARMOR_TOUGHNESS, KNOCKBACK_RESISTANCE);
+    private static final List<String> DEFAULT_RANGED_STATS_ORDER = List.of(DURABILITY, DRAW_SPEED, VELOCITY, ACCURACY, PROJECTILE_DAMAGE);
+    private static final List<String> DEFAULT_RANGED_STATS_RANDOM_POOL = List.of(DURABILITY, DRAW_SPEED, VELOCITY, ACCURACY, PROJECTILE_DAMAGE);
     private static final List<String> DEFAULT_STAFF_STATS_ORDER = List.of(DURABILITY, DRAW_SPEED, VELOCITY, ACCURACY, PROJECTILE_DAMAGE, ARMOR);
     private static final List<String> DEFAULT_STAFF_STATS_RANDOM_POOL = List.of(DURABILITY, DRAW_SPEED, VELOCITY, ACCURACY, PROJECTILE_DAMAGE, ARMOR);
+    private static final List<String> DEFAULT_TOOLS_STATS_ORDER = List.of(DURABILITY, ATTACK_DAMAGE, ATTACK_SPEED, MINING_SPEED);
+    private static final List<String> DEFAULT_TOOLS_STATS_RANDOM_POOL = List.of(DURABILITY, ATTACK_DAMAGE, ATTACK_SPEED, MINING_SPEED);
 
     public static final ForgeConfigSpec SERVER_CONFIG;
     public static final ForgeConfigSpec CLIENT_CONFIG;
@@ -48,134 +48,134 @@ public class Config {
 
     //SERVER
     //General
-    public static ForgeConfigSpec.EnumValue<GainingMethod> toolsSlotGainingMethod;
-    public static ForgeConfigSpec.EnumValue<GainingMethod> toolsStatGainingMethod;
-    public static ForgeConfigSpec.EnumValue<GainingMethod> rangedSlotGainingMethod;
-    public static ForgeConfigSpec.EnumValue<GainingMethod> rangedStatGainingMethod;
     public static ForgeConfigSpec.EnumValue<GainingMethod> armorSlotGainingMethod;
     public static ForgeConfigSpec.EnumValue<GainingMethod> armorStatGainingMethod;
+    public static ForgeConfigSpec.EnumValue<GainingMethod> rangedSlotGainingMethod;
+    public static ForgeConfigSpec.EnumValue<GainingMethod> rangedStatGainingMethod;
     public static ForgeConfigSpec.EnumValue<GainingMethod> staffSlotGainingMethod;
     public static ForgeConfigSpec.EnumValue<GainingMethod> staffStatGainingMethod;
+    public static ForgeConfigSpec.EnumValue<GainingMethod> toolsSlotGainingMethod;
+    public static ForgeConfigSpec.EnumValue<GainingMethod> toolsStatGainingMethod;
     public static ForgeConfigSpec.IntValue maxLevel;
     public static ForgeConfigSpec.IntValue baseExperience;
     public static ForgeConfigSpec.DoubleValue requiredXpMultiplier;
     public static ForgeConfigSpec.DoubleValue broadToolRequiredXpMultiplier;
 
     //general.slots
-    private static ForgeConfigSpec.ConfigValue<List<? extends String>> toolsSlotTypeRandomPool;
-    private static ForgeConfigSpec.ConfigValue<List<? extends String>> toolsSlotTypeOrder;
-    private static ForgeConfigSpec.ConfigValue<List<? extends String>> rangedSlotTypeRandomPool;
-    private static ForgeConfigSpec.ConfigValue<List<? extends String>> rangedSlotTypeOrder;
     private static ForgeConfigSpec.ConfigValue<List<? extends String>> armorSlotTypeRandomPool;
     private static ForgeConfigSpec.ConfigValue<List<? extends String>> armorSlotTypeOrder;
+    private static ForgeConfigSpec.ConfigValue<List<? extends String>> rangedSlotTypeRandomPool;
+    private static ForgeConfigSpec.ConfigValue<List<? extends String>> rangedSlotTypeOrder;
     private static ForgeConfigSpec.ConfigValue<List<? extends String>> staffSlotTypeRandomPool;
     private static ForgeConfigSpec.ConfigValue<List<? extends String>> staffSlotTypeOrder;
+    private static ForgeConfigSpec.ConfigValue<List<? extends String>> toolsSlotTypeRandomPool;
+    private static ForgeConfigSpec.ConfigValue<List<? extends String>> toolsSlotTypeOrder;
 
     //general.stats
-    private static ForgeConfigSpec.ConfigValue<List<? extends String>> toolsStatTypeRandomPool;
-    private static ForgeConfigSpec.ConfigValue<List<? extends String>> toolsStatTypeOrder;
-    private static ForgeConfigSpec.ConfigValue<List<? extends String>> rangedStatTypeRandomPool;
-    private static ForgeConfigSpec.ConfigValue<List<? extends String>> rangedStatTypeOrder;
     private static ForgeConfigSpec.ConfigValue<List<? extends String>> armorStatTypeRandomPool;
     private static ForgeConfigSpec.ConfigValue<List<? extends String>> armorStatTypeOrder;
+    private static ForgeConfigSpec.ConfigValue<List<? extends String>> rangedStatTypeRandomPool;
+    private static ForgeConfigSpec.ConfigValue<List<? extends String>> rangedStatTypeOrder;
     private static ForgeConfigSpec.ConfigValue<List<? extends String>> staffStatTypeRandomPool;
     private static ForgeConfigSpec.ConfigValue<List<? extends String>> staffStatTypeOrder;
-
-    //general.stats.toolValues
-    public static ForgeConfigSpec.IntValue toolDurabilityValue;
-    public static ForgeConfigSpec.DoubleValue toolAttackDamageValue;
-    public static ForgeConfigSpec.DoubleValue toolAttackSpeedValue;
-    public static ForgeConfigSpec.DoubleValue toolMiningSpeedValue;
-    
-    //general.stats.rangedValues
-    public static ForgeConfigSpec.IntValue rangedDurabilityValue;
-    public static ForgeConfigSpec.DoubleValue rangedDrawSpeedValue;
-    public static ForgeConfigSpec.DoubleValue rangedVelocityValue;
-    public static ForgeConfigSpec.DoubleValue rangedAccuracyValue;
-    public static ForgeConfigSpec.DoubleValue rangedProjectileDamageValue;
-    public static ForgeConfigSpec.DoubleValue rangedAttackDamageValue;
-    public static ForgeConfigSpec.DoubleValue rangedAttackSpeedValue;
+    private static ForgeConfigSpec.ConfigValue<List<? extends String>> toolsStatTypeRandomPool;
+    private static ForgeConfigSpec.ConfigValue<List<? extends String>> toolsStatTypeOrder;
 
     //general.stats.armorValues
-    public static ForgeConfigSpec.IntValue armorDurabilityValue;
     public static ForgeConfigSpec.DoubleValue armorArmorValue;
     public static ForgeConfigSpec.DoubleValue armorArmorToughnessValue;
+    public static ForgeConfigSpec.IntValue armorDurabilityValue;
     public static ForgeConfigSpec.DoubleValue armorKnockbackResistanceValue;
-    
+
+    //general.stats.rangedValues
+    public static ForgeConfigSpec.DoubleValue rangedAccuracyValue;
+    public static ForgeConfigSpec.DoubleValue rangedAttackDamageValue;
+    public static ForgeConfigSpec.DoubleValue rangedAttackSpeedValue;
+    public static ForgeConfigSpec.DoubleValue rangedDrawSpeedValue;
+    public static ForgeConfigSpec.IntValue rangedDurabilityValue;
+    public static ForgeConfigSpec.DoubleValue rangedProjectileDamageValue;
+    public static ForgeConfigSpec.DoubleValue rangedVelocityValue;
+
     //general.stats.staffValues
-    public static ForgeConfigSpec.IntValue staffDurabilityValue;
-    public static ForgeConfigSpec.DoubleValue staffDrawSpeedValue;
-    public static ForgeConfigSpec.DoubleValue staffVelocityValue;
     public static ForgeConfigSpec.DoubleValue staffAccuracyValue;
-    public static ForgeConfigSpec.DoubleValue staffProjectileDamageValue;
     public static ForgeConfigSpec.DoubleValue staffArmorValue;
+    public static ForgeConfigSpec.DoubleValue staffDrawSpeedValue;
+    public static ForgeConfigSpec.IntValue staffDurabilityValue;
+    public static ForgeConfigSpec.DoubleValue staffProjectileDamageValue;
+    public static ForgeConfigSpec.DoubleValue staffVelocityValue;
+
+    //general.stats.toolValues
+    public static ForgeConfigSpec.DoubleValue toolAttackDamageValue;
+    public static ForgeConfigSpec.DoubleValue toolAttackSpeedValue;
+    public static ForgeConfigSpec.IntValue toolDurabilityValue;
+    public static ForgeConfigSpec.DoubleValue toolMiningSpeedValue;
 
     //toolLevelling
+    public static ForgeConfigSpec.BooleanValue damageBlocked;
     public static ForgeConfigSpec.BooleanValue damageDealt;
     public static ForgeConfigSpec.BooleanValue damageTaken;
-    public static ForgeConfigSpec.BooleanValue damageBlocked;
     public static ForgeConfigSpec.BooleanValue enablePvp;
     public static ForgeConfigSpec.IntValue flyingTime;
 
     //toolLevelling.actions
-    public static ForgeConfigSpec.BooleanValue enableMiningXp;
-    public static ForgeConfigSpec.BooleanValue enableHarvestingXp;
-    public static ForgeConfigSpec.BooleanValue enableShearingXp;
-    public static ForgeConfigSpec.BooleanValue enableStrippingXp;
-    public static ForgeConfigSpec.BooleanValue enableScrappingXp;
-    public static ForgeConfigSpec.BooleanValue enableWaxingOffXp;
-    public static ForgeConfigSpec.BooleanValue enableTillingXp;
-    public static ForgeConfigSpec.BooleanValue enablePathMakingXp;
     public static ForgeConfigSpec.BooleanValue enableAttackingXp;
-    public static ForgeConfigSpec.BooleanValue enableShootingXp;
-    public static ForgeConfigSpec.BooleanValue enableTakingDamageXp;
     public static ForgeConfigSpec.BooleanValue enableBlockingDamageXp;
-    public static ForgeConfigSpec.BooleanValue enableThornsXp;
-    public static ForgeConfigSpec.BooleanValue enableFlyingXp;
-    public static ForgeConfigSpec.BooleanValue enablePlowingXp;
-    public static ForgeConfigSpec.BooleanValue enablePathMakerXp;
-    public static ForgeConfigSpec.BooleanValue enableSnowdriftXp;
-    public static ForgeConfigSpec.BooleanValue enableFlamewakeXp;
-    public static ForgeConfigSpec.BooleanValue enableFrostWalkerXp;
-    public static ForgeConfigSpec.BooleanValue enableWarpingXp;
-    public static ForgeConfigSpec.BooleanValue enableFlingingXp;
-    public static ForgeConfigSpec.BooleanValue enableSpringingXp;
     public static ForgeConfigSpec.BooleanValue enableBonkingXp;
-    public static ForgeConfigSpec.BooleanValue enableGlowingXp;
-    public static ForgeConfigSpec.BooleanValue enableFirestarterXp;
     public static ForgeConfigSpec.BooleanValue enableBrushingXp;
-    public static ForgeConfigSpec.BooleanValue enableGrapplingXp;
+    public static ForgeConfigSpec.BooleanValue enableFirestarterXp;
     public static ForgeConfigSpec.BooleanValue enableFishingXp;
+    public static ForgeConfigSpec.BooleanValue enableFlamewakeXp;
+    public static ForgeConfigSpec.BooleanValue enableFlingingXp;
+    public static ForgeConfigSpec.BooleanValue enableFlyingXp;
+    public static ForgeConfigSpec.BooleanValue enableFrostWalkerXp;
+    public static ForgeConfigSpec.BooleanValue enableGlowingXp;
+    public static ForgeConfigSpec.BooleanValue enableGrapplingXp;
+    public static ForgeConfigSpec.BooleanValue enableHarvestingXp;
+    public static ForgeConfigSpec.BooleanValue enableMiningXp;
+    public static ForgeConfigSpec.BooleanValue enablePathMakerXp;
+    public static ForgeConfigSpec.BooleanValue enablePathMakingXp;
+    public static ForgeConfigSpec.BooleanValue enablePlowingXp;
+    public static ForgeConfigSpec.BooleanValue enableScrappingXp;
+    public static ForgeConfigSpec.BooleanValue enableShearingXp;
+    public static ForgeConfigSpec.BooleanValue enableShootingXp;
+    public static ForgeConfigSpec.BooleanValue enableSnowdriftXp;
+    public static ForgeConfigSpec.BooleanValue enableSpringingXp;
+    public static ForgeConfigSpec.BooleanValue enableStrippingXp;
+    public static ForgeConfigSpec.BooleanValue enableTakingDamageXp;
+    public static ForgeConfigSpec.BooleanValue enableThornsXp;
+    public static ForgeConfigSpec.BooleanValue enableTillingXp;
+    public static ForgeConfigSpec.BooleanValue enableWarpingXp;
+    public static ForgeConfigSpec.BooleanValue enableWaxingOffXp;
 
     //toolLevelling.bonuses
-    public static ForgeConfigSpec.IntValue bonusMiningXp;
-    public static ForgeConfigSpec.IntValue bonusHarvestingXp;
-    public static ForgeConfigSpec.IntValue bonusShearingXp;
-    public static ForgeConfigSpec.IntValue bonusStrippingXp;
-    public static ForgeConfigSpec.IntValue bonusScrappingXp;
-    public static ForgeConfigSpec.IntValue bonusWaxingOffXp;
-    public static ForgeConfigSpec.IntValue bonusTillingXp;
-    public static ForgeConfigSpec.IntValue bonusPathMakingXp;
     public static ForgeConfigSpec.IntValue bonusAttackingXp;
-    public static ForgeConfigSpec.IntValue bonusShootingXp;
-    public static ForgeConfigSpec.IntValue bonusTakingDamageXp;
     public static ForgeConfigSpec.IntValue bonusBlockingDamageXp;
-    public static ForgeConfigSpec.IntValue bonusThornsXp;
-    public static ForgeConfigSpec.IntValue bonusFlyingXp;
-    public static ForgeConfigSpec.IntValue bonusPlowingXp;
-    public static ForgeConfigSpec.IntValue bonusPathMakerXp;
-    public static ForgeConfigSpec.IntValue bonusSnowdriftXp;
-    public static ForgeConfigSpec.IntValue bonusFlamewakeXp;
-    public static ForgeConfigSpec.IntValue bonusFrostWalkerXp;
-    public static ForgeConfigSpec.IntValue bonusWarpingXp;
-    public static ForgeConfigSpec.IntValue bonusFlingingXp;
-    public static ForgeConfigSpec.IntValue bonusSpringingXp;
     public static ForgeConfigSpec.IntValue bonusBonkingXp;
-    public static ForgeConfigSpec.IntValue bonusGlowingXp;
-    public static ForgeConfigSpec.IntValue bonusFirestarterXp;
     public static ForgeConfigSpec.IntValue bonusBrushingXp;
-    public static ForgeConfigSpec.IntValue bonusGrapplingXp;
+    public static ForgeConfigSpec.IntValue bonusFirestarterXp;
     public static ForgeConfigSpec.IntValue bonusFishingXp;
+    public static ForgeConfigSpec.IntValue bonusFlamewakeXp;
+    public static ForgeConfigSpec.IntValue bonusFlingingXp;
+    public static ForgeConfigSpec.IntValue bonusFlyingXp;
+    public static ForgeConfigSpec.IntValue bonusFrostWalkerXp;
+    public static ForgeConfigSpec.IntValue bonusGlowingXp;
+    public static ForgeConfigSpec.IntValue bonusGrapplingXp;
+    public static ForgeConfigSpec.IntValue bonusHarvestingXp;
+    public static ForgeConfigSpec.IntValue bonusMiningXp;
+    public static ForgeConfigSpec.IntValue bonusPathMakerXp;
+    public static ForgeConfigSpec.IntValue bonusPathMakingXp;
+    public static ForgeConfigSpec.IntValue bonusPlowingXp;
+    public static ForgeConfigSpec.IntValue bonusScrappingXp;
+    public static ForgeConfigSpec.IntValue bonusShearingXp;
+    public static ForgeConfigSpec.IntValue bonusShootingXp;
+    public static ForgeConfigSpec.IntValue bonusSnowdriftXp;
+    public static ForgeConfigSpec.IntValue bonusSpringingXp;
+    public static ForgeConfigSpec.IntValue bonusStrippingXp;
+    public static ForgeConfigSpec.IntValue bonusTakingDamageXp;
+    public static ForgeConfigSpec.IntValue bonusThornsXp;
+    public static ForgeConfigSpec.IntValue bonusTillingXp;
+    public static ForgeConfigSpec.IntValue bonusWarpingXp;
+    public static ForgeConfigSpec.IntValue bonusWaxingOffXp;
 
     //CLIENT
     public static ForgeConfigSpec.BooleanValue enableLevelUpMessage;
@@ -185,39 +185,39 @@ public class Config {
     private static void generalConfig(ForgeConfigSpec.Builder builder) {
         builder.comment("General addon settings").push("general");
 
-        toolsSlotGainingMethod = builder.comment("Method of gaining modifier slots for tools.")
-                .translation("config.tinkerslevellingaddon.general.tools_slot_gaining_method")
-                .defineEnum("toolsSlotGainingMethod", GainingMethod.PREDEFINED_ORDER, EnumGetMethod.NAME_IGNORECASE, GainingMethod.values());
-    
+        armorSlotGainingMethod = builder.comment("Method of gaining modifier slots for armor.")
+                .translation("config.tinkerslevellingaddon.general.armor_slot_gaining_method")
+                .defineEnum("armorSlotGainingMethod", GainingMethod.PREDEFINED_ORDER, EnumGetMethod.NAME_IGNORECASE, GainingMethod.values());
+
         rangedSlotGainingMethod = builder.comment("Method of gaining modifier slots for ranged weapons.")
                 .translation("config.tinkerslevellingaddon.general.ranged_slot_gaining_method")
                 .defineEnum("rangedSlotGainingMethod", GainingMethod.PREDEFINED_ORDER, EnumGetMethod.NAME_IGNORECASE, GainingMethod.values());
 
-        armorSlotGainingMethod = builder.comment("Method of gaining modifier slots for armor.")
-                .translation("config.tinkerslevellingaddon.general.armor_slot_gaining_method")
-                .defineEnum("armorSlotGainingMethod", GainingMethod.PREDEFINED_ORDER, EnumGetMethod.NAME_IGNORECASE, GainingMethod.values());
-        
         staffSlotGainingMethod = builder.comment("Method of gaining modifier slots for staffs.")
                 .translation("config.tinkerslevellingaddon.general.staff_slot_gaining_method")
                 .defineEnum("staffSlotGainingMethod", GainingMethod.PREDEFINED_ORDER, EnumGetMethod.NAME_IGNORECASE, GainingMethod.values());
 
-        slotsConfig(builder);
+        toolsSlotGainingMethod = builder.comment("Method of gaining modifier slots for tools.")
+                .translation("config.tinkerslevellingaddon.general.tools_slot_gaining_method")
+                .defineEnum("toolsSlotGainingMethod", GainingMethod.PREDEFINED_ORDER, EnumGetMethod.NAME_IGNORECASE, GainingMethod.values());
 
-        toolsStatGainingMethod = builder.comment("Method of gaining stats for tools.")
-                .translation("config.tinkerslevellingaddon.general.tools_stat_gaining_method")
-                .defineEnum("toolsStatGainingMethod", GainingMethod.NONE, EnumGetMethod.NAME_IGNORECASE, GainingMethod.values());
-    
-        rangedStatGainingMethod = builder.comment("Method of gaining stats for tools.")
-                .translation("config.tinkerslevellingaddon.general.ranged_stat_gaining_method")
-                .defineEnum("rangedStatGainingMethod", GainingMethod.NONE, EnumGetMethod.NAME_IGNORECASE, GainingMethod.values());
+        slotsConfig(builder);
 
         armorStatGainingMethod = builder.comment("Method of gaining stats for armor.")
                 .translation("config.tinkerslevellingaddon.general.armor_stat_gaining_method")
                 .defineEnum("armorStatGainingMethod", GainingMethod.NONE, EnumGetMethod.NAME_IGNORECASE, GainingMethod.values());
-        
+
+        rangedStatGainingMethod = builder.comment("Method of gaining stats for tools.")
+                .translation("config.tinkerslevellingaddon.general.ranged_stat_gaining_method")
+                .defineEnum("rangedStatGainingMethod", GainingMethod.NONE, EnumGetMethod.NAME_IGNORECASE, GainingMethod.values());
+
         staffStatGainingMethod = builder.comment("Method of gaining stats for staffs.")
                 .translation("config.tinkerslevellingaddon.general.staff_stat_gaining_method")
                 .defineEnum("staffStatGainingMethod", GainingMethod.NONE, EnumGetMethod.NAME_IGNORECASE, GainingMethod.values());
+
+        toolsStatGainingMethod = builder.comment("Method of gaining stats for tools.")
+                .translation("config.tinkerslevellingaddon.general.tools_stat_gaining_method")
+                .defineEnum("toolsStatGainingMethod", GainingMethod.NONE, EnumGetMethod.NAME_IGNORECASE, GainingMethod.values());
 
         statsConfig(builder);
 
@@ -243,29 +243,11 @@ public class Config {
     private static void slotsConfig(ForgeConfigSpec.Builder builder) {
         builder.comment("Modifier slots settings").push("slots");
 
-        toolsSlotTypeRandomPool = builder.comment("Set of modifier slot types from which random slot will be awarded when leveling up tools.",
-                        "If empty default pool will be used (" + String.join(", ", DEFAULT_TOOLS_SLOTS_RANDOM_POOL) + "). 80% chance for upgrade and 20% chance for ability.",
-                        "Allowed values: " + String.join(", ", getToolSlotTypes()))
-                .translation("config.tinkerslevellingaddon.general.slots.tools_slot_type_random_pool")
-                .defineList("toolsSlotTypeRandomPool", DEFAULT_TOOLS_SLOTS_RANDOM_POOL, t -> getToolSlotTypes().contains(t));
-
-        toolsSlotTypeOrder = builder.comment("List of modifier slot types (in order) that will be awarded when leveling up tools. If level is higher than list size the mod will start over.",
-                        "If empty default order will be used (" + String.join(", ", DEFAULT_TOOLS_SLOTS_ORDER) + ").",
-                        "Allowed values: " + String.join(", ", getToolSlotTypes()))
-                .translation("config.tinkerslevellingaddon.general.slots.tools_slot_type_order")
-                .defineList("toolsSlotTypeOrder", DEFAULT_TOOLS_SLOTS_ORDER, t -> getToolSlotTypes().contains(t));
-    
-        rangedSlotTypeRandomPool = builder.comment("Set of modifier slot types from which random slot will be awarded when leveling up ranged weapons.",
-                        "If empty default pool will be used (" + String.join(", ", DEFAULT_RANGED_SLOTS_RANDOM_POOL) + "). 80% chance for upgrade and 20% chance for ability.",
-                        "Allowed values: " + String.join(", ", getToolSlotTypes()))
-                .translation("config.tinkerslevellingaddon.general.slots.ranged_slot_type_random_pool")
-                .defineList("rangedSlotTypeRandomPool", DEFAULT_RANGED_SLOTS_RANDOM_POOL, t -> getRangedSlotTypes().contains(t));
-    
-        rangedSlotTypeOrder = builder.comment("List of modifier slot types (in order) that will be awarded when leveling up ranged weapons. If level is higher than list size the mod will start over.",
-                        "If empty default order will be used (" + String.join(", ", DEFAULT_RANGED_SLOTS_ORDER) + ").",
-                        "Allowed values: " + String.join(", ", getToolSlotTypes()))
-                .translation("config.tinkerslevellingaddon.general.slots.ranged_slot_type_order")
-                .defineList("rangedSlotTypeOrder", DEFAULT_RANGED_SLOTS_ORDER, t -> getRangedSlotTypes().contains(t));
+        armorSlotTypeOrder = builder.comment("List of modifier slot types (in order) that will be awarded when leveling up armor. If level is higher than list size the mod will start over.",
+                        "If empty default order will be used (" + String.join(", ", DEFAULT_ARMOR_SLOTS_ORDER) + ").",
+                        "Allowed values: " + String.join(", ", getArmorSlotTypes()))
+                .translation("config.tinkerslevellingaddon.general.slots.armor_slot_type_order")
+                .defineList("armorSlotTypeOrder", DEFAULT_ARMOR_SLOTS_ORDER, t -> getArmorSlotTypes().contains(t));
 
         armorSlotTypeRandomPool = builder.comment("Set of modifier slot types from which random slot will be awarded when leveling up armor.",
                         "If empty default pool will be used (" + String.join(", ", DEFAULT_ARMOR_SLOTS_RANDOM_POOL) + ").",
@@ -273,23 +255,41 @@ public class Config {
                 .translation("config.tinkerslevellingaddon.general.modifiers.armor_slot_type_random_pool")
                 .defineList("armorSlotTypeRandomPool", DEFAULT_ARMOR_SLOTS_RANDOM_POOL, t -> getArmorSlotTypes().contains(t));
 
-        armorSlotTypeOrder = builder.comment("List of modifier slot types (in order) that will be awarded when leveling up armor. If level is higher than list size the mod will start over.",
-                        "If empty default order will be used (" + String.join(", ", DEFAULT_ARMOR_SLOTS_ORDER) + ").",
-                        "Allowed values: " + String.join(", ", getArmorSlotTypes()))
-                .translation("config.tinkerslevellingaddon.general.slots.armor_slot_type_order")
-                .defineList("armorSlotTypeOrder", DEFAULT_ARMOR_SLOTS_ORDER, t -> getArmorSlotTypes().contains(t));
-        
-        staffSlotTypeRandomPool = builder.comment("Set of modifier slot types from which random slot will be awarded when leveling up staffs.",
-                        "If empty default pool will be used (" + String.join(", ", DEFAULT_STAFF_SLOTS_RANDOM_POOL) + ").",
-                        "Allowed values: " + String.join(", ", getArmorSlotTypes()))
-                .translation("config.tinkerslevellingaddon.general.modifiers.staff_slot_type_random_pool")
-                .defineList("staffSlotTypeRandomPool", DEFAULT_STAFF_SLOTS_RANDOM_POOL, t -> getStaffSlotTypes().contains(t));
-        
+        rangedSlotTypeOrder = builder.comment("List of modifier slot types (in order) that will be awarded when leveling up ranged weapons. If level is higher than list size the mod will start over.",
+                        "If empty default order will be used (" + String.join(", ", DEFAULT_RANGED_SLOTS_ORDER) + ").",
+                        "Allowed values: " + String.join(", ", getToolSlotTypes()))
+                .translation("config.tinkerslevellingaddon.general.slots.ranged_slot_type_order")
+                .defineList("rangedSlotTypeOrder", DEFAULT_RANGED_SLOTS_ORDER, t -> getRangedSlotTypes().contains(t));
+
+        rangedSlotTypeRandomPool = builder.comment("Set of modifier slot types from which random slot will be awarded when leveling up ranged weapons.",
+                        "If empty default pool will be used (" + String.join(", ", DEFAULT_RANGED_SLOTS_RANDOM_POOL) + "). 80% chance for upgrade and 20% chance for ability.",
+                        "Allowed values: " + String.join(", ", getToolSlotTypes()))
+                .translation("config.tinkerslevellingaddon.general.slots.ranged_slot_type_random_pool")
+                .defineList("rangedSlotTypeRandomPool", DEFAULT_RANGED_SLOTS_RANDOM_POOL, t -> getRangedSlotTypes().contains(t));
+
         staffSlotTypeOrder = builder.comment("List of modifier slot types (in order) that will be awarded when leveling up staffs. If level is higher than list size the mod will start over.",
                         "If empty default order will be used (" + String.join(", ", DEFAULT_STAFF_SLOTS_ORDER) + ").",
                         "Allowed values: " + String.join(", ", getStaffSlotTypes()))
                 .translation("config.tinkerslevellingaddon.general.slots.staff_slot_type_order")
                 .defineList("staffSlotTypeOrder", DEFAULT_STAFF_SLOTS_ORDER, t -> getStaffSlotTypes().contains(t));
+
+        staffSlotTypeRandomPool = builder.comment("Set of modifier slot types from which random slot will be awarded when leveling up staffs.",
+                        "If empty default pool will be used (" + String.join(", ", DEFAULT_STAFF_SLOTS_RANDOM_POOL) + ").",
+                        "Allowed values: " + String.join(", ", getArmorSlotTypes()))
+                .translation("config.tinkerslevellingaddon.general.modifiers.staff_slot_type_random_pool")
+                .defineList("staffSlotTypeRandomPool", DEFAULT_STAFF_SLOTS_RANDOM_POOL, t -> getStaffSlotTypes().contains(t));
+
+        toolsSlotTypeOrder = builder.comment("List of modifier slot types (in order) that will be awarded when leveling up tools. If level is higher than list size the mod will start over.",
+                        "If empty default order will be used (" + String.join(", ", DEFAULT_TOOLS_SLOTS_ORDER) + ").",
+                        "Allowed values: " + String.join(", ", getToolSlotTypes()))
+                .translation("config.tinkerslevellingaddon.general.slots.tools_slot_type_order")
+                .defineList("toolsSlotTypeOrder", DEFAULT_TOOLS_SLOTS_ORDER, t -> getToolSlotTypes().contains(t));
+
+        toolsSlotTypeRandomPool = builder.comment("Set of modifier slot types from which random slot will be awarded when leveling up tools.",
+                        "If empty default pool will be used (" + String.join(", ", DEFAULT_TOOLS_SLOTS_RANDOM_POOL) + "). 80% chance for upgrade and 20% chance for ability.",
+                        "Allowed values: " + String.join(", ", getToolSlotTypes()))
+                .translation("config.tinkerslevellingaddon.general.slots.tools_slot_type_random_pool")
+                .defineList("toolsSlotTypeRandomPool", DEFAULT_TOOLS_SLOTS_RANDOM_POOL, t -> getToolSlotTypes().contains(t));
 
         builder.pop();
     }
@@ -297,34 +297,11 @@ public class Config {
     private static void statsConfig(ForgeConfigSpec.Builder builder) {
         builder.comment("Stats settings").push("stats");
 
-        toolsStatTypeRandomPool = builder.comment("Set of stat types from which random stat will be awarded when leveling up tools.",
-                        "If empty default pool will be used (" + String.join(", ", DEFAULT_TOOLS_STATS_RANDOM_POOL) + "). 25% chance for every stat.",
-                        "Allowed values: " + String.join(", ", getToolStatTypes()))
-                .translation("config.tinkerslevellingaddon.general.stats.tools_stat_type_random_pool")
-                .defineList("toolsStatTypeRandomPool", DEFAULT_TOOLS_STATS_RANDOM_POOL, t -> getToolStatTypes().contains(t));
-
-        toolsStatTypeOrder = builder.comment("List of stat types (in order) that will be awarded when leveling up tools. If level is higher than list size the mod will start over.",
-                        "If empty default order will be used (" + String.join(", ", DEFAULT_TOOLS_STATS_ORDER) + ").",
-                        "Allowed values: " + String.join(", ", getToolStatTypes()))
-                .translation("config.tinkerslevellingaddon.general.stats.tools_stat_type_order")
-                .defineList("toolsStatTypeOrder", DEFAULT_TOOLS_STATS_ORDER, t -> getToolStatTypes().contains(t));
-
-        toolStatsValuesConfig(builder);
-    
-    
-        rangedStatTypeRandomPool = builder.comment("Set of stat types from which random stat will be awarded when leveling up ranged weapons.",
-                        "If empty default pool will be used (" + String.join(", ", DEFAULT_RANGED_STATS_RANDOM_POOL) + ").",
-                        "Possible values: " + String.join(", ", getRangedStatTypes()))
-                .translation("config.tinkerslevellingaddon.general.stats.ranged_stat_type_random_pool")
-                .defineList("rangedStatTypeRandomPool", DEFAULT_RANGED_STATS_RANDOM_POOL, t -> getRangedStatTypes().contains(t));
-    
-        rangedStatTypeOrder = builder.comment("List of stat types (in order) that will be awarded when leveling up ranged weapons. If level is higher than list size the mod will start over.",
-                        "If empty default rotation will be used (" + String.join(", ", DEFAULT_RANGED_STATS_ORDER) + ").",
-                        "Possible values: " + String.join(", ", getRangedStatTypes()))
-                .translation("config.tinkerslevellingaddon.general.stats.ranged_stat_type_order")
-                .defineList("rangedStatTypeRotation", DEFAULT_RANGED_STATS_ORDER, t -> getRangedStatTypes().contains(t));
-    
-        rangedStatsValuesConfig(builder);
+        armorStatTypeOrder = builder.comment("List of stat types (in order) that will be awarded when leveling up armor. If level is higher than list size the mod will start over.",
+                        "If empty default order will be used (" + String.join(", ", DEFAULT_ARMOR_STATS_ORDER) + ").",
+                        "Allowed values: " + String.join(", ", getArmorStatTypes()))
+                .translation("config.tinkerslevellingaddon.general.stats.armor_stat_type_order")
+                .defineList("armorStatTypeOrder", DEFAULT_ARMOR_STATS_ORDER, t -> getArmorStatTypes().contains(t));
 
         armorStatTypeRandomPool = builder.comment("Set of stat types from which random stat will be awarded when leveling up armor.",
                         "If empty default pool will be used (" + String.join(", ", DEFAULT_ARMOR_STATS_RANDOM_POOL) + ").",
@@ -332,81 +309,55 @@ public class Config {
                 .translation("config.tinkerslevellingaddon.general.stats.armor_stat_type_random_pool")
                 .defineList("armorStatTypeRandomPool", DEFAULT_ARMOR_STATS_RANDOM_POOL, t -> getArmorStatTypes().contains(t));
 
-        armorStatTypeOrder = builder.comment("List of stat types (in order) that will be awarded when leveling up armor. If level is higher than list size the mod will start over.",
-                        "If empty default order will be used (" + String.join(", ", DEFAULT_ARMOR_STATS_ORDER) + ").",
-                        "Allowed values: " + String.join(", ", getArmorStatTypes()))
-                .translation("config.tinkerslevellingaddon.general.stats.armor_stat_type_order")
-                .defineList("armorStatTypeOrder", DEFAULT_ARMOR_STATS_ORDER, t -> getArmorStatTypes().contains(t));
-
         armorStatsValuesConfig(builder);
-        
-        staffStatTypeRandomPool = builder.comment("Set of stat types from which random stat will be awarded when leveling up staffs.",
-                        "If empty default pool will be used (" + String.join(", ", DEFAULT_STAFF_STATS_RANDOM_POOL) + ").",
-                        "Allowed values: " + String.join(", ", getStaffStatTypes()))
-                .translation("config.tinkerslevellingaddon.general.stats.staff_stat_type_random_pool")
-                .defineList("staffStatTypeRandomPool", DEFAULT_STAFF_STATS_RANDOM_POOL, t -> getStaffStatTypes().contains(t));
-        
+
+        rangedStatTypeOrder = builder.comment("List of stat types (in order) that will be awarded when leveling up ranged weapons. If level is higher than list size the mod will start over.",
+                        "If empty default rotation will be used (" + String.join(", ", DEFAULT_RANGED_STATS_ORDER) + ").",
+                        "Possible values: " + String.join(", ", getRangedStatTypes()))
+                .translation("config.tinkerslevellingaddon.general.stats.ranged_stat_type_order")
+                .defineList("rangedStatTypeRotation", DEFAULT_RANGED_STATS_ORDER, t -> getRangedStatTypes().contains(t));
+
+        rangedStatTypeRandomPool = builder.comment("Set of stat types from which random stat will be awarded when leveling up ranged weapons.",
+                        "If empty default pool will be used (" + String.join(", ", DEFAULT_RANGED_STATS_RANDOM_POOL) + ").",
+                        "Possible values: " + String.join(", ", getRangedStatTypes()))
+                .translation("config.tinkerslevellingaddon.general.stats.ranged_stat_type_random_pool")
+                .defineList("rangedStatTypeRandomPool", DEFAULT_RANGED_STATS_RANDOM_POOL, t -> getRangedStatTypes().contains(t));
+
+        rangedStatsValuesConfig(builder);
+
         staffStatTypeOrder = builder.comment("List of stat types (in order) that will be awarded when leveling up staffs. If level is higher than list size the mod will start over.",
                         "If empty default order will be used (" + String.join(", ", DEFAULT_STAFF_STATS_ORDER) + ").",
                         "Allowed values: " + String.join(", ", getStaffStatTypes()))
                 .translation("config.tinkerslevellingaddon.general.stats.staff_stat_type_order")
                 .defineList("staffStatTypeOrder", DEFAULT_STAFF_STATS_ORDER, t -> getStaffStatTypes().contains(t));
-        
+
+        staffStatTypeRandomPool = builder.comment("Set of stat types from which random stat will be awarded when leveling up staffs.",
+                        "If empty default pool will be used (" + String.join(", ", DEFAULT_STAFF_STATS_RANDOM_POOL) + ").",
+                        "Allowed values: " + String.join(", ", getStaffStatTypes()))
+                .translation("config.tinkerslevellingaddon.general.stats.staff_stat_type_random_pool")
+                .defineList("staffStatTypeRandomPool", DEFAULT_STAFF_STATS_RANDOM_POOL, t -> getStaffStatTypes().contains(t));
+
         staffStatsValuesConfig(builder);
 
-        builder.pop();
-    }
+        toolsStatTypeOrder = builder.comment("List of stat types (in order) that will be awarded when leveling up tools. If level is higher than list size the mod will start over.",
+                        "If empty default order will be used (" + String.join(", ", DEFAULT_TOOLS_STATS_ORDER) + ").",
+                        "Allowed values: " + String.join(", ", getToolStatTypes()))
+                .translation("config.tinkerslevellingaddon.general.stats.tools_stat_type_order")
+                .defineList("toolsStatTypeOrder", DEFAULT_TOOLS_STATS_ORDER, t -> getToolStatTypes().contains(t));
 
-    private static void toolStatsValuesConfig(ForgeConfigSpec.Builder builder) {
-        builder.comment("Tool stat values rewarded on level ups").push("toolValues");
+        toolsStatTypeRandomPool = builder.comment("Set of stat types from which random stat will be awarded when leveling up tools.",
+                        "If empty default pool will be used (" + String.join(", ", DEFAULT_TOOLS_STATS_RANDOM_POOL) + "). 25% chance for every stat.",
+                        "Allowed values: " + String.join(", ", getToolStatTypes()))
+                .translation("config.tinkerslevellingaddon.general.stats.tools_stat_type_random_pool")
+                .defineList("toolsStatTypeRandomPool", DEFAULT_TOOLS_STATS_RANDOM_POOL, t -> getToolStatTypes().contains(t));
 
-        toolDurabilityValue = builder.translation("tooltip.tinkerslevellingaddon.stats.durability")
-                .defineInRange(DURABILITY, 50, 1, 1000);
+        toolStatsValuesConfig(builder);
 
-        toolAttackDamageValue = builder.translation("tooltip.tinkerslevellingaddon.stats.attack_damage")
-                .defineInRange(ATTACK_DAMAGE, 0.5D, 0.1D, 10D);
-
-        toolAttackSpeedValue = builder.translation("tooltip.tinkerslevellingaddon.stats.attack_speed")
-                .defineInRange(ATTACK_SPEED, 0.25D, 0.1D, 10D);
-
-        toolMiningSpeedValue = builder.translation("tooltip.tinkerslevellingaddon.stats.mining_speed")
-                .defineInRange(MINING_SPEED, 1D, 0.1D, 10D);
-
-        builder.pop();
-    }
-    
-    private static void rangedStatsValuesConfig(ForgeConfigSpec.Builder builder) {
-        builder.comment("Ranged weapons stat values rewarded on level ups").push("rangedValues");
-        
-        rangedDurabilityValue = builder.translation("tooltip.tinkerslevellingaddon.stat.durability")
-                .defineInRange(DURABILITY, 30, 1, 1000);
-    
-        rangedDrawSpeedValue = builder.translation("tooltip.tinkerslevellingaddon.stat.draw_speed")
-                .defineInRange(DRAW_SPEED, 0.1D, 0.1D, 10D);
-    
-        rangedVelocityValue = builder.translation("tooltip.tinkerslevellingaddon.stat.velocity")
-                .defineInRange(VELOCITY, 0.1D, 0.1D, 10D);
-    
-        rangedAccuracyValue = builder.translation("tooltip.tinkerslevellingaddon.stat.accuracy")
-                .defineInRange(ACCURACY, 0.01D, 0.01D, 1D);
-    
-        rangedProjectileDamageValue = builder.translation("tooltip.tinkerslevellingaddon.stat.projectile_damage")
-                .defineInRange(PROJECTILE_DAMAGE, 0.1D, 0.1D, 10D);
-    
-        rangedAttackDamageValue = builder.translation("tooltip.tinkerslevellingaddon.stat.attack_damage")
-                .defineInRange(ATTACK_DAMAGE, 0.5D, 0.1D, 10D);
-    
-        rangedAttackSpeedValue = builder.translation("tooltip.tinkerslevellingaddon.stat.attack_speed")
-                .defineInRange(ATTACK_SPEED, 0.25D, 0.1D, 10D);
-        
         builder.pop();
     }
 
     private static void armorStatsValuesConfig(ForgeConfigSpec.Builder builder) {
         builder.comment("Armor stat values rewarded on level ups").push("armorValues");
-
-        armorDurabilityValue = builder.translation("tooltip.tinkerslevellingaddon.stats.durability")
-                .defineInRange(DURABILITY, 50, 1, 1000);
 
         armorArmorValue = builder.translation("tooltip.tinkerslevellingaddon.stats.armor")
                 .defineInRange(ARMOR, 0.25D, 0.1D, 10D);
@@ -414,33 +365,81 @@ public class Config {
         armorArmorToughnessValue = builder.translation("tooltip.tinkerslevellingaddon.stats.armor_toughness")
                 .defineInRange(ARMOR_TOUGHNESS, 0.1D, 0.1D, 10D);
 
+        armorDurabilityValue = builder.translation("tooltip.tinkerslevellingaddon.stats.durability")
+                .defineInRange(DURABILITY, 50, 1, 1000);
+
         armorKnockbackResistanceValue = builder.translation("tooltip.tinkerslevellingaddon.stats.knockback_resistance")
                 .defineInRange(KNOCKBACK_RESISTANCE, 0.1D, 0.1D, 1D);
 
         builder.pop();
     }
-    
+
+    private static void rangedStatsValuesConfig(ForgeConfigSpec.Builder builder) {
+        builder.comment("Ranged weapons stat values rewarded on level ups").push("rangedValues");
+
+        rangedAccuracyValue = builder.translation("tooltip.tinkerslevellingaddon.stat.accuracy")
+                .defineInRange(ACCURACY, 0.01D, 0.01D, 1D);
+
+        rangedAttackDamageValue = builder.translation("tooltip.tinkerslevellingaddon.stat.attack_damage")
+                .defineInRange(ATTACK_DAMAGE, 0.5D, 0.1D, 10D);
+
+        rangedAttackSpeedValue = builder.translation("tooltip.tinkerslevellingaddon.stat.attack_speed")
+                .defineInRange(ATTACK_SPEED, 0.25D, 0.1D, 10D);
+
+        rangedDrawSpeedValue = builder.translation("tooltip.tinkerslevellingaddon.stat.draw_speed")
+                .defineInRange(DRAW_SPEED, 0.1D, 0.1D, 10D);
+
+        rangedDurabilityValue = builder.translation("tooltip.tinkerslevellingaddon.stat.durability")
+                .defineInRange(DURABILITY, 30, 1, 1000);
+
+        rangedProjectileDamageValue = builder.translation("tooltip.tinkerslevellingaddon.stat.projectile_damage")
+                .defineInRange(PROJECTILE_DAMAGE, 0.1D, 0.1D, 10D);
+
+        rangedVelocityValue = builder.translation("tooltip.tinkerslevellingaddon.stat.velocity")
+                .defineInRange(VELOCITY, 0.1D, 0.1D, 10D);
+
+        builder.pop();
+    }
+
     private static void staffStatsValuesConfig(ForgeConfigSpec.Builder builder) {
         builder.comment("Staff stat values rewarded on level ups").push("staffValues");
-        
-        staffDurabilityValue = builder.translation("tooltip.tinkerslevellingaddon.stat.durability")
-                .defineInRange(DURABILITY, 30, 1, 1000);
-        
-        staffDrawSpeedValue = builder.translation("tooltip.tinkerslevellingaddon.stat.draw_speed")
-                .defineInRange(DRAW_SPEED, 0.1D, 0.1D, 10D);
-        
-        staffVelocityValue = builder.translation("tooltip.tinkerslevellingaddon.stat.velocity")
-                .defineInRange(VELOCITY, 0.1D, 0.1D, 10D);
-        
+
         staffAccuracyValue = builder.translation("tooltip.tinkerslevellingaddon.stat.accuracy")
                 .defineInRange(ACCURACY, 0.01D, 0.01D, 1D);
-        
-        staffProjectileDamageValue = builder.translation("tooltip.tinkerslevellingaddon.stat.projectile_damage")
-                .defineInRange(PROJECTILE_DAMAGE, 0.1D, 0.1D, 10D);
-        
+
         staffArmorValue = builder.translation("tooltip.tinkerslevellingaddon.stats.armor")
                 .defineInRange(ARMOR, 0.25D, 0.1D, 10D);
-        
+
+        staffDrawSpeedValue = builder.translation("tooltip.tinkerslevellingaddon.stat.draw_speed")
+                .defineInRange(DRAW_SPEED, 0.1D, 0.1D, 10D);
+
+        staffDurabilityValue = builder.translation("tooltip.tinkerslevellingaddon.stat.durability")
+                .defineInRange(DURABILITY, 30, 1, 1000);
+
+        staffProjectileDamageValue = builder.translation("tooltip.tinkerslevellingaddon.stat.projectile_damage")
+                .defineInRange(PROJECTILE_DAMAGE, 0.1D, 0.1D, 10D);
+
+        staffVelocityValue = builder.translation("tooltip.tinkerslevellingaddon.stat.velocity")
+                .defineInRange(VELOCITY, 0.1D, 0.1D, 10D);
+
+        builder.pop();
+    }
+
+    private static void toolStatsValuesConfig(ForgeConfigSpec.Builder builder) {
+        builder.comment("Tool stat values rewarded on level ups").push("toolValues");
+
+        toolAttackDamageValue = builder.translation("tooltip.tinkerslevellingaddon.stats.attack_damage")
+                .defineInRange(ATTACK_DAMAGE, 0.5D, 0.1D, 10D);
+
+        toolAttackSpeedValue = builder.translation("tooltip.tinkerslevellingaddon.stats.attack_speed")
+                .defineInRange(ATTACK_SPEED, 0.25D, 0.1D, 10D);
+
+        toolDurabilityValue = builder.translation("tooltip.tinkerslevellingaddon.stats.durability")
+                .defineInRange(DURABILITY, 50, 1, 1000);
+
+        toolMiningSpeedValue = builder.translation("tooltip.tinkerslevellingaddon.stats.mining_speed")
+                .defineInRange(MINING_SPEED, 1D, 0.1D, 10D);
+
         builder.pop();
     }
 
@@ -473,92 +472,118 @@ public class Config {
     private static void actionsConfig(ForgeConfigSpec.Builder builder) {
         builder.comment("If true, given action will yield tool experience.").push("actions");
 
-        enableMiningXp = builder.translation("config.tinkerslevellingaddon.levelling.mining")
-                .define("mining", true);
+        enableAttackingXp = builder
+                .translation("config.tinkerslevellingaddon.levelling.attacking")
+                .define("attacking", true);
 
-        enableHarvestingXp = builder.translation("config.tinkerslevellingaddon.levelling.harvesting")
+        enableBlockingDamageXp = builder
+                .translation("config.tinkerslevellingaddon.levelling.blocking_damage")
+                .define("blockingDamage", true);
+
+        enableBonkingXp = builder
+                .translation("config.tinkerslevellingaddon.levelling.bonking")
+                .define("bonking", true);
+
+        enableBrushingXp = builder
+                .translation("config.tinkerslevellingaddon.levelling.brushing")
+                .define("brushing", true);
+
+        enableFirestarterXp = builder
+                .translation("config.tinkerslevellingaddon.levelling.firestarter")
+                .define("firestarter", true);
+
+        enableFishingXp = builder
+                .translation("config.tinkerslevellingaddon.levelling.fishing")
+                .define("fishing", true);
+
+        enableFlamewakeXp = builder
+                .translation("config.tinkerslevellingaddon.levelling.flamewake")
+                .define("flamewake", true);
+
+        enableFlingingXp = builder
+                .translation("config.tinkerslevellingaddon.levelling.flinging")
+                .define("flinging", true);
+
+        enableFlyingXp = builder
+                .translation("config.tinkerslevellingaddon.levelling.flying")
+                .define("flying", true);
+
+        enableFrostWalkerXp = builder
+                .translation("config.tinkerslevellingaddon.levelling.frost_walker")
+                .define("frost_walker", true);
+
+        enableGlowingXp = builder
+                .translation("config.tinkerslevellingaddon.levelling.glowing")
+                .define("glowing", true);
+
+        enableGrapplingXp = builder
+                .translation("config.tinkerslevellingaddon.levelling.grappling")
+                .define("grappling", true);
+
+        enableHarvestingXp = builder
+                .translation("config.tinkerslevellingaddon.levelling.harvesting")
                 .define("harvesting", true);
 
-        enableShearingXp = builder.translation("config.tinkerslevellingaddon.levelling.shearing")
-                .define("shearing", true);
+        enableMiningXp = builder
+                .translation("config.tinkerslevellingaddon.levelling.mining")
+                .define("mining", true);
 
-        enableStrippingXp = builder.translation("config.tinkerslevellingaddon.levelling.stripping")
-                .define("stripping", true);
+        enablePathMakerXp = builder
+                .translation("config.tinkerslevellingaddon.levelling.path_maker")
+                .define("path_maker", true);
 
-        enableScrappingXp = builder.translation("config.tinkerslevellingaddon.levelling.scrapping")
-                .define("scrapping", true);
-
-        enableWaxingOffXp = builder.translation("config.tinkerslevellingaddon.levelling.waxing_off")
-                .define("waxingOff", true);
-
-        enableTillingXp = builder.translation("config.tinkerslevellingaddon.levelling.tilling")
-                .define("tilling", true);
-
-        enablePathMakingXp = builder.translation("config.tinkerslevellingaddon.levelling.path_making")
+        enablePathMakingXp = builder
+                .translation("config.tinkerslevellingaddon.levelling.path_making")
                 .define("pathMaking", true);
 
-        enableAttackingXp = builder.translation("config.tinkerslevellingaddon.levelling.attacking")
-                .define("attacking", true);
+        enablePlowingXp = builder
+                .translation("config.tinkerslevellingaddon.levelling.plowing")
+                .define("plowing", true);
+
+        enableScrappingXp = builder
+                .translation("config.tinkerslevellingaddon.levelling.scrapping")
+                .define("scrapping", true);
+
+        enableShearingXp = builder
+                .translation("config.tinkerslevellingaddon.levelling.shearing")
+                .define("shearing", true);
 
         enableShootingXp = builder.comment("Applies to ranged weapons like longbows and crossbows.")
                 .translation("config.tinkerslevellingaddon.levelling.shooting")
                 .define("shooting", true);
 
+        enableSnowdriftXp = builder
+                .translation("config.tinkerslevellingaddon.levelling.snowdrift")
+                .define("snowdrift", true);
+
+        enableSpringingXp = builder
+                .translation("config.tinkerslevellingaddon.levelling.springing")
+                .define("springing", true);
+
+        enableStrippingXp = builder
+                .translation("config.tinkerslevellingaddon.levelling.stripping")
+                .define("stripping", true);
+
         enableTakingDamageXp = builder.comment("Applies to armor only.")
                 .translation("config.tinkerslevellingaddon.levelling.taking_damage")
                 .define("takingDamage", true);
-        
-        enableBlockingDamageXp = builder.translation("config.tinkerslevellingaddon.levelling.blocking_damage")
-                .define("blockingDamage", true);
 
         enableThornsXp = builder.comment("Applies to armor only. Thorns modifier gives 15% chance per level to gain experience.")
                 .translation("config.tinkerslevellingaddon.levelling.thorns")
                 .define("thorns", true);
-        
-        enableFlyingXp = builder.translation("config.tinkerslevellingaddon.levelling.flying")
-                .define("flying", true);
-        
-        enablePlowingXp = builder.translation("config.tinkerslevellingaddon.levelling.plowing")
-                .define("plowing", true);
-        
-        enablePathMakerXp = builder.translation("config.tinkerslevellingaddon.levelling.path_maker")
-                .define("path_maker", true);
-        
-        enableSnowdriftXp = builder.translation("config.tinkerslevellingaddon.levelling.snowdrift")
-                .define("snowdrift", true);
-        
-        enableFlamewakeXp = builder.translation("config.tinkerslevellingaddon.levelling.flamewake")
-                .define("flamewake", true);
-        
-        enableFrostWalkerXp = builder.translation("config.tinkerslevellingaddon.levelling.frost_walker")
-                .define("frost_walker", true);
-        
-        enableWarpingXp = builder.translation("config.tinkerslevellingaddon.levelling.warping")
+
+        enableTillingXp = builder
+                .translation("config.tinkerslevellingaddon.levelling.tilling")
+                .define("tilling", true);
+
+        enableWarpingXp = builder
+                .translation("config.tinkerslevellingaddon.levelling.warping")
                 .define("warping", true);
-        
-        enableFlingingXp = builder.translation("config.tinkerslevellingaddon.levelling.flinging")
-                .define("flinging", true);
-        
-        enableSpringingXp = builder.translation("config.tinkerslevellingaddon.levelling.springing")
-                .define("springing", true);
-        
-        enableBonkingXp = builder.translation("config.tinkerslevellingaddon.levelling.bonking")
-                .define("bonking", true);
-        
-        enableGlowingXp = builder.translation("config.tinkerslevellingaddon.levelling.glowing")
-                .define("glowing", true);
-        
-        enableFirestarterXp = builder.translation("config.tinkerslevellingaddon.levelling.firestarter")
-                .define("firestarter", true);
 
-        enableBrushingXp = builder.translation("config.tinkerslevellingaddon.levelling.brushing")
-                .define("brushing", true);
+        enableWaxingOffXp = builder
+                .translation("config.tinkerslevellingaddon.levelling.waxing_off")
+                .define("waxingOff", true);
 
-        enableGrapplingXp = builder.translation("config.tinkerslevellingaddon.levelling.grappling")
-                .define("grappling", true);
-
-        enableFishingXp = builder.translation("config.tinkerslevellingaddon.levelling.fishing")
-                .define("fishing", true);
 
         builder.pop();
     }
@@ -566,91 +591,91 @@ public class Config {
     private static void bonusesConfig(ForgeConfigSpec.Builder builder) {
         builder.comment("Amount of bonus experience for performing actions. If set to 0 there is no bonus experience.").push("bonuses");
 
-        bonusMiningXp = builder.translation("config.tinkerslevellingaddon.levelling.mining")
-                .defineInRange("mining", 0, 0, Integer.MAX_VALUE);
+        bonusAttackingXp = builder.translation("config.tinkerslevellingaddon.levelling.attacking")
+                .defineInRange("attacking", 0, 0, Integer.MAX_VALUE);
+
+        bonusBlockingDamageXp = builder.translation("config.tinkerslevellingaddon.levelling.blocking_damage")
+                .defineInRange("blockingDamage", 0, 0, Integer.MAX_VALUE);
+
+        bonusBonkingXp = builder.translation("config.tinkerslevellingaddon.levelling.bonking")
+                .defineInRange("bonking", 0, 0, Integer.MAX_VALUE);
+
+        bonusBrushingXp = builder.translation("config.tinkerslevellingaddon.levelling.brushing")
+                .defineInRange("brushing", 0, 0, Integer.MAX_VALUE);
+
+        bonusFirestarterXp = builder.translation("config.tinkerslevellingaddon.levelling.firestarter")
+                .defineInRange("firestarter", 0, 0, Integer.MAX_VALUE);
+
+        bonusFishingXp = builder.translation("config.tinkerslevellingaddon.levelling.fishing")
+                .defineInRange("fishing", 0, 0, Integer.MAX_VALUE);
+
+        bonusFlamewakeXp = builder.translation("config.tinkerslevellingaddon.levelling.flamewake")
+                .defineInRange("flamewake", 0, 0, Integer.MAX_VALUE);
+
+        bonusFlingingXp = builder.translation("config.tinkerslevellingaddon.levelling.flinging")
+                .defineInRange("flinging", 0, 0, Integer.MAX_VALUE);
+
+        bonusFlyingXp = builder.translation("config.tinkerslevellingaddon.levelling.flying")
+                .defineInRange("flying", 0, 0, Integer.MAX_VALUE);
+
+        bonusFrostWalkerXp = builder.translation("config.tinkerslevellingaddon.levelling.frost_walker")
+                .defineInRange("frost_walker", 0, 0, Integer.MAX_VALUE);
+
+        bonusGlowingXp = builder.translation("config.tinkerslevellingaddon.levelling.glowing")
+                .defineInRange("glowing", 0, 0, Integer.MAX_VALUE);
+
+        bonusGrapplingXp = builder.translation("config.tinkerslevellingaddon.levelling.grappling")
+                .defineInRange("grappling", 0, 0, Integer.MAX_VALUE);
 
         bonusHarvestingXp = builder.translation("config.tinkerslevellingaddon.levelling.harvesting")
                 .defineInRange("harvesting", 0, 0, Integer.MAX_VALUE);
 
-        bonusShearingXp = builder.translation("config.tinkerslevellingaddon.levelling.shearing")
-                .defineInRange("shearing", 0, 0, Integer.MAX_VALUE);
+        bonusMiningXp = builder.translation("config.tinkerslevellingaddon.levelling.mining")
+                .defineInRange("mining", 0, 0, Integer.MAX_VALUE);
 
-        bonusStrippingXp = builder.translation("config.tinkerslevellingaddon.levelling.stripping")
-                .defineInRange("stripping", 0, 0, Integer.MAX_VALUE);
-
-        bonusScrappingXp = builder.translation("config.tinkerslevellingaddon.levelling.scrapping")
-                .defineInRange("scrapping", 0, 0, Integer.MAX_VALUE);
-
-        bonusWaxingOffXp = builder.translation("config.tinkerslevellingaddon.levelling.waxing_off")
-                .defineInRange("waxingOff", 0, 0, Integer.MAX_VALUE);
-
-        bonusTillingXp = builder.translation("config.tinkerslevellingaddon.levelling.tilling")
-                .defineInRange("tilling", 0, 0, Integer.MAX_VALUE);
+        bonusPathMakerXp = builder.translation("config.tinkerslevellingaddon.levelling.path_maker")
+                .defineInRange("path_maker", 0, 0, Integer.MAX_VALUE);
 
         bonusPathMakingXp = builder.translation("config.tinkerslevellingaddon.levelling.path_making")
                 .defineInRange("pathMaking", 0, 0, Integer.MAX_VALUE);
 
-        bonusAttackingXp = builder.translation("config.tinkerslevellingaddon.levelling.attacking")
-                .defineInRange("attacking", 0, 0, Integer.MAX_VALUE);
+        bonusPlowingXp = builder.translation("config.tinkerslevellingaddon.levelling.plowing")
+                .defineInRange("plowing", 0, 0, Integer.MAX_VALUE);
+
+        bonusScrappingXp = builder.translation("config.tinkerslevellingaddon.levelling.scrapping")
+                .defineInRange("scrapping", 0, 0, Integer.MAX_VALUE);
+
+        bonusShearingXp = builder.translation("config.tinkerslevellingaddon.levelling.shearing")
+                .defineInRange("shearing", 0, 0, Integer.MAX_VALUE);
 
         bonusShootingXp = builder.translation("config.tinkerslevellingaddon.levelling.shooting")
                 .defineInRange("shooting", 0, 0, Integer.MAX_VALUE);
 
+        bonusSnowdriftXp = builder.translation("config.tinkerslevellingaddon.levelling.snowdrift")
+                .defineInRange("snowdrift", 0, 0, Integer.MAX_VALUE);
+
+        bonusSpringingXp = builder.translation("config.tinkerslevellingaddon.levelling.springing")
+                .defineInRange("springing", 0, 0, Integer.MAX_VALUE);
+
+        bonusStrippingXp = builder.translation("config.tinkerslevellingaddon.levelling.stripping")
+                .defineInRange("stripping", 0, 0, Integer.MAX_VALUE);
+
         bonusTakingDamageXp = builder.translation("config.tinkerslevellingaddon.levelling.taking_damage")
                 .defineInRange("takingDamage", 0, 0, Integer.MAX_VALUE);
-        
-        bonusBlockingDamageXp = builder.translation("config.tinkerslevellingaddon.levelling.blocking_damage")
-                .defineInRange("blockingDamage", 0, 0, Integer.MAX_VALUE);
 
         bonusThornsXp = builder.comment("As with Thorns damage calculations, this is the upper bound of the bonus experience that could be granted.",
                         "For example, for the value of 3 (default), we get: 1 (base xp) + 0 to 3 (bonus xp) = 1 to 4 (result xp)")
                 .translation("config.tinkerslevellingaddon.levelling.thorns")
                 .defineInRange("thorns", 3, 0, Integer.MAX_VALUE);
-        
-        bonusFlyingXp = builder.translation("config.tinkerslevellingaddon.levelling.flying")
-                .defineInRange("flying", 0, 0, Integer.MAX_VALUE);
-        
-        bonusPlowingXp = builder.translation("config.tinkerslevellingaddon.levelling.plowing")
-                .defineInRange("plowing", 0, 0, Integer.MAX_VALUE);
-        
-        bonusPathMakerXp = builder.translation("config.tinkerslevellingaddon.levelling.path_maker")
-                .defineInRange("path_maker", 0, 0, Integer.MAX_VALUE);
-        
-        bonusSnowdriftXp = builder.translation("config.tinkerslevellingaddon.levelling.snowdrift")
-                .defineInRange("snowdrift", 0, 0, Integer.MAX_VALUE);
-        
-        bonusFlamewakeXp = builder.translation("config.tinkerslevellingaddon.levelling.flamewake")
-                .defineInRange("flamewake", 0, 0, Integer.MAX_VALUE);
-        
-        bonusFrostWalkerXp = builder.translation("config.tinkerslevellingaddon.levelling.frost_walker")
-                .defineInRange("frost_walker", 0, 0, Integer.MAX_VALUE);
-        
+
+        bonusTillingXp = builder.translation("config.tinkerslevellingaddon.levelling.tilling")
+                .defineInRange("tilling", 0, 0, Integer.MAX_VALUE);
+
         bonusWarpingXp = builder.translation("config.tinkerslevellingaddon.levelling.warping")
                 .defineInRange("warping", 0, 0, Integer.MAX_VALUE);
-        
-        bonusFlingingXp = builder.translation("config.tinkerslevellingaddon.levelling.flinging")
-                .defineInRange("flinging", 0, 0, Integer.MAX_VALUE);
-        
-        bonusSpringingXp = builder.translation("config.tinkerslevellingaddon.levelling.springing")
-                .defineInRange("springing", 0, 0, Integer.MAX_VALUE);
-        
-        bonusBonkingXp = builder.translation("config.tinkerslevellingaddon.levelling.bonking")
-                .defineInRange("bonking", 0, 0, Integer.MAX_VALUE);
-        
-        bonusGlowingXp = builder.translation("config.tinkerslevellingaddon.levelling.glowing")
-                .defineInRange("glowing", 0, 0, Integer.MAX_VALUE);
-        
-        bonusFirestarterXp = builder.translation("config.tinkerslevellingaddon.levelling.firestarter")
-                .defineInRange("firestarter", 0, 0, Integer.MAX_VALUE);
 
-        bonusBrushingXp = builder.translation("config.tinkerslevellingaddon.levelling.brushing")
-                .defineInRange("brushing", 0, 0, Integer.MAX_VALUE);
-
-        bonusGrapplingXp = builder.translation("config.tinkerslevellingaddon.levelling.grappling")
-                .defineInRange("grappling", 0, 0, Integer.MAX_VALUE);
-
-        bonusFishingXp = builder.translation("config.tinkerslevellingaddon.levelling.fishing")
-                .defineInRange("fishing", 0, 0, Integer.MAX_VALUE);
+        bonusWaxingOffXp = builder.translation("config.tinkerslevellingaddon.levelling.waxing_off")
+                .defineInRange("waxingOff", 0, 0, Integer.MAX_VALUE);
 
         builder.pop();
     }
@@ -675,6 +700,102 @@ public class Config {
     public static void init() {
         ModLoadingContext.get().registerConfig(ModConfig.Type.SERVER, SERVER_CONFIG);
         ModLoadingContext.get().registerConfig(ModConfig.Type.CLIENT, CLIENT_CONFIG);
+    }
+
+    public static List<String> getArmorSlotsOrder() {
+        List<? extends String> slotsOrder = armorSlotTypeOrder.get();
+        if (slotsOrder.isEmpty()) {
+            slotsOrder = DEFAULT_ARMOR_SLOTS_ORDER;
+        }
+        return (List<String>) slotsOrder;
+    }
+
+    public static List<String> getArmorSlotsRandomPool() {
+        List<? extends String> slotsRandomPool = armorSlotTypeRandomPool.get();
+        if (slotsRandomPool.isEmpty()) {
+            slotsRandomPool = DEFAULT_ARMOR_SLOTS_RANDOM_POOL;
+        }
+        return (List<String>) slotsRandomPool;
+    }
+
+    public static List<String> getArmorStatsOrder() {
+        List<? extends String> statsOrder = armorStatTypeOrder.get();
+        if (statsOrder.isEmpty()) {
+            statsOrder = DEFAULT_ARMOR_STATS_ORDER;
+        }
+        return (List<String>) statsOrder;
+    }
+
+    public static List<String> getArmorStatsRandomPool() {
+        List<? extends String> statsRandomPool = armorStatTypeRandomPool.get();
+        if (statsRandomPool.isEmpty()) {
+            statsRandomPool = DEFAULT_ARMOR_STATS_RANDOM_POOL;
+        }
+        return (List<String>) statsRandomPool;
+    }
+
+    public static List<String> getRangedSlotsOrder() {
+        List<? extends String> slotsOrder = rangedSlotTypeOrder.get();
+        if (slotsOrder.isEmpty()) {
+            slotsOrder = DEFAULT_RANGED_SLOTS_ORDER;
+        }
+        return (List<String>) slotsOrder;
+    }
+
+    public static List<String> getRangedSlotsRandomPool() {
+        List<? extends String> slotsRandomPool = rangedSlotTypeRandomPool.get();
+        if (slotsRandomPool.isEmpty()) {
+            slotsRandomPool = DEFAULT_RANGED_SLOTS_RANDOM_POOL;
+        }
+        return (List<String>) slotsRandomPool;
+    }
+
+    public static List<String> getRangedStatsOrder() {
+        List<? extends String> statsOrder = rangedStatTypeOrder.get();
+        if (statsOrder.isEmpty()) {
+            statsOrder = DEFAULT_RANGED_STATS_ORDER;
+        }
+        return (List<String>) statsOrder;
+    }
+
+    public static List<String> getRangedStatsRandomPool() {
+        List<? extends String> statsRandomPool = rangedStatTypeRandomPool.get();
+        if (statsRandomPool.isEmpty()) {
+            statsRandomPool = DEFAULT_RANGED_STATS_RANDOM_POOL;
+        }
+        return (List<String>) statsRandomPool;
+    }
+
+    public static List<String> getStaffSlotsOrder() {
+        List<? extends String> slotsOrder = staffSlotTypeOrder.get();
+        if (slotsOrder.isEmpty()) {
+            slotsOrder = DEFAULT_STAFF_SLOTS_ORDER;
+        }
+        return (List<String>) slotsOrder;
+    }
+
+    public static List<String> getStaffSlotsRandomPool() {
+        List<? extends String> slotsRandomPool = staffSlotTypeRandomPool.get();
+        if (slotsRandomPool.isEmpty()) {
+            slotsRandomPool = DEFAULT_STAFF_SLOTS_RANDOM_POOL;
+        }
+        return (List<String>) slotsRandomPool;
+    }
+
+    public static List<String> getStaffStatsOrder() {
+        List<? extends String> statsOrder = staffStatTypeOrder.get();
+        if (statsOrder.isEmpty()) {
+            statsOrder = DEFAULT_STAFF_STATS_ORDER;
+        }
+        return (List<String>) statsOrder;
+    }
+
+    public static List<String> getStaffStatsRandomPool() {
+        List<? extends String> statsRandomPool = staffStatTypeRandomPool.get();
+        if (statsRandomPool.isEmpty()) {
+            statsRandomPool = DEFAULT_STAFF_STATS_RANDOM_POOL;
+        }
+        return (List<String>) statsRandomPool;
     }
 
     public static List<String> getToolsSlotsOrder() {
@@ -709,118 +830,22 @@ public class Config {
         return (List<String>) statsRandomPool;
     }
 
-    public static List<String> getArmorSlotsOrder() {
-        List<? extends String> slotsOrder = armorSlotTypeOrder.get();
-        if (slotsOrder.isEmpty()) {
-            slotsOrder = DEFAULT_ARMOR_SLOTS_ORDER;
-        }
-        return (List<String>) slotsOrder;
-    }
-
-    public static List<String> getArmorSlotsRandomPool() {
-        List<? extends String> slotsRandomPool = armorSlotTypeRandomPool.get();
-        if (slotsRandomPool.isEmpty()) {
-            slotsRandomPool = DEFAULT_ARMOR_SLOTS_RANDOM_POOL;
-        }
-        return (List<String>) slotsRandomPool;
-    }
-
-    public static List<String> getArmorStatsOrder() {
-        List<? extends String> statsOrder = armorStatTypeOrder.get();
-        if (statsOrder.isEmpty()) {
-            statsOrder = DEFAULT_ARMOR_STATS_ORDER;
-        }
-        return (List<String>) statsOrder;
-    }
-
-    public static List<String> getArmorStatsRandomPool() {
-        List<? extends String> statsRandomPool = armorStatTypeRandomPool.get();
-        if (statsRandomPool.isEmpty()) {
-            statsRandomPool = DEFAULT_ARMOR_STATS_RANDOM_POOL;
-        }
-        return (List<String>) statsRandomPool;
-    }
-    
-    public static List<String> getRangedSlotsOrder() {
-        List<? extends String> slotsOrder = rangedSlotTypeOrder.get();
-        if (slotsOrder.isEmpty()) {
-            slotsOrder = DEFAULT_RANGED_SLOTS_ORDER;
-        }
-        return (List<String>) slotsOrder;
-    }
-    
-    public static List<String> getRangedSlotsRandomPool() {
-        List<? extends String> slotsRandomPool = rangedSlotTypeRandomPool.get();
-        if (slotsRandomPool.isEmpty()) {
-            slotsRandomPool = DEFAULT_RANGED_SLOTS_RANDOM_POOL;
-        }
-        return (List<String>) slotsRandomPool;
-    }
-
-    public static List<String> getRangedStatsOrder() {
-        List<? extends String> statsOrder = rangedStatTypeOrder.get();
-        if (statsOrder.isEmpty()) {
-            statsOrder = DEFAULT_RANGED_STATS_ORDER;
-        }
-        return (List<String>) statsOrder;
-    }
-
-    public static List<String> getRangedStatsRandomPool() {
-        List<? extends String> statsRandomPool = rangedStatTypeRandomPool.get();
-        if (statsRandomPool.isEmpty()) {
-            statsRandomPool = DEFAULT_RANGED_STATS_RANDOM_POOL;
-        }
-        return (List<String>) statsRandomPool;
-    }
-    
-    public static List<String> getStaffSlotsOrder() {
-        List<? extends String> slotsOrder = staffSlotTypeOrder.get();
-        if (slotsOrder.isEmpty()) {
-            slotsOrder = DEFAULT_STAFF_SLOTS_ORDER;
-        }
-        return (List<String>) slotsOrder;
-    }
-    
-    public static List<String> getStaffSlotsRandomPool() {
-        List<? extends String> slotsRandomPool = staffSlotTypeRandomPool.get();
-        if (slotsRandomPool.isEmpty()) {
-            slotsRandomPool = DEFAULT_STAFF_SLOTS_RANDOM_POOL;
-        }
-        return (List<String>) slotsRandomPool;
-    }
-    
-    public static List<String> getStaffStatsOrder() {
-        List<? extends String> statsOrder = staffStatTypeOrder.get();
-        if (statsOrder.isEmpty()) {
-            statsOrder = DEFAULT_STAFF_STATS_ORDER;
-        }
-        return (List<String>) statsOrder;
-    }
-    
-    public static List<String> getStaffStatsRandomPool() {
-        List<? extends String> statsRandomPool = staffStatTypeRandomPool.get();
-        if (statsRandomPool.isEmpty()) {
-            statsRandomPool = DEFAULT_STAFF_STATS_RANDOM_POOL;
-        }
-        return (List<String>) statsRandomPool;
-    }
-
-    public static double getToolStatValue(FloatToolStat stat) {
+    public static double getArmorStatValue(FloatToolStat stat) {
         if (stat.equals(ToolStats.DURABILITY)) {
-            return toolDurabilityValue.get();
+            return armorDurabilityValue.get();
         }
-        if (stat.equals(ToolStats.ATTACK_DAMAGE)) {
-            return toolAttackDamageValue.get();
+        if (stat.equals(ToolStats.ARMOR)) {
+            return armorArmorValue.get();
         }
-        if (stat.equals(ToolStats.ATTACK_SPEED)) {
-            return toolAttackSpeedValue.get();
+        if (stat.equals(ToolStats.ARMOR_TOUGHNESS)) {
+            return armorArmorToughnessValue.get();
         }
-        if (stat.equals(ToolStats.MINING_SPEED)) {
-            return toolMiningSpeedValue.get();
+        if (stat.equals(ToolStats.KNOCKBACK_RESISTANCE)) {
+            return armorKnockbackResistanceValue.get();
         }
         return 0;
     }
-    
+
     public static double getRangedStatValue(FloatToolStat stat) {
         if (stat.equals(ToolStats.DRAW_SPEED)) {
             return rangedDrawSpeedValue.get();
@@ -846,22 +871,6 @@ public class Config {
         return 0;
     }
 
-    public static double getArmorStatValue(FloatToolStat stat) {
-        if (stat.equals(ToolStats.DURABILITY)) {
-            return armorDurabilityValue.get();
-        }
-        if (stat.equals(ToolStats.ARMOR)) {
-            return armorArmorValue.get();
-        }
-        if (stat.equals(ToolStats.ARMOR_TOUGHNESS)) {
-            return armorArmorToughnessValue.get();
-        }
-        if (stat.equals(ToolStats.KNOCKBACK_RESISTANCE)) {
-            return armorKnockbackResistanceValue.get();
-        }
-        return 0;
-    }
-    
     public static double getStaffStatValue(FloatToolStat stat) {
         if (stat.equals(ToolStats.DRAW_SPEED)) {
             return staffDrawSpeedValue.get();
@@ -880,6 +889,22 @@ public class Config {
         }
         if (stat.equals(ToolStats.ARMOR)) {
             return staffArmorValue.get();
+        }
+        return 0;
+    }
+
+    public static double getToolStatValue(FloatToolStat stat) {
+        if (stat.equals(ToolStats.DURABILITY)) {
+            return toolDurabilityValue.get();
+        }
+        if (stat.equals(ToolStats.ATTACK_DAMAGE)) {
+            return toolAttackDamageValue.get();
+        }
+        if (stat.equals(ToolStats.ATTACK_SPEED)) {
+            return toolAttackSpeedValue.get();
+        }
+        if (stat.equals(ToolStats.MINING_SPEED)) {
+            return toolMiningSpeedValue.get();
         }
         return 0;
     }
