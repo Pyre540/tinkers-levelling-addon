@@ -19,6 +19,7 @@ import net.minecraft.world.entity.decoration.ArmorStand;
 import net.minecraft.world.entity.monster.Creeper;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.AbstractArrow;
+import net.minecraft.world.entity.projectile.FishingHook;
 import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.UseOnContext;
@@ -37,6 +38,7 @@ import net.minecraftforge.common.util.BlockSnapshot;
 import net.minecraftforge.event.ForgeEventFactory;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.living.ShieldBlockEvent;
+import net.minecraftforge.event.entity.player.ItemFishedEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import org.jetbrains.annotations.Nullable;
@@ -58,6 +60,7 @@ import slimeknights.tconstruct.library.modifiers.hook.interaction.EntityInteract
 import slimeknights.tconstruct.library.modifiers.hook.interaction.InteractionSource;
 import slimeknights.tconstruct.library.modifiers.hook.interaction.UsingToolModifierHook;
 import slimeknights.tconstruct.library.modifiers.hook.mining.BlockBreakModifierHook;
+import slimeknights.tconstruct.library.modifiers.hook.ranged.LauncherHitModifierHook;
 import slimeknights.tconstruct.library.modifiers.hook.ranged.ProjectileLaunchModifierHook;
 import slimeknights.tconstruct.library.modifiers.hook.special.BlockTransformModifierHook;
 import slimeknights.tconstruct.library.modifiers.hook.special.PlantHarvestModifierHook;
@@ -101,7 +104,7 @@ import static pyre.tinkerslevellingaddon.util.WorldUtil.*;
 @Mod.EventBusSubscriber(modid = TinkersLevellingAddon.MOD_ID, bus = Mod.EventBusSubscriber.Bus.FORGE)
 public class ImprovableModifier extends NoLevelsModifier implements PlantHarvestModifierHook, ShearsModifierHook,
         BlockBreakModifierHook, BlockTransformModifierHook, ProjectileLaunchModifierHook, OnAttackedModifierHook,
-        MeleeHitModifierHook, ElytraFlightModifierHook, ArmorWalkModifierHook, UsingToolModifierHook,
+        MeleeHitModifierHook, LauncherHitModifierHook, ElytraFlightModifierHook, ArmorWalkModifierHook, UsingToolModifierHook,
         EntityInteractionModifierHook, SlingLaunchModifierHook, BlockInteractionModifierHook, ModifierRemovalHook,
         VolatileDataModifierHook, ToolStatsModifierHook {
     
@@ -119,9 +122,9 @@ public class ImprovableModifier extends NoLevelsModifier implements PlantHarvest
         hookBuilder.addHook(this, ModifierHooks.PLANT_HARVEST, ModifierHooks.SHEAR_ENTITY,
                 ModifierHooks.TOOL_USING, ModifierHooks.ENTITY_INTERACT, ModifierHooks.BLOCK_TRANSFORM,
                 ModifierHooks.BLOCK_BREAK, ModifierHooks.BLOCK_INTERACT, ModifierHooks.ON_ATTACKED,
-                ModifierHooks.MELEE_HIT, ModifierHooks.PROJECTILE_LAUNCH, ModifierHooks.ELYTRA_FLIGHT,
-                ModifierHooks.BOOT_WALK, ModifierHooks.SLING_LAUNCH, ModifierHooks.VOLATILE_DATA,
-                ModifierHooks.TOOL_STATS, ModifierHooks.REMOVE);
+                ModifierHooks.MELEE_HIT, ModifierHooks.LAUNCHER_HIT, ModifierHooks.PROJECTILE_LAUNCH,
+                ModifierHooks.ELYTRA_FLIGHT, ModifierHooks.BOOT_WALK, ModifierHooks.SLING_LAUNCH,
+                ModifierHooks.VOLATILE_DATA, ModifierHooks.TOOL_STATS, ModifierHooks.REMOVE);
     }
 
     @Override
@@ -217,6 +220,41 @@ public class ImprovableModifier extends NoLevelsModifier implements PlantHarvest
     }
 
     @Override
+    public void onLauncherHitEntity(IToolStackView tool, ModifierEntry modifier, Projectile projectile,
+                                    LivingEntity attacker, Entity target, @Nullable LivingEntity livingTarget,
+                                    float damageDealt) {
+        if (!tool.isBroken() && attacker instanceof ServerPlayer player && isValidLauncherTarget(player, target)) {
+            int xp = (Config.damageDealt.get() ? Math.round(damageDealt) : 1) + Config.bonusAttackingXp.get();
+            addExperience(tool, xp);
+        }
+    }
+
+    @Override
+    public void onLauncherHitBlock(IToolStackView tool, ModifierEntry modifier, Projectile projectile,
+                                   LivingEntity owner, BlockPos target) {
+        if (!tool.isBroken() && owner instanceof ServerPlayer && Config.enableGrapplingXp.get() &&
+                projectile instanceof FishingHook) {
+            addExperience(tool, 1 + Config.bonusGrapplingXp.get());
+        }
+    }
+
+    @SubscribeEvent
+    static void onItemFished(ItemFishedEvent event) {
+        if (Config.enableFishingXp.get() && event.getEntity() instanceof ServerPlayer player) {
+            ItemStack stack = player.getMainHandItem();
+            if (!stack.canPerformAction(ToolActions.FISHING_ROD_CAST)) {
+                stack = player.getOffhandItem();
+                if (!stack.canPerformAction(ToolActions.FISHING_ROD_CAST)) {
+                    return;
+                }
+            }
+            if (hasImprovable(stack)) {
+                addExperience(ToolStack.from(stack), 1 + Config.bonusFishingXp.get());
+            }
+        }
+    }
+
+    @Override
     public void onAttacked(IToolStackView tool, ModifierEntry modifier, EquipmentContext context, EquipmentSlot slotType,
                            DamageSource source, float amount, boolean isDirectDamage) {
         if (!Config.enableTakingDamageXp.get() || slotType.getType() != EquipmentSlot.Type.ARMOR || !isDirectDamage ||
@@ -237,6 +275,10 @@ public class ImprovableModifier extends NoLevelsModifier implements PlantHarvest
     public void onProjectileLaunch(IToolStackView tool, ModifierEntry modifier, LivingEntity shooter,
                                    Projectile projectile, @Nullable AbstractArrow arrow, ModDataNBT persistentData,
                                    boolean primary) {
+        if (projectile instanceof FishingHook) {
+            //we can get tool context when fishing/grappling, so we do not reward xp on lunching fishing hook
+            return;
+        }
         //no way to get tool context when the arrow lands, so reward xp on launch instead
         if (Config.enableShootingXp.get() && shooter instanceof ServerPlayer) {
             addExperience(tool, 1 + Config.bonusShootingXp.get());

@@ -156,6 +156,8 @@
   "config.tinkerslevellingaddon.levelling.glowing": "Świecenie",
   "config.tinkerslevellingaddon.levelling.firestarter": "Podpalacz",
   "config.tinkerslevellingaddon.levelling.brushing": "Szczotkowanie",
+  "config.tinkerslevellingaddon.levelling.grappling": "Grappling",
+  "config.tinkerslevellingaddon.levelling.fishing": "Wędkowanie",
 
   "config.tinkerslevellingaddon.client.messages": "Wiadomości",
   "config.tinkerslevellingaddon.client.squash_pluses": "Alternatywny przyrostek dla nazw poziomów",

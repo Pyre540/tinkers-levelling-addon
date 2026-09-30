@@ -144,6 +144,8 @@ public class Config {
     public static ForgeConfigSpec.BooleanValue enableGlowingXp;
     public static ForgeConfigSpec.BooleanValue enableFirestarterXp;
     public static ForgeConfigSpec.BooleanValue enableBrushingXp;
+    public static ForgeConfigSpec.BooleanValue enableGrapplingXp;
+    public static ForgeConfigSpec.BooleanValue enableFishingXp;
 
     //toolLevelling.bonuses
     public static ForgeConfigSpec.IntValue bonusMiningXp;
@@ -172,6 +174,8 @@ public class Config {
     public static ForgeConfigSpec.IntValue bonusGlowingXp;
     public static ForgeConfigSpec.IntValue bonusFirestarterXp;
     public static ForgeConfigSpec.IntValue bonusBrushingXp;
+    public static ForgeConfigSpec.IntValue bonusGrapplingXp;
+    public static ForgeConfigSpec.IntValue bonusFishingXp;
 
     //CLIENT
     public static ForgeConfigSpec.BooleanValue enableLevelUpMessage;
@@ -550,6 +554,12 @@ public class Config {
         enableBrushingXp = builder.translation("config.tinkerslevellingaddon.levelling.brushing")
                 .define("brushing", true);
 
+        enableGrapplingXp = builder.translation("config.tinkerslevellingaddon.levelling.grappling")
+                .define("grappling", true);
+
+        enableFishingXp = builder.translation("config.tinkerslevellingaddon.levelling.fishing")
+                .define("fishing", true);
+
         builder.pop();
     }
 
@@ -635,6 +645,12 @@ public class Config {
 
         bonusBrushingXp = builder.translation("config.tinkerslevellingaddon.levelling.brushing")
                 .defineInRange("brushing", 0, 0, Integer.MAX_VALUE);
+
+        bonusGrapplingXp = builder.translation("config.tinkerslevellingaddon.levelling.grappling")
+                .defineInRange("grappling", 0, 0, Integer.MAX_VALUE);
+
+        bonusFishingXp = builder.translation("config.tinkerslevellingaddon.levelling.fishing")
+                .defineInRange("fishing", 0, 0, Integer.MAX_VALUE);
 
         builder.pop();
     }

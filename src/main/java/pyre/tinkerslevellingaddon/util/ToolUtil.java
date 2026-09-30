@@ -4,6 +4,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.decoration.ArmorStand;
 import net.minecraft.world.entity.player.Player;
@@ -43,6 +44,11 @@ public class ToolUtil {
         return context.getLivingTarget() != null && !(context.getTarget() instanceof ArmorStand) &&
                 (Config.enablePvp.get() || !(context.getLivingTarget() instanceof Player)) &&
                 !context.getLivingTarget().equals(attacker);
+    }
+
+    public static boolean isValidLauncherTarget(ServerPlayer attacker, Entity target) {
+        return !(target instanceof ArmorStand) && (Config.enablePvp.get() || !(target instanceof Player)) &&
+                !target.equals(attacker);
     }
 
     public static boolean isValidDamageSource(DamageSource source, Player player) {
