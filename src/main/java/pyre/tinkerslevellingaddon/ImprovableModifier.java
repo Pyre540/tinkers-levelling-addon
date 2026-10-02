@@ -40,13 +40,19 @@ import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.living.ShieldBlockEvent;
 import net.minecraftforge.event.entity.player.ItemFishedEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fluids.FluidStack;
+import net.minecraftforge.fluids.capability.IFluidHandler;
 import net.minecraftforge.fml.common.Mod;
 import org.jetbrains.annotations.Nullable;
 import pyre.tinkerslevellingaddon.config.Config;
 import pyre.tinkerslevellingaddon.util.ModUtil;
+import slimeknights.tconstruct.library.json.LevelingValue;
 import slimeknights.tconstruct.library.modifiers.Modifier;
 import slimeknights.tconstruct.library.modifiers.ModifierEntry;
 import slimeknights.tconstruct.library.modifiers.ModifierHooks;
+import slimeknights.tconstruct.library.modifiers.fluid.FluidEffectContext;
+import slimeknights.tconstruct.library.modifiers.fluid.FluidEffectManager;
+import slimeknights.tconstruct.library.modifiers.fluid.FluidEffects;
 import slimeknights.tconstruct.library.modifiers.hook.armor.ArmorWalkModifierHook;
 import slimeknights.tconstruct.library.modifiers.hook.armor.ElytraFlightModifierHook;
 import slimeknights.tconstruct.library.modifiers.hook.armor.OnAttackedModifierHook;
@@ -71,6 +77,7 @@ import slimeknights.tconstruct.library.modifiers.modules.armor.ArmorWalkRadiusMo
 import slimeknights.tconstruct.library.modifiers.modules.armor.CoverGroundWalkerModule;
 import slimeknights.tconstruct.library.modifiers.modules.armor.ReplaceBlockWalkerModule;
 import slimeknights.tconstruct.library.modifiers.modules.armor.ToolActionWalkerTransformModule;
+import slimeknights.tconstruct.library.modifiers.modules.util.ModifierCondition;
 import slimeknights.tconstruct.library.module.ModuleHookMap;
 import slimeknights.tconstruct.library.tools.SlotType;
 import slimeknights.tconstruct.library.tools.context.EquipmentContext;
@@ -82,6 +89,7 @@ import slimeknights.tconstruct.library.tools.definition.module.aoe.CircleAOEIter
 import slimeknights.tconstruct.library.tools.definition.module.weapon.CircleWeaponAttack;
 import slimeknights.tconstruct.library.tools.definition.module.weapon.MeleeHitToolHook;
 import slimeknights.tconstruct.library.tools.definition.module.weapon.SweepWeaponAttack;
+import slimeknights.tconstruct.library.tools.helper.ModifierUtil;
 import slimeknights.tconstruct.library.tools.item.IModifiable;
 import slimeknights.tconstruct.library.tools.nbt.*;
 import slimeknights.tconstruct.library.tools.stat.FloatToolStat;
@@ -100,6 +108,7 @@ import java.util.function.Function;
 import static pyre.tinkerslevellingaddon.util.ToolLevellingUtil.*;
 import static pyre.tinkerslevellingaddon.util.ToolUtil.*;
 import static pyre.tinkerslevellingaddon.util.WorldUtil.*;
+import static slimeknights.tconstruct.library.tools.capability.fluid.ToolTankHelper.TANK_HELPER;
 
 @Mod.EventBusSubscriber(modid = TinkersLevellingAddon.MOD_ID, bus = Mod.EventBusSubscriber.Bus.FORGE)
 public class ImprovableModifier extends NoLevelsModifier implements PlantHarvestModifierHook, ShearsModifierHook,
@@ -203,19 +212,25 @@ public class ImprovableModifier extends NoLevelsModifier implements PlantHarvest
 
     @Override
     public void afterMeleeHit(IToolStackView tool, ModifierEntry modifier, ToolAttackContext context, float damageDealt) {
-        if (!Config.enableAttackingXp.get() || !(context.getPlayerAttacker() instanceof ServerPlayer player) ||
-                !isAttackAllowed(context, tool) || !isValidMeleeTarget(player, context)) {
+        if (!(context.getPlayerAttacker() instanceof ServerPlayer player)) {
             return;
         }
-        int xp = (Config.damageDealt.get() ? Math.round(damageDealt) : 1) + Config.bonusAttackingXp.get();
-        addExperience(tool, xp);
-        //handle aoe hits
-        MeleeHitToolHook hook = tool.getDefinitionData().getHook(ToolHooks.MELEE_HIT);
-        if (hook instanceof SweepWeaponAttack sweepHook) {
-            handleSweepAttack(context, tool, player, damageDealt, sweepHook);
+
+        if (Config.enableAttackingXp.get() && isAttackAllowed(context, tool) && isValidMeleeTarget(player, context)) {
+            int xp = (Config.damageDealt.get() ? Math.round(damageDealt) : 1) + Config.bonusAttackingXp.get();
+            addExperience(tool, xp);
+            //handle aoe hits
+            MeleeHitToolHook hook = tool.getDefinitionData().getHook(ToolHooks.MELEE_HIT);
+            if (hook instanceof SweepWeaponAttack sweepHook) {
+                handleSweepAttack(context, tool, player, damageDealt, sweepHook);
+            }
+            if (hook instanceof CircleWeaponAttack circleHook) {
+                handleCircleAttack(context, tool, player, damageDealt, circleHook);
+            }
         }
-        if (hook instanceof CircleWeaponAttack circleHook) {
-            handleCircleAttack(context, tool, player, damageDealt, circleHook);
+        if (Config.enableSpillingXp.get() && damageDealt > 0 && context.isFullyCharged()) {
+            handleSpilling(tool, tool.getModifier(ModifierIds.spilling), context.getAttacker(),
+                    context.getPlayerAttacker(), context.getTarget(), context.getLivingTarget(), context.getProjectile());
         }
     }
 
@@ -223,9 +238,16 @@ public class ImprovableModifier extends NoLevelsModifier implements PlantHarvest
     public void onLauncherHitEntity(IToolStackView tool, ModifierEntry modifier, Projectile projectile,
                                     LivingEntity attacker, Entity target, @Nullable LivingEntity livingTarget,
                                     float damageDealt) {
-        if (!tool.isBroken() && attacker instanceof ServerPlayer player && isValidLauncherTarget(player, target)) {
+        if (!(attacker instanceof ServerPlayer player)) {
+            return;
+        }
+        if (Config.enableAttackingXp.get() && !tool.isBroken() && isValidLauncherTarget(player, target)) {
             int xp = (Config.damageDealt.get() ? Math.round(damageDealt) : 1) + Config.bonusAttackingXp.get();
             addExperience(tool, xp);
+        }
+        if (Config.enableSpillingXp.get() && damageDealt > 0) {
+            handleSpilling(tool, tool.getModifier(ModifierIds.spilling), attacker, ModifierUtil.asPlayer(attacker),
+                    target, livingTarget, projectile);
         }
     }
 
@@ -667,6 +689,28 @@ public class ImprovableModifier extends NoLevelsModifier implements PlantHarvest
                         .getBlocks(tool, context, state, AreaOfEffectIterator.AOEMatchType.TRANSFORM)) {
                     if (isBrushable(Util.offset(blockHit, extraPos), level)) {
                         addExperience(tool, 1 + Config.bonusBrushingXp.get());
+                    }
+                }
+            }
+        }
+    }
+
+    private void handleSpilling(IToolStackView tool, ModifierEntry modifier, LivingEntity attacker,
+                                       Player playerAttacker, Entity target, LivingEntity livingTarget,
+                                       Projectile projectile) {
+        if (modifier != ModifierEntry.EMPTY && ModifierCondition.ANY_TOOL.matches(tool, modifier)) {
+            FluidStack fluid = TANK_HELPER.getFluid(tool);
+            if (!fluid.isEmpty()) {
+                FluidEffects recipe = FluidEffectManager.INSTANCE.find(fluid.getFluid());
+                if (recipe.hasEntityEffects()) {
+                    int consumed = recipe.applyToEntity(fluid, LevelingValue.eachLevel(1).compute(modifier.getEffectiveLevel()),
+                            FluidEffectContext.builder(attacker.level())
+                                    .user(attacker, playerAttacker)
+                                    .projectile(projectile)
+                                    .target(target, livingTarget),
+                            IFluidHandler.FluidAction.SIMULATE);
+                    if (consumed > 0) {
+                        addExperience(tool, 1 + Config.bonusSpillingXp.get());
                     }
                 }
             }

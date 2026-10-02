@@ -87,13 +87,6 @@ public class ToolUtil {
         return blockAngle >= angle;
     }
 
-    public static boolean isDifferentTinkersItem(IToolStackView item1, IToolStackView item2) {
-        if(item1 == null || item2 == null || item1.getItem() != item2.getItem()) {
-            return true;
-        }
-        return !item1.getModifiers().equals(item2.getModifiers()) || !item1.getMaterials().equals(item2.getMaterials());
-    }
-
     public static boolean hasImprovable(ItemStack activeStack) {
         return ModifierUtil.getModifierLevel(activeStack, Registration.IMPROVABLE.get().getId()) > 0;
     }

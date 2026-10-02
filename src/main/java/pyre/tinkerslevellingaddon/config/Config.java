@@ -139,6 +139,7 @@ public class Config {
     public static ForgeConfigSpec.BooleanValue enableShearingXp;
     public static ForgeConfigSpec.BooleanValue enableShootingXp;
     public static ForgeConfigSpec.BooleanValue enableSnowdriftXp;
+    public static ForgeConfigSpec.BooleanValue enableSpillingXp;
     public static ForgeConfigSpec.BooleanValue enableSpringingXp;
     public static ForgeConfigSpec.BooleanValue enableStrippingXp;
     public static ForgeConfigSpec.BooleanValue enableTakingDamageXp;
@@ -169,6 +170,7 @@ public class Config {
     public static ForgeConfigSpec.IntValue bonusShearingXp;
     public static ForgeConfigSpec.IntValue bonusShootingXp;
     public static ForgeConfigSpec.IntValue bonusSnowdriftXp;
+    public static ForgeConfigSpec.IntValue bonusSpillingXp;
     public static ForgeConfigSpec.IntValue bonusSpringingXp;
     public static ForgeConfigSpec.IntValue bonusStrippingXp;
     public static ForgeConfigSpec.IntValue bonusTakingDamageXp;
@@ -556,6 +558,10 @@ public class Config {
                 .translation("config.tinkerslevellingaddon.levelling.snowdrift")
                 .define("snowdrift", true);
 
+        enableSpillingXp = builder
+                .translation("config.tinkerslevellingaddon.levelling.spilling")
+                .define("spilling", true);
+
         enableSpringingXp = builder
                 .translation("config.tinkerslevellingaddon.levelling.springing")
                 .define("springing", true);
@@ -653,6 +659,9 @@ public class Config {
 
         bonusSnowdriftXp = builder.translation("config.tinkerslevellingaddon.levelling.snowdrift")
                 .defineInRange("snowdrift", 0, 0, Integer.MAX_VALUE);
+
+        bonusSpillingXp = builder.translation("config.tinkerslevellingaddon.levelling.spilling")
+                .defineInRange("spilling", 0, 0, Integer.MAX_VALUE);
 
         bonusSpringingXp = builder.translation("config.tinkerslevellingaddon.levelling.springing")
                 .defineInRange("springing", 0, 0, Integer.MAX_VALUE);
