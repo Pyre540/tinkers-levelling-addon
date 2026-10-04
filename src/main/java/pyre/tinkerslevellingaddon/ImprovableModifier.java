@@ -96,6 +96,7 @@ import slimeknights.tconstruct.library.tools.stat.ToolStats;
 import slimeknights.tconstruct.library.utils.MutableUseOnContext;
 import slimeknights.tconstruct.library.utils.Util;
 import slimeknights.tconstruct.tools.data.ModifierIds;
+import slimeknights.tconstruct.tools.entity.CustomFireball;
 import slimeknights.tconstruct.tools.entity.FluidEffectProjectile;
 import slimeknights.tconstruct.tools.modules.armor.FireWalkerModule;
 import slimeknights.tconstruct.tools.modules.armor.GlowWalkerModule;
@@ -307,6 +308,9 @@ public class ImprovableModifier extends NoLevelsModifier implements PlantHarvest
         }
         if (Config.enableSpittingXp.get() && projectile instanceof FluidEffectProjectile) {
             addExperience(tool, 1 + Config.bonusSpittingXp.get());
+        }
+        if (Config.enableSlimeballXp.get() && projectile instanceof CustomFireball) {
+            addExperience(tool, 1 + Config.bonusSlimeballXp.get());
         }
     }
     

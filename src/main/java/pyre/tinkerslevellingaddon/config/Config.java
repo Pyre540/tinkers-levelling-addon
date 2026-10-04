@@ -138,6 +138,7 @@ public class Config {
     public static ForgeConfigSpec.BooleanValue enableScrappingXp;
     public static ForgeConfigSpec.BooleanValue enableShearingXp;
     public static ForgeConfigSpec.BooleanValue enableShootingXp;
+    public static ForgeConfigSpec.BooleanValue enableSlimeballXp;
     public static ForgeConfigSpec.BooleanValue enableSlurpingXp;
     public static ForgeConfigSpec.BooleanValue enableSnowdriftXp;
     public static ForgeConfigSpec.BooleanValue enableSpillingXp;
@@ -172,6 +173,7 @@ public class Config {
     public static ForgeConfigSpec.IntValue bonusScrappingXp;
     public static ForgeConfigSpec.IntValue bonusShearingXp;
     public static ForgeConfigSpec.IntValue bonusShootingXp;
+    public static ForgeConfigSpec.IntValue bonusSlimeballXp;
     public static ForgeConfigSpec.IntValue bonusSlurpingXp;
     public static ForgeConfigSpec.IntValue bonusSnowdriftXp;
     public static ForgeConfigSpec.IntValue bonusSpillingXp;
@@ -560,7 +562,11 @@ public class Config {
                 .translation("config.tinkerslevellingaddon.levelling.shooting")
                 .define("shooting", true);
 
-        enableSlurpingXp = builder.comment("Applies to ranged weapons like longbows and crossbows.")
+        enableSlimeballXp = builder
+                .translation("config.tinkerslevellingaddon.levelling.slimeball")
+                .define("slimeball", true);
+
+        enableSlurpingXp = builder
                 .translation("config.tinkerslevellingaddon.levelling.slurping")
                 .define("slurping", true);
 
@@ -674,6 +680,9 @@ public class Config {
 
         bonusShootingXp = builder.translation("config.tinkerslevellingaddon.levelling.shooting")
                 .defineInRange("shooting", 0, 0, Integer.MAX_VALUE);
+
+        bonusSlimeballXp = builder.translation("config.tinkerslevellingaddon.levelling.slimeball")
+                .defineInRange("slimeball", 0, 0, Integer.MAX_VALUE);
 
         bonusSlurpingXp = builder.translation("config.tinkerslevellingaddon.levelling.slurping")
                 .defineInRange("slurping", 0, 0, Integer.MAX_VALUE);
