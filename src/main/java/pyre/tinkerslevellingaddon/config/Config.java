@@ -138,8 +138,11 @@ public class Config {
     public static ForgeConfigSpec.BooleanValue enableScrappingXp;
     public static ForgeConfigSpec.BooleanValue enableShearingXp;
     public static ForgeConfigSpec.BooleanValue enableShootingXp;
+    public static ForgeConfigSpec.BooleanValue enableSlurpingXp;
     public static ForgeConfigSpec.BooleanValue enableSnowdriftXp;
     public static ForgeConfigSpec.BooleanValue enableSpillingXp;
+    public static ForgeConfigSpec.BooleanValue enableSpittingXp;
+    public static ForgeConfigSpec.BooleanValue enableSplashingXp;
     public static ForgeConfigSpec.BooleanValue enableSpringingXp;
     public static ForgeConfigSpec.BooleanValue enableStrippingXp;
     public static ForgeConfigSpec.BooleanValue enableTakingDamageXp;
@@ -169,8 +172,11 @@ public class Config {
     public static ForgeConfigSpec.IntValue bonusScrappingXp;
     public static ForgeConfigSpec.IntValue bonusShearingXp;
     public static ForgeConfigSpec.IntValue bonusShootingXp;
+    public static ForgeConfigSpec.IntValue bonusSlurpingXp;
     public static ForgeConfigSpec.IntValue bonusSnowdriftXp;
     public static ForgeConfigSpec.IntValue bonusSpillingXp;
+    public static ForgeConfigSpec.IntValue bonusSpittingXp;
+    public static ForgeConfigSpec.IntValue bonusSplashingXp;
     public static ForgeConfigSpec.IntValue bonusSpringingXp;
     public static ForgeConfigSpec.IntValue bonusStrippingXp;
     public static ForgeConfigSpec.IntValue bonusTakingDamageXp;
@@ -554,6 +560,10 @@ public class Config {
                 .translation("config.tinkerslevellingaddon.levelling.shooting")
                 .define("shooting", true);
 
+        enableSlurpingXp = builder.comment("Applies to ranged weapons like longbows and crossbows.")
+                .translation("config.tinkerslevellingaddon.levelling.slurping")
+                .define("slurping", true);
+
         enableSnowdriftXp = builder
                 .translation("config.tinkerslevellingaddon.levelling.snowdrift")
                 .define("snowdrift", true);
@@ -561,6 +571,14 @@ public class Config {
         enableSpillingXp = builder
                 .translation("config.tinkerslevellingaddon.levelling.spilling")
                 .define("spilling", true);
+
+        enableSpittingXp = builder
+                .translation("config.tinkerslevellingaddon.levelling.spitting")
+                .define("spitting", true);
+
+        enableSplashingXp = builder
+                .translation("config.tinkerslevellingaddon.levelling.splashing")
+                .define("splashing", true);
 
         enableSpringingXp = builder
                 .translation("config.tinkerslevellingaddon.levelling.springing")
@@ -657,11 +675,20 @@ public class Config {
         bonusShootingXp = builder.translation("config.tinkerslevellingaddon.levelling.shooting")
                 .defineInRange("shooting", 0, 0, Integer.MAX_VALUE);
 
+        bonusSlurpingXp = builder.translation("config.tinkerslevellingaddon.levelling.slurping")
+                .defineInRange("slurping", 0, 0, Integer.MAX_VALUE);
+
         bonusSnowdriftXp = builder.translation("config.tinkerslevellingaddon.levelling.snowdrift")
                 .defineInRange("snowdrift", 0, 0, Integer.MAX_VALUE);
 
         bonusSpillingXp = builder.translation("config.tinkerslevellingaddon.levelling.spilling")
                 .defineInRange("spilling", 0, 0, Integer.MAX_VALUE);
+
+        bonusSpittingXp = builder.translation("config.tinkerslevellingaddon.levelling.spitting")
+                .defineInRange("spitting", 0, 0, Integer.MAX_VALUE);
+
+        bonusSplashingXp = builder.translation("config.tinkerslevellingaddon.levelling.splashing")
+                .defineInRange("splashing", 0, 0, Integer.MAX_VALUE);
 
         bonusSpringingXp = builder.translation("config.tinkerslevellingaddon.levelling.springing")
                 .defineInRange("springing", 0, 0, Integer.MAX_VALUE);

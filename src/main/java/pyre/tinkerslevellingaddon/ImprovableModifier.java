@@ -46,6 +46,7 @@ import net.minecraftforge.fml.common.Mod;
 import org.jetbrains.annotations.Nullable;
 import pyre.tinkerslevellingaddon.config.Config;
 import pyre.tinkerslevellingaddon.util.ModUtil;
+import slimeknights.tconstruct.common.TinkerTags;
 import slimeknights.tconstruct.library.json.LevelingValue;
 import slimeknights.tconstruct.library.modifiers.Modifier;
 import slimeknights.tconstruct.library.modifiers.ModifierEntry;
@@ -61,10 +62,7 @@ import slimeknights.tconstruct.library.modifiers.hook.build.ModifierRemovalHook;
 import slimeknights.tconstruct.library.modifiers.hook.build.ToolStatsModifierHook;
 import slimeknights.tconstruct.library.modifiers.hook.build.VolatileDataModifierHook;
 import slimeknights.tconstruct.library.modifiers.hook.combat.MeleeHitModifierHook;
-import slimeknights.tconstruct.library.modifiers.hook.interaction.BlockInteractionModifierHook;
-import slimeknights.tconstruct.library.modifiers.hook.interaction.EntityInteractionModifierHook;
-import slimeknights.tconstruct.library.modifiers.hook.interaction.InteractionSource;
-import slimeknights.tconstruct.library.modifiers.hook.interaction.UsingToolModifierHook;
+import slimeknights.tconstruct.library.modifiers.hook.interaction.*;
 import slimeknights.tconstruct.library.modifiers.hook.mining.BlockBreakModifierHook;
 import slimeknights.tconstruct.library.modifiers.hook.ranged.LauncherHitModifierHook;
 import slimeknights.tconstruct.library.modifiers.hook.ranged.ProjectileLaunchModifierHook;
@@ -98,6 +96,7 @@ import slimeknights.tconstruct.library.tools.stat.ToolStats;
 import slimeknights.tconstruct.library.utils.MutableUseOnContext;
 import slimeknights.tconstruct.library.utils.Util;
 import slimeknights.tconstruct.tools.data.ModifierIds;
+import slimeknights.tconstruct.tools.entity.FluidEffectProjectile;
 import slimeknights.tconstruct.tools.modules.armor.FireWalkerModule;
 import slimeknights.tconstruct.tools.modules.armor.GlowWalkerModule;
 
@@ -113,9 +112,9 @@ import static slimeknights.tconstruct.library.tools.capability.fluid.ToolTankHel
 @Mod.EventBusSubscriber(modid = TinkersLevellingAddon.MOD_ID, bus = Mod.EventBusSubscriber.Bus.FORGE)
 public class ImprovableModifier extends NoLevelsModifier implements PlantHarvestModifierHook, ShearsModifierHook,
         BlockBreakModifierHook, BlockTransformModifierHook, ProjectileLaunchModifierHook, OnAttackedModifierHook,
-        MeleeHitModifierHook, LauncherHitModifierHook, ElytraFlightModifierHook, ArmorWalkModifierHook, UsingToolModifierHook,
-        EntityInteractionModifierHook, SlingLaunchModifierHook, BlockInteractionModifierHook, ModifierRemovalHook,
-        VolatileDataModifierHook, ToolStatsModifierHook {
+        MeleeHitModifierHook, LauncherHitModifierHook, ElytraFlightModifierHook, ArmorWalkModifierHook,
+        UsingToolModifierHook, InventoryTickModifierHook, EntityInteractionModifierHook, SlingLaunchModifierHook,
+        BlockInteractionModifierHook, ModifierRemovalHook, VolatileDataModifierHook, ToolStatsModifierHook {
     
     public static final TextColor IMPROVABLE_MODIFIER_COLOR = TextColor.fromRgb(9337340);
     
@@ -133,7 +132,8 @@ public class ImprovableModifier extends NoLevelsModifier implements PlantHarvest
                 ModifierHooks.BLOCK_BREAK, ModifierHooks.BLOCK_INTERACT, ModifierHooks.ON_ATTACKED,
                 ModifierHooks.MELEE_HIT, ModifierHooks.LAUNCHER_HIT, ModifierHooks.PROJECTILE_LAUNCH,
                 ModifierHooks.ELYTRA_FLIGHT, ModifierHooks.BOOT_WALK, ModifierHooks.SLING_LAUNCH,
-                ModifierHooks.VOLATILE_DATA, ModifierHooks.TOOL_STATS, ModifierHooks.REMOVE);
+                ModifierHooks.INVENTORY_TICK, ModifierHooks.VOLATILE_DATA, ModifierHooks.TOOL_STATS,
+                ModifierHooks.REMOVE);
     }
 
     @Override
@@ -297,13 +297,16 @@ public class ImprovableModifier extends NoLevelsModifier implements PlantHarvest
     public void onProjectileLaunch(IToolStackView tool, ModifierEntry modifier, LivingEntity shooter,
                                    Projectile projectile, @Nullable AbstractArrow arrow, ModDataNBT persistentData,
                                    boolean primary) {
-        if (projectile instanceof FishingHook) {
+        if (!(shooter instanceof ServerPlayer) || projectile instanceof FishingHook) {
             //we can get tool context when fishing/grappling, so we do not reward xp on lunching fishing hook
             return;
         }
         //no way to get tool context when the arrow lands, so reward xp on launch instead
-        if (Config.enableShootingXp.get() && shooter instanceof ServerPlayer) {
+        if (Config.enableShootingXp.get() && arrow != null) {
             addExperience(tool, 1 + Config.bonusShootingXp.get());
+        }
+        if (Config.enableSpittingXp.get() && projectile instanceof FluidEffectProjectile) {
+            addExperience(tool, 1 + Config.bonusSpittingXp.get());
         }
     }
     
@@ -429,18 +432,23 @@ public class ImprovableModifier extends NoLevelsModifier implements PlantHarvest
         }
     }
 
-    //use beforeEntityUse because afterEntityUse consumes interaction and do not update tool data
     @Override
-    public InteractionResult beforeEntityUse(IToolStackView tool, ModifierEntry modifier, Player player, Entity target, InteractionHand hand, InteractionSource source) {
-        if (tool.isBroken() || player.level().isClientSide || !(player instanceof ServerPlayer)) {
+    public InteractionResult beforeEntityUse(IToolStackView tool, ModifierEntry modifier, Player player, Entity target,
+                                             InteractionHand hand, InteractionSource source) {
+        if (tool.isBroken() || !(player instanceof ServerPlayer)) {
             return InteractionResult.PASS;
         }
+        //use beforeEntityUse because afterEntityUse consumes interaction and do not update tool data
         if (Config.enableFirestarterXp.get() && tool.getModifier(ModifierIds.firestarter) != ModifierEntry.EMPTY
                 && tool.getHook(ToolHooks.INTERACTION).canInteract(tool, ModifierIds.firestarter, source)
                 && target instanceof Creeper creeper && !creeper.isIgnited()) {
             addExperience(tool, 1 + Config.bonusFirestarterXp.get());
         }
-
+        ModifierEntry splashing = tool.getModifier(ModifierIds.splashing);
+        if (Config.enableSplashingXp.get() && splashing != ModifierEntry.EMPTY
+                && tool.getHook(ToolHooks.INTERACTION).canInteract(tool, ModifierIds.splashing, source)) {
+            handleEntitySplashing(tool, player, target, splashing);
+        }
         return InteractionResult.PASS;
     }
 
@@ -470,6 +478,11 @@ public class ImprovableModifier extends NoLevelsModifier implements PlantHarvest
                 && tool.getHook(ToolHooks.INTERACTION).canInteract(tool, ModifierIds.firestarter, source)) {
             handleFirestarter(tool, context);
         }
+        ModifierEntry splashing = tool.getModifier(ModifierIds.splashing);
+        if (Config.enableSplashingXp.get() && splashing != ModifierEntry.EMPTY
+                && tool.getHook(ToolHooks.INTERACTION).canInteract(tool, ModifierIds.splashing, source)) {
+            handleBlockSplashing(tool, context, splashing);
+        }
 
         return InteractionResult.PASS;
     }
@@ -477,13 +490,40 @@ public class ImprovableModifier extends NoLevelsModifier implements PlantHarvest
     @Override
     public void onUsingTick(IToolStackView tool, ModifierEntry modifier, LivingEntity entity, int useDuration,
                             int timeLeft, ModifierEntry activeModifier) {
-        if (tool.isBroken() || timeLeft < 0 || !(entity instanceof ServerPlayer player) ||
-                activeModifier == ModifierEntry.EMPTY) {
+        if (tool.isBroken() || timeLeft < 0 || !(entity instanceof ServerPlayer player)) {
             return;
         }
 
-        if (Config.enableBrushingXp.get() && activeModifier.getId().equals(ModifierIds.brushing)) {
+        if (Config.enableBrushingXp.get() && ModifierIds.brushing.equals(activeModifier.getId())) {
             handleBrushing(tool, entity, timeLeft, player, activeModifier);
+        }
+        ModifierEntry slurping = tool.getModifier(ModifierIds.slurping);
+        if (Config.enableSlurpingXp.get() && slurping != ModifierEntry.EMPTY && slurping.equals(activeModifier)) {
+            handleToolSlurping(tool, useDuration - timeLeft, player, slurping);
+        }
+    }
+
+    @Override
+    public void beforeReleaseUsing(IToolStackView tool, ModifierEntry modifier, LivingEntity entity, int useDuration,
+                                   int timeLeft, ModifierEntry activeModifier) {
+        if (tool.isBroken() || timeLeft < 0 || !(entity instanceof ServerPlayer player)) {
+            return;
+        }
+        ModifierEntry slurping = tool.getModifier(ModifierIds.slurping);
+        if (Config.enableSlurpingXp.get() && slurping != ModifierEntry.EMPTY && slurping.equals(activeModifier)) {
+            handleToolSlurping(tool, useDuration - timeLeft, player, slurping);
+        }
+    }
+
+    @Override
+    public void onInventoryTick(IToolStackView tool, ModifierEntry modifier, Level world, LivingEntity holder,
+                                int itemSlot, boolean isSelected, boolean isCorrectSlot, ItemStack stack) {
+        if (tool.isBroken() || !(holder instanceof ServerPlayer player)) {
+            return;
+        }
+        ModifierEntry slurping = tool.getModifier(ModifierIds.slurping);
+        if (Config.enableSlurpingXp.get() && slurping != ModifierEntry.EMPTY && isCorrectSlot) {
+            handleArmorSlurping(tool, player, slurping);
         }
     }
 
@@ -712,6 +752,100 @@ public class ImprovableModifier extends NoLevelsModifier implements PlantHarvest
                     if (consumed > 0) {
                         addExperience(tool, 1 + Config.bonusSpillingXp.get());
                     }
+                }
+            }
+        }
+    }
+
+    private void handleEntitySplashing(IToolStackView tool, Player player, Entity target, ModifierEntry splashing) {
+        //code based on SplashingModule.beforeEntityUse
+        FluidStack fluid = TANK_HELPER.getFluid(tool);
+        if (!fluid.isEmpty()) {
+            FluidEffects recipe = FluidEffectManager.INSTANCE.find(fluid.getFluid());
+            if (recipe.hasEntityEffects()) {
+                Level world = player.level();
+                float level = LevelingValue.eachLevel(1).compute(splashing);
+                int consumed = recipe.applyToEntity(fluid, level, FluidEffectContext.builder(world).user(player).target(target), IFluidHandler.FluidAction.SIMULATE);
+                if (consumed > 0) {
+                    addExperience(tool, 1 + Config.bonusSplashingXp.get());
+                    fluid.shrink(consumed);
+                }
+                // AoE
+                if (!fluid.isEmpty()) {
+                    float range = 1 + tool.getVolatileData().getInt(IModifiable.EXPANDED);
+                    float rangeSq = range * range;
+                    for (Entity aoeTarget : world.getEntitiesOfClass(Entity.class, target.getBoundingBox().inflate(range, 0.25, range))) {
+                        if (aoeTarget != player && aoeTarget != target && !(aoeTarget instanceof ArmorStand stand && stand.isMarker()) &&
+                                target.distanceToSqr(aoeTarget) < rangeSq && (Config.enablePvp.get() || !(aoeTarget instanceof Player))) {
+                            consumed = recipe.applyToEntity(fluid, level, FluidEffectContext.builder(world).user(player).target(aoeTarget), IFluidHandler.FluidAction.SIMULATE);
+                            if (consumed > 0) {
+                                addExperience(tool, 1 + Config.bonusSplashingXp.get());
+                                fluid.shrink(consumed);
+                                if (fluid.isEmpty()) {
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private void handleBlockSplashing(IToolStackView tool, UseOnContext context, ModifierEntry splashing) {
+        //code based on SplashingModule.afterBlockUse
+        FluidStack fluid = TANK_HELPER.getFluid(tool);
+        if (!fluid.isEmpty()) {
+            FluidEffects recipe = FluidEffectManager.INSTANCE.find(fluid.getFluid());
+            if (recipe.hasBlockEffects()) {
+                Level world = context.getLevel();
+                Player player = context.getPlayer();
+
+                float level = LevelingValue.eachLevel(1).compute(splashing);
+                BlockHitResult hit = new BlockHitResult(context.getClickLocation(), context.getClickedFace(),
+                        context.getClickedPos(), context.isInside()
+                );
+                BlockState state = world.getBlockState(hit.getBlockPos());
+                int consumed = recipe.applyToBlock(fluid, level, FluidEffectContext.builder(world).user(player).block(hit), IFluidHandler.FluidAction.EXECUTE);
+                if (consumed > 0) {
+                    addExperience(tool, 1 + Config.bonusSplashingXp.get());
+                    fluid.shrink(consumed);
+                }
+
+                // AoE
+                if (!fluid.isEmpty()) {
+                    for (BlockPos offset : tool.getHook(ToolHooks.AOE_ITERATOR).getBlocks(tool, context, state, AreaOfEffectIterator.AOEMatchType.TRANSFORM)) {
+                        BlockHitResult offsetHit = Util.offset(hit, offset);
+                        consumed = recipe.applyToBlock(fluid, level, FluidEffectContext.builder(world).user(player).block(offsetHit), IFluidHandler.FluidAction.EXECUTE);
+                        if (consumed > 0) {
+                            addExperience(tool, 1 + Config.bonusSplashingXp.get());
+                            fluid.shrink(consumed);
+                            if (fluid.isEmpty()) {
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private void handleToolSlurping(IToolStackView tool, int useTime, ServerPlayer player,
+                                    ModifierEntry slurping) {
+        int duration = slurping.getHook(ModifierHooks.GENERAL_INTERACT).getUseDuration(tool, slurping);
+        if (useTime == duration) {
+            if (canSlurp(tool, player, slurping)) {
+                addExperience(tool, 1 + Config.bonusSlurpingXp.get());
+            }
+        }
+    }
+
+    private void handleArmorSlurping(IToolStackView tool, ServerPlayer player, ModifierEntry slurping) {
+        if (tool.hasTag(TinkerTags.Items.WORN_ARMOR)) {
+            int finishTime = tool.getPersistentData().getInt(ModifierIds.slurping);
+            if (finishTime > 0 && finishTime - player.tickCount < 0) {
+                if (canSlurp(tool, player, slurping)) {
+                    addExperience(tool, 1 + Config.bonusSlurpingXp.get());
                 }
             }
         }

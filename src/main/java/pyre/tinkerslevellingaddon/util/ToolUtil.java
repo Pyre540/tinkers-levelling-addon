@@ -14,10 +14,16 @@ import net.minecraft.world.item.ShieldItem;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.ForgeMod;
+import net.minecraftforge.fluids.FluidStack;
+import net.minecraftforge.fluids.capability.IFluidHandler;
 import org.jetbrains.annotations.Nullable;
 import pyre.tinkerslevellingaddon.config.Config;
 import pyre.tinkerslevellingaddon.setup.Registration;
+import slimeknights.tconstruct.library.json.LevelingValue;
 import slimeknights.tconstruct.library.modifiers.ModifierEntry;
+import slimeknights.tconstruct.library.modifiers.fluid.FluidEffectContext;
+import slimeknights.tconstruct.library.modifiers.fluid.FluidEffectManager;
+import slimeknights.tconstruct.library.modifiers.fluid.FluidEffects;
 import slimeknights.tconstruct.library.modifiers.hook.build.ConditionalStatModifierHook;
 import slimeknights.tconstruct.library.modifiers.hook.interaction.GeneralInteractionModifierHook;
 import slimeknights.tconstruct.library.modifiers.modules.armor.ArmorWalkRadiusModule;
@@ -27,6 +33,8 @@ import slimeknights.tconstruct.library.tools.nbt.IToolStackView;
 import slimeknights.tconstruct.library.tools.nbt.ToolStack;
 import slimeknights.tconstruct.library.tools.stat.ToolStats;
 import slimeknights.tconstruct.tools.data.ModifierIds;
+
+import static slimeknights.tconstruct.library.tools.capability.fluid.ToolTankHelper.TANK_HELPER;
 
 public class ToolUtil {
 
@@ -85,6 +93,17 @@ public class ToolUtil {
         }
         double angle = Math.abs(180 - Math.acos(direction.dot(viewVector) / length) * Mth.RAD_TO_DEG);
         return blockAngle >= angle;
+    }
+
+    public static boolean canSlurp(IToolStackView tool, ServerPlayer player, ModifierEntry slurping) {
+        FluidStack fluid = TANK_HELPER.getFluid(tool);
+        if (!fluid.isEmpty()) {
+            FluidEffects recipe = FluidEffectManager.INSTANCE.find(fluid.getFluid());
+            return recipe.hasEntityEffects() && recipe.applyToEntity(fluid, LevelingValue.eachLevel(1).compute(slurping),
+                    FluidEffectContext.builder(player.level()).user(player, player).target(player),
+                    IFluidHandler.FluidAction.SIMULATE) > 0;
+        }
+        return false;
     }
 
     public static boolean hasImprovable(ItemStack activeStack) {

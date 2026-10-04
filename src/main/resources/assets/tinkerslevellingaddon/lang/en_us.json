@@ -159,6 +159,9 @@
   "config.tinkerslevellingaddon.levelling.grappling": "Grappling",
   "config.tinkerslevellingaddon.levelling.fishing": "Fishing",
   "config.tinkerslevellingaddon.levelling.spilling": "Spilling",
+  "config.tinkerslevellingaddon.levelling.splashing": "Splashing",
+  "config.tinkerslevellingaddon.levelling.spitting": "Spitting",
+  "config.tinkerslevellingaddon.levelling.slurping": "Slurping",
 
   "config.tinkerslevellingaddon.client.messages": "Messages",
   "config.tinkerslevellingaddon.client.squash_pluses": "Alternative suffix for level names",

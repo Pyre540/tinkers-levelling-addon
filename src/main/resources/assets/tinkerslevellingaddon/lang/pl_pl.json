@@ -159,6 +159,9 @@
   "config.tinkerslevellingaddon.levelling.grappling": "Grappling",
   "config.tinkerslevellingaddon.levelling.fishing": "Wędkowanie",
   "config.tinkerslevellingaddon.levelling.spilling": "Rozlewanie",
+  "config.tinkerslevellingaddon.levelling.splashing": "Rozpryskiwanie",
+  "config.tinkerslevellingaddon.levelling.spitting": "Plucie",
+  "config.tinkerslevellingaddon.levelling.slurping": "Siorbanie",
 
   "config.tinkerslevellingaddon.client.messages": "Wiadomości",
   "config.tinkerslevellingaddon.client.squash_pluses": "Alternatywny przyrostek dla nazw poziomów",
