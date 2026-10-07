@@ -131,6 +131,7 @@ public class Config {
     public static ForgeConfigSpec.BooleanValue enableGlowingXp;
     public static ForgeConfigSpec.BooleanValue enableGrapplingXp;
     public static ForgeConfigSpec.BooleanValue enableHarvestingXp;
+    public static ForgeConfigSpec.BooleanValue enableMeltingXp;
     public static ForgeConfigSpec.BooleanValue enableMiningXp;
     public static ForgeConfigSpec.BooleanValue enablePathMakerXp;
     public static ForgeConfigSpec.BooleanValue enablePathMakingXp;
@@ -166,6 +167,7 @@ public class Config {
     public static ForgeConfigSpec.IntValue bonusGlowingXp;
     public static ForgeConfigSpec.IntValue bonusGrapplingXp;
     public static ForgeConfigSpec.IntValue bonusHarvestingXp;
+    public static ForgeConfigSpec.IntValue bonusMeltingXp;
     public static ForgeConfigSpec.IntValue bonusMiningXp;
     public static ForgeConfigSpec.IntValue bonusPathMakerXp;
     public static ForgeConfigSpec.IntValue bonusPathMakingXp;
@@ -534,6 +536,10 @@ public class Config {
                 .translation("config.tinkerslevellingaddon.levelling.harvesting")
                 .define("harvesting", true);
 
+        enableMeltingXp = builder
+                .translation("config.tinkerslevellingaddon.levelling.melting")
+                .define("melting", true);
+
         enableMiningXp = builder
                 .translation("config.tinkerslevellingaddon.levelling.mining")
                 .define("mining", true);
@@ -659,6 +665,9 @@ public class Config {
 
         bonusHarvestingXp = builder.translation("config.tinkerslevellingaddon.levelling.harvesting")
                 .defineInRange("harvesting", 0, 0, Integer.MAX_VALUE);
+
+        bonusMeltingXp = builder.translation("config.tinkerslevellingaddon.levelling.melting")
+                .defineInRange("melting", 0, 0, Integer.MAX_VALUE);
 
         bonusMiningXp = builder.translation("config.tinkerslevellingaddon.levelling.mining")
                 .defineInRange("mining", 0, 0, Integer.MAX_VALUE);

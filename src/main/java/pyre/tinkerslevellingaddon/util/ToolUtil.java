@@ -11,6 +11,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.ProjectileUtil;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ShieldItem;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.ForgeMod;
@@ -21,18 +22,24 @@ import pyre.tinkerslevellingaddon.config.Config;
 import pyre.tinkerslevellingaddon.setup.Registration;
 import slimeknights.tconstruct.library.json.LevelingValue;
 import slimeknights.tconstruct.library.modifiers.ModifierEntry;
+import slimeknights.tconstruct.library.modifiers.ModifierHooks;
 import slimeknights.tconstruct.library.modifiers.fluid.FluidEffectContext;
 import slimeknights.tconstruct.library.modifiers.fluid.FluidEffectManager;
 import slimeknights.tconstruct.library.modifiers.fluid.FluidEffects;
+import slimeknights.tconstruct.library.modifiers.hook.behavior.ProcessLootModifierHook;
 import slimeknights.tconstruct.library.modifiers.hook.build.ConditionalStatModifierHook;
 import slimeknights.tconstruct.library.modifiers.hook.interaction.GeneralInteractionModifierHook;
 import slimeknights.tconstruct.library.modifiers.modules.armor.ArmorWalkRadiusModule;
+import slimeknights.tconstruct.library.recipe.TinkerRecipeTypes;
+import slimeknights.tconstruct.library.recipe.melting.IMeltingContainer;
+import slimeknights.tconstruct.library.recipe.melting.IMeltingRecipe;
 import slimeknights.tconstruct.library.tools.context.ToolAttackContext;
 import slimeknights.tconstruct.library.tools.helper.ModifierUtil;
 import slimeknights.tconstruct.library.tools.nbt.IToolStackView;
 import slimeknights.tconstruct.library.tools.nbt.ToolStack;
 import slimeknights.tconstruct.library.tools.stat.ToolStats;
 import slimeknights.tconstruct.tools.data.ModifierIds;
+import slimeknights.tconstruct.tools.modules.MeltingModule;
 
 import static slimeknights.tconstruct.library.tools.capability.fluid.ToolTankHelper.TANK_HELPER;
 
@@ -104,6 +111,36 @@ public class ToolUtil {
                     IFluidHandler.FluidAction.SIMULATE) > 0;
         }
         return false;
+    }
+
+    public static FluidStack getMeltItemResult(ModifierEntry modifier, ItemStack stack, Level world) {
+        ProcessLootModifierHook hook = modifier.getModifier().getHook(ModifierHooks.PROCESS_LOOT);
+        if (!(hook instanceof MeltingModule melting)) {
+            return FluidStack.EMPTY;
+        }
+
+        int level = modifier.intEffectiveLevel();
+        IMeltingContainer inv = new IMeltingContainer() {
+            @Override
+            public IOreRate getOreRate() {
+                return melting.getOreRate();
+            }
+
+            @Override
+            public ItemStack getStack() {
+                return stack;
+            }
+        };
+        IMeltingRecipe recipe = world.getRecipeManager().getRecipeFor(TinkerRecipeTypes.MELTING.get(), inv, world).orElse(null);
+        if (recipe == null) {
+            return FluidStack.EMPTY;
+        }
+
+        FluidStack result = FluidStack.EMPTY;
+        if (recipe.getTemperature(inv) <= melting.temperature().compute(level)) {
+            result = recipe.getOutput(inv);
+        }
+        return result;
     }
 
     public static boolean hasImprovable(ItemStack activeStack) {

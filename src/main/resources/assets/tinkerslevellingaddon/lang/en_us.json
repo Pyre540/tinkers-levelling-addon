@@ -163,6 +163,7 @@
   "config.tinkerslevellingaddon.levelling.spitting": "Spitting",
   "config.tinkerslevellingaddon.levelling.slurping": "Slurping",
   "config.tinkerslevellingaddon.levelling.slimeball": "Slimeball",
+  "config.tinkerslevellingaddon.levelling.melting": "Melting",
 
   "config.tinkerslevellingaddon.client.messages": "Messages",
   "config.tinkerslevellingaddon.client.squash_pluses": "Alternative suffix for level names",

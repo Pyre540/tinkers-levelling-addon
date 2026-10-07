@@ -28,6 +28,8 @@ import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.block.BaseFireBlock;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.storage.loot.LootContext;
+import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
@@ -57,6 +59,7 @@ import slimeknights.tconstruct.library.modifiers.fluid.FluidEffects;
 import slimeknights.tconstruct.library.modifiers.hook.armor.ArmorWalkModifierHook;
 import slimeknights.tconstruct.library.modifiers.hook.armor.ElytraFlightModifierHook;
 import slimeknights.tconstruct.library.modifiers.hook.armor.OnAttackedModifierHook;
+import slimeknights.tconstruct.library.modifiers.hook.behavior.ProcessLootModifierHook;
 import slimeknights.tconstruct.library.modifiers.hook.build.ConditionalStatModifierHook;
 import slimeknights.tconstruct.library.modifiers.hook.build.ModifierRemovalHook;
 import slimeknights.tconstruct.library.modifiers.hook.build.ToolStatsModifierHook;
@@ -77,6 +80,8 @@ import slimeknights.tconstruct.library.modifiers.modules.armor.ReplaceBlockWalke
 import slimeknights.tconstruct.library.modifiers.modules.armor.ToolActionWalkerTransformModule;
 import slimeknights.tconstruct.library.modifiers.modules.util.ModifierCondition;
 import slimeknights.tconstruct.library.module.ModuleHookMap;
+import slimeknights.tconstruct.library.recipe.entitymelting.EntityMeltingRecipe;
+import slimeknights.tconstruct.library.recipe.entitymelting.EntityMeltingRecipeCache;
 import slimeknights.tconstruct.library.tools.SlotType;
 import slimeknights.tconstruct.library.tools.context.EquipmentContext;
 import slimeknights.tconstruct.library.tools.context.ToolAttackContext;
@@ -95,9 +100,12 @@ import slimeknights.tconstruct.library.tools.stat.ModifierStatsBuilder;
 import slimeknights.tconstruct.library.tools.stat.ToolStats;
 import slimeknights.tconstruct.library.utils.MutableUseOnContext;
 import slimeknights.tconstruct.library.utils.Util;
+import slimeknights.tconstruct.smeltery.block.entity.module.EntityMeltingModule;
+import slimeknights.tconstruct.tools.TinkerModifiers;
 import slimeknights.tconstruct.tools.data.ModifierIds;
 import slimeknights.tconstruct.tools.entity.CustomFireball;
 import slimeknights.tconstruct.tools.entity.FluidEffectProjectile;
+import slimeknights.tconstruct.tools.modules.MeltingModule;
 import slimeknights.tconstruct.tools.modules.armor.FireWalkerModule;
 import slimeknights.tconstruct.tools.modules.armor.GlowWalkerModule;
 
@@ -115,7 +123,8 @@ public class ImprovableModifier extends NoLevelsModifier implements PlantHarvest
         BlockBreakModifierHook, BlockTransformModifierHook, ProjectileLaunchModifierHook, OnAttackedModifierHook,
         MeleeHitModifierHook, LauncherHitModifierHook, ElytraFlightModifierHook, ArmorWalkModifierHook,
         UsingToolModifierHook, InventoryTickModifierHook, EntityInteractionModifierHook, SlingLaunchModifierHook,
-        BlockInteractionModifierHook, ModifierRemovalHook, VolatileDataModifierHook, ToolStatsModifierHook {
+        BlockInteractionModifierHook, ProcessLootModifierHook, ModifierRemovalHook, VolatileDataModifierHook,
+        ToolStatsModifierHook {
     
     public static final TextColor IMPROVABLE_MODIFIER_COLOR = TextColor.fromRgb(9337340);
     
@@ -133,8 +142,8 @@ public class ImprovableModifier extends NoLevelsModifier implements PlantHarvest
                 ModifierHooks.BLOCK_BREAK, ModifierHooks.BLOCK_INTERACT, ModifierHooks.ON_ATTACKED,
                 ModifierHooks.MELEE_HIT, ModifierHooks.LAUNCHER_HIT, ModifierHooks.PROJECTILE_LAUNCH,
                 ModifierHooks.ELYTRA_FLIGHT, ModifierHooks.BOOT_WALK, ModifierHooks.SLING_LAUNCH,
-                ModifierHooks.INVENTORY_TICK, ModifierHooks.VOLATILE_DATA, ModifierHooks.TOOL_STATS,
-                ModifierHooks.REMOVE);
+                ModifierHooks.INVENTORY_TICK, ModifierHooks.PROCESS_LOOT, ModifierHooks.VOLATILE_DATA,
+                ModifierHooks.TOOL_STATS, ModifierHooks.REMOVE);
     }
 
     @Override
@@ -233,6 +242,10 @@ public class ImprovableModifier extends NoLevelsModifier implements PlantHarvest
             handleSpilling(tool, tool.getModifier(ModifierIds.spilling), context.getAttacker(),
                     context.getPlayerAttacker(), context.getTarget(), context.getLivingTarget(), context.getProjectile());
         }
+        if (Config.enableMeltingXp.get() && damageDealt > 0 &&
+                tool.getModifier(TinkerModifiers.melting.getId()) != ModifierEntry.EMPTY) {
+            handleTargetMelting(tool, context.getLivingTarget());
+        }
     }
 
     @Override
@@ -249,6 +262,10 @@ public class ImprovableModifier extends NoLevelsModifier implements PlantHarvest
         if (Config.enableSpillingXp.get() && damageDealt > 0) {
             handleSpilling(tool, tool.getModifier(ModifierIds.spilling), attacker, ModifierUtil.asPlayer(attacker),
                     target, livingTarget, projectile);
+        }
+        if (Config.enableMeltingXp.get() && damageDealt > 0 &&
+                tool.getModifier(TinkerModifiers.melting.getId()) != ModifierEntry.EMPTY) {
+            handleTargetMelting(tool, livingTarget);
         }
     }
 
@@ -528,6 +545,15 @@ public class ImprovableModifier extends NoLevelsModifier implements PlantHarvest
         ModifierEntry slurping = tool.getModifier(ModifierIds.slurping);
         if (Config.enableSlurpingXp.get() && slurping != ModifierEntry.EMPTY && isCorrectSlot) {
             handleArmorSlurping(tool, player, slurping);
+        }
+    }
+
+    @Override
+    public void processLoot(IToolStackView tool, ModifierEntry modifier, List<ItemStack> generatedLoot,
+                            LootContext context) {
+        ModifierEntry melting = tool.getModifier(TinkerModifiers.melting.getId());
+        if (Config.enableMeltingXp.get() && melting != ModifierEntry.EMPTY) {
+            handleLootMelting(tool, generatedLoot, context, melting);
         }
     }
 
@@ -851,6 +877,55 @@ public class ImprovableModifier extends NoLevelsModifier implements PlantHarvest
                 if (canSlurp(tool, player, slurping)) {
                     addExperience(tool, 1 + Config.bonusSlurpingXp.get());
                 }
+            }
+        }
+    }
+
+    private static void handleTargetMelting(IToolStackView tool, LivingEntity target) {
+        if (target == null) {
+            return;
+        }
+        EntityMeltingRecipe recipe = EntityMeltingRecipeCache.findRecipe(target.level().getRecipeManager(), target.getType());
+        FluidStack output;
+        if (recipe != null) {
+            output = recipe.getOutput(target);
+        } else {
+            output = EntityMeltingModule.getDefaultFluid();
+        }
+        FluidStack fluid = TANK_HELPER.getFluid(tool);
+        if (fluid.isEmpty() || fluid.isFluidEqual(output)) {
+            addExperience(tool, 1 + Config.bonusMeltingXp.get());
+        }
+    }
+
+    private void handleLootMelting(IToolStackView tool, List<ItemStack> generatedLoot, LootContext context, ModifierEntry melting) {
+        FluidStack current = TANK_HELPER.getFluid(tool);
+        int capacity = TANK_HELPER.getCapacity(tool);
+        if (current.getAmount() >= capacity) {
+            return;
+        }
+
+        boolean forceMelt = tool.getVolatileData().getBoolean(MeltingModule.FORCE_MELTING);
+        if (forceMelt && context.hasParam(LootContextParams.BLOCK_STATE)) {
+            BlockState state = context.getParam(LootContextParams.BLOCK_STATE);
+            forceMelt = tool.getHook(ToolHooks.IS_EFFECTIVE).isToolEffective(tool, state);
+        }
+
+        Level world = context.getLevel();
+        for (ItemStack stack : generatedLoot) {
+            FluidStack output = getMeltItemResult(melting, stack, world);
+            if (!output.isEmpty() && (current.isEmpty() || current.isFluidEqual(output))) {
+                if (forceMelt) {
+                    addExperience(tool, 1 + Config.bonusMeltingXp.get());
+                } else {
+                    int maxCopies = Math.min((capacity - current.getAmount()) / output.getAmount(), stack.getCount());
+                    if (maxCopies <= 0) {
+                        continue;
+                    }
+                    addExperience(tool, 1 + Config.bonusMeltingXp.get());
+                }
+            } else if (forceMelt) {
+                addExperience(tool, 1 + Config.bonusMeltingXp.get());
             }
         }
     }
