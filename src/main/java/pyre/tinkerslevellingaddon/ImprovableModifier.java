@@ -49,7 +49,6 @@ import org.jetbrains.annotations.Nullable;
 import pyre.tinkerslevellingaddon.config.Config;
 import pyre.tinkerslevellingaddon.util.ModUtil;
 import slimeknights.tconstruct.common.TinkerTags;
-import slimeknights.tconstruct.library.json.LevelingValue;
 import slimeknights.tconstruct.library.modifiers.Modifier;
 import slimeknights.tconstruct.library.modifiers.ModifierEntry;
 import slimeknights.tconstruct.library.modifiers.ModifierHooks;
@@ -78,7 +77,6 @@ import slimeknights.tconstruct.library.modifiers.modules.armor.ArmorWalkRadiusMo
 import slimeknights.tconstruct.library.modifiers.modules.armor.CoverGroundWalkerModule;
 import slimeknights.tconstruct.library.modifiers.modules.armor.ReplaceBlockWalkerModule;
 import slimeknights.tconstruct.library.modifiers.modules.armor.ToolActionWalkerTransformModule;
-import slimeknights.tconstruct.library.modifiers.modules.util.ModifierCondition;
 import slimeknights.tconstruct.library.module.ModuleHookMap;
 import slimeknights.tconstruct.library.recipe.entitymelting.EntityMeltingRecipe;
 import slimeknights.tconstruct.library.recipe.entitymelting.EntityMeltingRecipeCache;
@@ -108,6 +106,8 @@ import slimeknights.tconstruct.tools.entity.FluidEffectProjectile;
 import slimeknights.tconstruct.tools.modules.MeltingModule;
 import slimeknights.tconstruct.tools.modules.armor.FireWalkerModule;
 import slimeknights.tconstruct.tools.modules.armor.GlowWalkerModule;
+import slimeknights.tconstruct.tools.modules.combat.SpillingModule;
+import slimeknights.tconstruct.tools.modules.interaction.SplashingModule;
 
 import java.util.Collections;
 import java.util.List;
@@ -765,15 +765,20 @@ public class ImprovableModifier extends NoLevelsModifier implements PlantHarvest
         }
     }
 
-    private void handleSpilling(IToolStackView tool, ModifierEntry modifier, LivingEntity attacker,
+    private void handleSpilling(IToolStackView tool, ModifierEntry spilling, LivingEntity attacker,
                                        Player playerAttacker, Entity target, LivingEntity livingTarget,
                                        Projectile projectile) {
-        if (modifier != ModifierEntry.EMPTY && ModifierCondition.ANY_TOOL.matches(tool, modifier)) {
+        if (spilling == ModifierEntry.EMPTY) {
+            return;
+        }
+
+        MeleeHitModifierHook hook = spilling.getModifier().getHook(ModifierHooks.MELEE_HIT);
+        if (hook instanceof SpillingModule spillingModule && spillingModule.condition().matches(tool, spilling)) {
             FluidStack fluid = TANK_HELPER.getFluid(tool);
             if (!fluid.isEmpty()) {
                 FluidEffects recipe = FluidEffectManager.INSTANCE.find(fluid.getFluid());
                 if (recipe.hasEntityEffects()) {
-                    int consumed = recipe.applyToEntity(fluid, LevelingValue.eachLevel(1).compute(modifier.getEffectiveLevel()),
+                    int consumed = recipe.applyToEntity(fluid, spillingModule.level().compute(spilling.getEffectiveLevel()),
                             FluidEffectContext.builder(attacker.level())
                                     .user(attacker, playerAttacker)
                                     .projectile(projectile)
@@ -789,12 +794,17 @@ public class ImprovableModifier extends NoLevelsModifier implements PlantHarvest
 
     private void handleEntitySplashing(IToolStackView tool, Player player, Entity target, ModifierEntry splashing) {
         //code based on SplashingModule.beforeEntityUse
+        EntityInteractionModifierHook hook = splashing.getModifier().getHook(ModifierHooks.ENTITY_INTERACT);
+        if (!(hook instanceof SplashingModule splashingModule)) {
+            return;
+        }
+
         FluidStack fluid = TANK_HELPER.getFluid(tool);
         if (!fluid.isEmpty()) {
             FluidEffects recipe = FluidEffectManager.INSTANCE.find(fluid.getFluid());
             if (recipe.hasEntityEffects()) {
                 Level world = player.level();
-                float level = LevelingValue.eachLevel(1).compute(splashing);
+                float level = splashingModule.strength().compute(splashing);
                 int consumed = recipe.applyToEntity(fluid, level, FluidEffectContext.builder(world).user(player).target(target), IFluidHandler.FluidAction.SIMULATE);
                 if (consumed > 0) {
                     addExperience(tool, 1 + Config.bonusSplashingXp.get());
@@ -824,6 +834,11 @@ public class ImprovableModifier extends NoLevelsModifier implements PlantHarvest
 
     private void handleBlockSplashing(IToolStackView tool, UseOnContext context, ModifierEntry splashing) {
         //code based on SplashingModule.afterBlockUse
+        EntityInteractionModifierHook hook = splashing.getModifier().getHook(ModifierHooks.ENTITY_INTERACT);
+        if (!(hook instanceof SplashingModule splashingModule)) {
+            return;
+        }
+
         FluidStack fluid = TANK_HELPER.getFluid(tool);
         if (!fluid.isEmpty()) {
             FluidEffects recipe = FluidEffectManager.INSTANCE.find(fluid.getFluid());
@@ -831,12 +846,16 @@ public class ImprovableModifier extends NoLevelsModifier implements PlantHarvest
                 Level world = context.getLevel();
                 Player player = context.getPlayer();
 
-                float level = LevelingValue.eachLevel(1).compute(splashing);
+                float level = splashingModule.strength().compute(splashing);
                 BlockHitResult hit = new BlockHitResult(context.getClickLocation(), context.getClickedFace(),
                         context.getClickedPos(), context.isInside()
                 );
                 BlockState state = world.getBlockState(hit.getBlockPos());
-                int consumed = recipe.applyToBlock(fluid, level, FluidEffectContext.builder(world).user(player).block(hit), IFluidHandler.FluidAction.EXECUTE);
+                int consumed = recipe.applyToBlock(fluid, level,
+                        FluidEffectContext.builder(world)
+                                .user(player)
+                                .block(hit),
+                        IFluidHandler.FluidAction.EXECUTE);
                 if (consumed > 0) {
                     addExperience(tool, 1 + Config.bonusSplashingXp.get());
                     fluid.shrink(consumed);
@@ -844,9 +863,14 @@ public class ImprovableModifier extends NoLevelsModifier implements PlantHarvest
 
                 // AoE
                 if (!fluid.isEmpty()) {
-                    for (BlockPos offset : tool.getHook(ToolHooks.AOE_ITERATOR).getBlocks(tool, context, state, AreaOfEffectIterator.AOEMatchType.TRANSFORM)) {
+                    for (BlockPos offset : tool.getHook(ToolHooks.AOE_ITERATOR)
+                            .getBlocks(tool, context, state, AreaOfEffectIterator.AOEMatchType.TRANSFORM)) {
                         BlockHitResult offsetHit = Util.offset(hit, offset);
-                        consumed = recipe.applyToBlock(fluid, level, FluidEffectContext.builder(world).user(player).block(offsetHit), IFluidHandler.FluidAction.EXECUTE);
+                        consumed = recipe.applyToBlock(fluid, level,
+                                FluidEffectContext.builder(world)
+                                        .user(player)
+                                        .block(offsetHit),
+                                IFluidHandler.FluidAction.EXECUTE);
                         if (consumed > 0) {
                             addExperience(tool, 1 + Config.bonusSplashingXp.get());
                             fluid.shrink(consumed);
