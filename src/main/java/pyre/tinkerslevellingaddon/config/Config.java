@@ -122,6 +122,7 @@ public class Config {
     public static ForgeConfigSpec.BooleanValue enableBlockingDamageXp;
     public static ForgeConfigSpec.BooleanValue enableBonkingXp;
     public static ForgeConfigSpec.BooleanValue enableBrushingXp;
+    public static ForgeConfigSpec.BooleanValue enableBucketingXp;
     public static ForgeConfigSpec.BooleanValue enableFirestarterXp;
     public static ForgeConfigSpec.BooleanValue enableFishingXp;
     public static ForgeConfigSpec.BooleanValue enableFlamewakeXp;
@@ -158,6 +159,7 @@ public class Config {
     public static ForgeConfigSpec.IntValue bonusBlockingDamageXp;
     public static ForgeConfigSpec.IntValue bonusBonkingXp;
     public static ForgeConfigSpec.IntValue bonusBrushingXp;
+    public static ForgeConfigSpec.IntValue bonusBucketingXp;
     public static ForgeConfigSpec.IntValue bonusFirestarterXp;
     public static ForgeConfigSpec.IntValue bonusFishingXp;
     public static ForgeConfigSpec.IntValue bonusFlamewakeXp;
@@ -500,6 +502,10 @@ public class Config {
                 .translation("config.tinkerslevellingaddon.levelling.brushing")
                 .define("brushing", true);
 
+        enableBucketingXp = builder.comment("Placing fluids in world only, no container filling, no fluid pickup.")
+                .translation("config.tinkerslevellingaddon.levelling.bucketing")
+                .define("bucketing", true);
+
         enableFirestarterXp = builder
                 .translation("config.tinkerslevellingaddon.levelling.firestarter")
                 .define("firestarter", true);
@@ -638,6 +644,9 @@ public class Config {
 
         bonusBrushingXp = builder.translation("config.tinkerslevellingaddon.levelling.brushing")
                 .defineInRange("brushing", 0, 0, Integer.MAX_VALUE);
+
+        bonusBucketingXp = builder.translation("config.tinkerslevellingaddon.levelling.bucketing")
+                .defineInRange("bucketing", 0, 0, Integer.MAX_VALUE);
 
         bonusFirestarterXp = builder.translation("config.tinkerslevellingaddon.levelling.firestarter")
                 .defineInRange("firestarter", 0, 0, Integer.MAX_VALUE);

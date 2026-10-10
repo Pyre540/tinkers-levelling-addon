@@ -28,6 +28,8 @@ import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.block.BaseFireBlock;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.material.FlowingFluid;
+import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.phys.BlockHitResult;
@@ -43,6 +45,7 @@ import net.minecraftforge.event.entity.living.ShieldBlockEvent;
 import net.minecraftforge.event.entity.player.ItemFishedEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fluids.FluidStack;
+import net.minecraftforge.fluids.FluidType;
 import net.minecraftforge.fluids.capability.IFluidHandler;
 import net.minecraftforge.fml.common.Mod;
 import org.jetbrains.annotations.Nullable;
@@ -107,6 +110,7 @@ import slimeknights.tconstruct.tools.modules.MeltingModule;
 import slimeknights.tconstruct.tools.modules.armor.FireWalkerModule;
 import slimeknights.tconstruct.tools.modules.armor.GlowWalkerModule;
 import slimeknights.tconstruct.tools.modules.combat.SpillingModule;
+import slimeknights.tconstruct.tools.modules.interaction.BucketModule;
 import slimeknights.tconstruct.tools.modules.interaction.SplashingModule;
 
 import java.util.Collections;
@@ -503,6 +507,11 @@ public class ImprovableModifier extends NoLevelsModifier implements PlantHarvest
         if (Config.enableSplashingXp.get() && splashing != ModifierEntry.EMPTY
                 && tool.getHook(ToolHooks.INTERACTION).canInteract(tool, ModifierIds.splashing, source)) {
             handleBlockSplashing(tool, context, splashing);
+        }
+        ModifierEntry bucketing = tool.getModifier(ModifierIds.bucketing);
+        if (Config.enableBucketingXp.get() && bucketing != ModifierEntry.EMPTY
+                && tool.getHook(ToolHooks.INTERACTION).canInteract(tool, ModifierIds.bucketing, source)) {
+            handleBucketing(tool, context, bucketing);
         }
 
         return InteractionResult.PASS;
@@ -951,6 +960,41 @@ public class ImprovableModifier extends NoLevelsModifier implements PlantHarvest
             } else if (forceMelt) {
                 addExperience(tool, 1 + Config.bonusMeltingXp.get());
             }
+        }
+    }
+
+    private void handleBucketing(IToolStackView tool, UseOnContext context, ModifierEntry bucketing) {
+        BlockInteractionModifierHook hook = bucketing.getModifier().getHook(ModifierHooks.BLOCK_INTERACT);
+        BucketModule bucketModule;
+        if (hook instanceof BucketModule bucketModule1) {
+            bucketModule = bucketModule1;
+        } else if (hook instanceof BlockInteractionModifierHook.FirstMerger merger) {
+            bucketModule = merger.modules().stream()
+                    .filter(BucketModule.class::isInstance)
+                    .map(BucketModule.class::cast)
+                    .findFirst().orElse(null);
+            if (bucketModule == null) {
+                return;
+            }
+        } else {
+            return;
+        }
+
+        Player player = context.getPlayer();
+        if (player == null || !player.isShiftKeyDown()) {
+            return;
+        }
+        FluidStack fluidStack = TANK_HELPER.getFluid(tool);
+        if (fluidStack.getAmount() < FluidType.BUCKET_VOLUME) {
+            return;
+        }
+        Fluid fluid = fluidStack.getFluid();
+        if (!bucketModule.fluids().matches(fluid) || !(fluid instanceof FlowingFluid)) {
+            return;
+        }
+
+        if (canPlaceBucketFluid(context, player, fluidStack)) {
+            addExperience(tool, 1 + Config.bonusBucketingXp.get());
         }
     }
 }

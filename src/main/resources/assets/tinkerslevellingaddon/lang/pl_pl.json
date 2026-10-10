@@ -164,6 +164,7 @@
   "config.tinkerslevellingaddon.levelling.slurping": "Siorbanie",
   "config.tinkerslevellingaddon.levelling.slimeball": "Kula szlamu",
   "config.tinkerslevellingaddon.levelling.melting": "Topienie",
+  "config.tinkerslevellingaddon.levelling.bucketing": "Wiaderko",
 
   "config.tinkerslevellingaddon.client.messages": "Wiadomości",
   "config.tinkerslevellingaddon.client.squash_pluses": "Alternatywny przyrostek dla nazw poziomów",
