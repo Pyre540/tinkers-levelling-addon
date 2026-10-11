@@ -40,7 +40,10 @@ public class ToolLevellingUtil {
     public static final String VELOCITY = "velocity";
     public static final String ACCURACY = "accuracy";
     public static final String PROJECTILE_DAMAGE = "projectileDamage";
-    
+    //shields
+    public static final String BLOCK_AMOUNT = "blockAmount";
+    public static final String BLOCK_ANGLE = "blockAngle";
+
     private static final Map<String, SlotType> TOOL_SLOT_TYPES;
     private static final Map<String, SlotType> ARMOR_SLOT_TYPES;
     private static final Map<String, SlotType> ALL_SLOT_TYPES;
@@ -49,6 +52,7 @@ public class ToolLevellingUtil {
     private static final Map<String, FloatToolStat> RANGED_STAT_TYPES;
     private static final Map<String, FloatToolStat> ARMOR_STAT_TYPES;
     private static final Map<String, FloatToolStat> STAFF_STAT_TYPES;
+    private static final Map<String, FloatToolStat> SHIELD_STAT_TYPES;
     private static final Map<String, FloatToolStat> ALL_STAT_TYPES;
     
     private static final Random RANDOM = new Random();
@@ -103,11 +107,20 @@ public class ToolLevellingUtil {
         STAFF_STAT_TYPES.put(PROJECTILE_DAMAGE, ToolStats.PROJECTILE_DAMAGE);
         STAFF_STAT_TYPES.put(DURABILITY, ToolStats.DURABILITY);
         STAFF_STAT_TYPES.put(ARMOR, ToolStats.ARMOR);
-        
+
+        SHIELD_STAT_TYPES = new LinkedHashMap<>();
+        SHIELD_STAT_TYPES.put(NONE, null);
+        SHIELD_STAT_TYPES.put(DURABILITY, ToolStats.DURABILITY);
+        SHIELD_STAT_TYPES.put(ARMOR_TOUGHNESS, ToolStats.ARMOR_TOUGHNESS);
+        SHIELD_STAT_TYPES.put(KNOCKBACK_RESISTANCE, ToolStats.KNOCKBACK_RESISTANCE);
+        SHIELD_STAT_TYPES.put(BLOCK_AMOUNT, ToolStats.BLOCK_AMOUNT);
+        SHIELD_STAT_TYPES.put(BLOCK_ANGLE, ToolStats.BLOCK_ANGLE);
+
         ALL_STAT_TYPES = new HashMap<>(TOOL_STAT_TYPES);
         ALL_STAT_TYPES.putAll(RANGED_STAT_TYPES);
         ALL_STAT_TYPES.putAll(ARMOR_STAT_TYPES);
         ALL_STAT_TYPES.putAll(STAFF_STAT_TYPES);
+        ALL_STAT_TYPES.putAll(SHIELD_STAT_TYPES);
     }
     
     public static Set<String> getToolSlotTypes() {
@@ -127,6 +140,10 @@ public class ToolLevellingUtil {
         //this probably always be the same as tools
         return TOOL_SLOT_TYPES.keySet();
     }
+
+    public static Set<String> getShieldSlotTypes() {
+        return TOOL_SLOT_TYPES.keySet();
+    }
     
     public static Set<String> getToolStatTypes() {
         return TOOL_STAT_TYPES.keySet();
@@ -143,8 +160,15 @@ public class ToolLevellingUtil {
     public static Set<String> getStaffStatTypes() {
         return STAFF_STAT_TYPES.keySet();
     }
+
+    public static Set<String> getShieldStatTypes() {
+        return SHIELD_STAT_TYPES.keySet();
+    }
     
     public static boolean isSlotsLevellingEnabled(IToolContext context) {
+        if (isShield(context)) {
+            return Config.shieldSlotGainingMethod.get() != Config.GainingMethod.NONE;
+        }
         if (isStaff(context)) {
             return Config.staffSlotGainingMethod.get() != Config.GainingMethod.NONE;
         }
@@ -159,6 +183,9 @@ public class ToolLevellingUtil {
     }
     
     public static boolean isStatsLevellingEnabled(IToolContext context) {
+        if (isShield(context)) {
+            return Config.shieldStatGainingMethod.get() != Config.GainingMethod.NONE;
+        }
         if (isStaff(context)) {
             return Config.staffStatGainingMethod.get() != Config.GainingMethod.NONE;
         }
@@ -173,6 +200,9 @@ public class ToolLevellingUtil {
     }
     
     public static boolean canPredictNextSlot(ToolStack tool) {
+        if (isShield(tool)) {
+            return Config.shieldSlotGainingMethod.get() == Config.GainingMethod.PREDEFINED_ORDER;
+        }
         if (isStaff(tool)) {
             return Config.staffSlotGainingMethod.get() == Config.GainingMethod.PREDEFINED_ORDER;
         }
@@ -187,6 +217,9 @@ public class ToolLevellingUtil {
     }
     
     public static boolean canPredictNextStat(ToolStack tool) {
+        if (isShield(tool)) {
+            return Config.shieldStatGainingMethod.get() == Config.GainingMethod.PREDEFINED_ORDER;
+        }
         if (isStaff(tool)) {
             return Config.staffStatGainingMethod.get() == Config.GainingMethod.PREDEFINED_ORDER;
         }
@@ -201,6 +234,14 @@ public class ToolLevellingUtil {
     }
     
     public static String getSlot(IToolStackView tool, int level) {
+        if (isShield(tool)) {
+            return switch (Config.shieldSlotGainingMethod.get()) {
+                case NONE -> null;
+                case PREDEFINED_ORDER -> getShieldSlotForLevel(level);
+                case RANDOM -> getRandomShieldSlot();
+            };
+        }
+
         if (isStaff(tool)) {
             return switch (Config.staffSlotGainingMethod.get()) {
                 case NONE -> null;
@@ -233,6 +274,14 @@ public class ToolLevellingUtil {
     }
     
     public static String getStat(IToolStackView tool, int level) {
+        if (isShield(tool)) {
+            return switch (Config.shieldStatGainingMethod.get()) {
+                case NONE -> null;
+                case PREDEFINED_ORDER -> getShieldStatForLevel(level);
+                case RANDOM -> getRandomShieldStat();
+            };
+        }
+
         if (isStaff(tool)) {
             return switch (Config.staffStatGainingMethod.get()) {
                 case NONE -> null;
@@ -269,6 +318,9 @@ public class ToolLevellingUtil {
     }
     
     public static double getStatValue(IToolContext tool, FloatToolStat stat) {
+        if (isShield(tool)) {
+            return Config.getShieldStatValue(stat);
+        }
         if (isStaff(tool)) {
             return Config.getStaffStatValue(stat);
         }
@@ -401,6 +453,10 @@ public class ToolLevellingUtil {
     public static boolean isRanged(IToolContext tool) {
         return tool.hasTag(TinkerTags.Items.RANGED);
     }
+
+    public static boolean isShield(IToolContext tool) {
+        return tool.hasTag(TinkerTags.Items.SHIELDS);
+    }
     
     public static boolean isBroadTool(IToolStackView tool) {
         return tool.getMaterials().size() > 3 || isStaff(tool);
@@ -453,6 +509,16 @@ public class ToolLevellingUtil {
         List<String> staffSlotsRandomPool = Config.getStaffSlotsRandomPool();
         return staffSlotsRandomPool.get(RANDOM.nextInt(staffSlotsRandomPool.size()));
     }
+
+    private static String getShieldSlotForLevel(int level) {
+        List<String> shieldSlotsOrder = Config.getShieldSlotsOrder();
+        return shieldSlotsOrder.get((level - 1) % shieldSlotsOrder.size());
+    }
+
+    private static String getRandomShieldSlot() {
+        List<String> shieldSlotsRandomPool = Config.getShieldSlotsRandomPool();
+        return shieldSlotsRandomPool.get(RANDOM.nextInt(shieldSlotsRandomPool.size()));
+    }
     
     private static String getToolStatForLevel(int level) {
         List<String> toolsStatsOrder = Config.getToolsStatsOrder();
@@ -492,6 +558,16 @@ public class ToolLevellingUtil {
     private static String getRandomStaffStat() {
         List<String> staffStatsRandomPool = Config.getStaffStatsRandomPool();
         return staffStatsRandomPool.get(RANDOM.nextInt(staffStatsRandomPool.size()));
+    }
+
+    private static String getShieldStatForLevel(int level) {
+        List<String> shieldStatsOrder = Config.getShieldStatsOrder();
+        return shieldStatsOrder.get((level - 1) % shieldStatsOrder.size());
+    }
+
+    private static String getRandomShieldStat() {
+        List<String> shieldStatsRandomPool = Config.getShieldStatsRandomPool();
+        return shieldStatsRandomPool.get(RANDOM.nextInt(shieldStatsRandomPool.size()));
     }
     
     private static void appendHistory(ResourceLocation historyKey, String value, ModDataNBT data) {

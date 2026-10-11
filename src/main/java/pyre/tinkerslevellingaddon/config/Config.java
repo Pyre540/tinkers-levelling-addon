@@ -19,6 +19,8 @@ public class Config {
     private static final List<String> DEFAULT_ARMOR_SLOTS_RANDOM_POOL = List.of(UPGRADE, UPGRADE, DEFENSE, DEFENSE, ABILITY);
     private static final List<String> DEFAULT_RANGED_SLOTS_ORDER = List.of(UPGRADE, UPGRADE, UPGRADE, ABILITY, UPGRADE);
     private static final List<String> DEFAULT_RANGED_SLOTS_RANDOM_POOL = List.of(UPGRADE, UPGRADE, UPGRADE, UPGRADE, ABILITY);
+    private static final List<String> DEFAULT_SHIELD_SLOTS_ORDER = List.of(UPGRADE, DEFENSE, UPGRADE, DEFENSE, ABILITY);
+    private static final List<String> DEFAULT_SHIELD_SLOTS_RANDOM_POOL = List.of(UPGRADE, DEFENSE, UPGRADE, DEFENSE, ABILITY);
     private static final List<String> DEFAULT_STAFF_SLOTS_ORDER = List.of(UPGRADE, UPGRADE, UPGRADE, DEFENSE, ABILITY);
     private static final List<String> DEFAULT_STAFF_SLOTS_RANDOM_POOL = List.of(UPGRADE, UPGRADE, UPGRADE, DEFENSE, ABILITY);
     private static final List<String> DEFAULT_TOOLS_SLOTS_ORDER = List.of(UPGRADE, UPGRADE, UPGRADE, ABILITY, UPGRADE);
@@ -28,6 +30,8 @@ public class Config {
     private static final List<String> DEFAULT_ARMOR_STATS_RANDOM_POOL = List.of(DURABILITY, ARMOR, ARMOR_TOUGHNESS, KNOCKBACK_RESISTANCE);
     private static final List<String> DEFAULT_RANGED_STATS_ORDER = List.of(DURABILITY, DRAW_SPEED, VELOCITY, ACCURACY, PROJECTILE_DAMAGE);
     private static final List<String> DEFAULT_RANGED_STATS_RANDOM_POOL = List.of(DURABILITY, DRAW_SPEED, VELOCITY, ACCURACY, PROJECTILE_DAMAGE);
+    private static final List<String> DEFAULT_SHIELD_STATS_ORDER = List.of(DURABILITY, BLOCK_AMOUNT, BLOCK_ANGLE, ARMOR_TOUGHNESS, KNOCKBACK_RESISTANCE);
+    private static final List<String> DEFAULT_SHIELD_STATS_RANDOM_POOL = List.of(DURABILITY, BLOCK_AMOUNT, BLOCK_ANGLE, ARMOR_TOUGHNESS, KNOCKBACK_RESISTANCE);
     private static final List<String> DEFAULT_STAFF_STATS_ORDER = List.of(DURABILITY, DRAW_SPEED, VELOCITY, ACCURACY, PROJECTILE_DAMAGE, ARMOR);
     private static final List<String> DEFAULT_STAFF_STATS_RANDOM_POOL = List.of(DURABILITY, DRAW_SPEED, VELOCITY, ACCURACY, PROJECTILE_DAMAGE, ARMOR);
     private static final List<String> DEFAULT_TOOLS_STATS_ORDER = List.of(DURABILITY, ATTACK_DAMAGE, ATTACK_SPEED, MINING_SPEED);
@@ -52,6 +56,8 @@ public class Config {
     public static ForgeConfigSpec.EnumValue<GainingMethod> armorStatGainingMethod;
     public static ForgeConfigSpec.EnumValue<GainingMethod> rangedSlotGainingMethod;
     public static ForgeConfigSpec.EnumValue<GainingMethod> rangedStatGainingMethod;
+    public static ForgeConfigSpec.EnumValue<GainingMethod> shieldSlotGainingMethod;
+    public static ForgeConfigSpec.EnumValue<GainingMethod> shieldStatGainingMethod;
     public static ForgeConfigSpec.EnumValue<GainingMethod> staffSlotGainingMethod;
     public static ForgeConfigSpec.EnumValue<GainingMethod> staffStatGainingMethod;
     public static ForgeConfigSpec.EnumValue<GainingMethod> toolsSlotGainingMethod;
@@ -66,6 +72,8 @@ public class Config {
     private static ForgeConfigSpec.ConfigValue<List<? extends String>> armorSlotTypeOrder;
     private static ForgeConfigSpec.ConfigValue<List<? extends String>> rangedSlotTypeRandomPool;
     private static ForgeConfigSpec.ConfigValue<List<? extends String>> rangedSlotTypeOrder;
+    private static ForgeConfigSpec.ConfigValue<List<? extends String>> shieldSlotTypeRandomPool;
+    private static ForgeConfigSpec.ConfigValue<List<? extends String>> shieldSlotTypeOrder;
     private static ForgeConfigSpec.ConfigValue<List<? extends String>> staffSlotTypeRandomPool;
     private static ForgeConfigSpec.ConfigValue<List<? extends String>> staffSlotTypeOrder;
     private static ForgeConfigSpec.ConfigValue<List<? extends String>> toolsSlotTypeRandomPool;
@@ -76,6 +84,8 @@ public class Config {
     private static ForgeConfigSpec.ConfigValue<List<? extends String>> armorStatTypeOrder;
     private static ForgeConfigSpec.ConfigValue<List<? extends String>> rangedStatTypeRandomPool;
     private static ForgeConfigSpec.ConfigValue<List<? extends String>> rangedStatTypeOrder;
+    private static ForgeConfigSpec.ConfigValue<List<? extends String>> shieldStatTypeRandomPool;
+    private static ForgeConfigSpec.ConfigValue<List<? extends String>> shieldStatTypeOrder;
     private static ForgeConfigSpec.ConfigValue<List<? extends String>> staffStatTypeRandomPool;
     private static ForgeConfigSpec.ConfigValue<List<? extends String>> staffStatTypeOrder;
     private static ForgeConfigSpec.ConfigValue<List<? extends String>> toolsStatTypeRandomPool;
@@ -95,6 +105,13 @@ public class Config {
     public static ForgeConfigSpec.IntValue rangedDurabilityValue;
     public static ForgeConfigSpec.DoubleValue rangedProjectileDamageValue;
     public static ForgeConfigSpec.DoubleValue rangedVelocityValue;
+
+    //general.stats.shieldValues
+    public static ForgeConfigSpec.DoubleValue shieldArmorToughnessValue;
+    public static ForgeConfigSpec.DoubleValue shieldBlockAmountValue;
+    public static ForgeConfigSpec.IntValue shieldBlockAngleValue;
+    public static ForgeConfigSpec.IntValue shieldDurabilityValue;
+    public static ForgeConfigSpec.DoubleValue shieldKnockbackResistanceValue;
 
     //general.stats.staffValues
     public static ForgeConfigSpec.DoubleValue staffAccuracyValue;
@@ -207,6 +224,10 @@ public class Config {
                 .translation("config.tinkerslevellingaddon.general.ranged_slot_gaining_method")
                 .defineEnum("rangedSlotGainingMethod", GainingMethod.PREDEFINED_ORDER, EnumGetMethod.NAME_IGNORECASE, GainingMethod.values());
 
+        shieldSlotGainingMethod = builder.comment("Method of gaining modifier slots for shields.")
+                .translation("config.tinkerslevellingaddon.general.shield_slot_gaining_method")
+                .defineEnum("shieldSlotGainingMethod", GainingMethod.PREDEFINED_ORDER, EnumGetMethod.NAME_IGNORECASE, GainingMethod.values());
+
         staffSlotGainingMethod = builder.comment("Method of gaining modifier slots for staffs.")
                 .translation("config.tinkerslevellingaddon.general.staff_slot_gaining_method")
                 .defineEnum("staffSlotGainingMethod", GainingMethod.PREDEFINED_ORDER, EnumGetMethod.NAME_IGNORECASE, GainingMethod.values());
@@ -224,6 +245,10 @@ public class Config {
         rangedStatGainingMethod = builder.comment("Method of gaining stats for tools.")
                 .translation("config.tinkerslevellingaddon.general.ranged_stat_gaining_method")
                 .defineEnum("rangedStatGainingMethod", GainingMethod.NONE, EnumGetMethod.NAME_IGNORECASE, GainingMethod.values());
+
+        shieldStatGainingMethod = builder.comment("Method of gaining stats for shields.")
+                .translation("config.tinkerslevellingaddon.general.shield_stat_gaining_method")
+                .defineEnum("shieldStatGainingMethod", GainingMethod.NONE, EnumGetMethod.NAME_IGNORECASE, GainingMethod.values());
 
         staffStatGainingMethod = builder.comment("Method of gaining stats for staffs.")
                 .translation("config.tinkerslevellingaddon.general.staff_stat_gaining_method")
@@ -280,6 +305,18 @@ public class Config {
                         "Allowed values: " + String.join(", ", getToolSlotTypes()))
                 .translation("config.tinkerslevellingaddon.general.slots.ranged_slot_type_random_pool")
                 .defineList("rangedSlotTypeRandomPool", DEFAULT_RANGED_SLOTS_RANDOM_POOL, t -> getRangedSlotTypes().contains(t));
+
+        shieldSlotTypeOrder = builder.comment("List of modifier slot types (in order) that will be awarded when leveling up shields. If level is higher than list size the mod will start over.",
+                        "If empty default order will be used (" + String.join(", ", DEFAULT_SHIELD_SLOTS_ORDER) + ").",
+                        "Allowed values: " + String.join(", ", getShieldSlotTypes()))
+                .translation("config.tinkerslevellingaddon.general.slots.shield_slot_type_order")
+                .defineList("shieldSlotTypeOrder", DEFAULT_SHIELD_SLOTS_ORDER, t -> getShieldSlotTypes().contains(t));
+
+        shieldSlotTypeRandomPool = builder.comment("Set of modifier slot types from which random slot will be awarded when leveling up shields.",
+                        "If empty default pool will be used (" + String.join(", ", DEFAULT_SHIELD_SLOTS_RANDOM_POOL) + ").",
+                        "Allowed values: " + String.join(", ", getShieldSlotTypes()))
+                .translation("config.tinkerslevellingaddon.general.modifiers.shield_slot_type_random_pool")
+                .defineList("shieldSlotTypeRandomPool", DEFAULT_SHIELD_SLOTS_RANDOM_POOL, t -> getShieldSlotTypes().contains(t));
 
         staffSlotTypeOrder = builder.comment("List of modifier slot types (in order) that will be awarded when leveling up staffs. If level is higher than list size the mod will start over.",
                         "If empty default order will be used (" + String.join(", ", DEFAULT_STAFF_SLOTS_ORDER) + ").",
@@ -338,6 +375,20 @@ public class Config {
                 .defineList("rangedStatTypeRandomPool", DEFAULT_RANGED_STATS_RANDOM_POOL, t -> getRangedStatTypes().contains(t));
 
         rangedStatsValuesConfig(builder);
+
+        shieldStatTypeOrder = builder.comment("List of stat types (in order) that will be awarded when leveling up shields. If level is higher than list size the mod will start over.",
+                        "If empty default order will be used (" + String.join(", ", DEFAULT_SHIELD_STATS_ORDER) + ").",
+                        "Allowed values: " + String.join(", ", getShieldStatTypes()))
+                .translation("config.tinkerslevellingaddon.general.stats.shield_stat_type_order")
+                .defineList("shieldStatTypeOrder", DEFAULT_SHIELD_STATS_ORDER, t -> getShieldStatTypes().contains(t));
+
+        shieldStatTypeRandomPool = builder.comment("Set of stat types from which random stat will be awarded when leveling up shields.",
+                        "If empty default pool will be used (" + String.join(", ", DEFAULT_SHIELD_STATS_RANDOM_POOL) + ").",
+                        "Allowed values: " + String.join(", ", getShieldStatTypes()))
+                .translation("config.tinkerslevellingaddon.general.stats.shield_stat_type_random_pool")
+                .defineList("shieldStatTypeRandomPool", DEFAULT_SHIELD_STATS_RANDOM_POOL, t -> getShieldStatTypes().contains(t));
+
+        shieldStatsValuesConfig(builder);
 
         staffStatTypeOrder = builder.comment("List of stat types (in order) that will be awarded when leveling up staffs. If level is higher than list size the mod will start over.",
                         "If empty default order will be used (" + String.join(", ", DEFAULT_STAFF_STATS_ORDER) + ").",
@@ -411,6 +462,27 @@ public class Config {
 
         rangedVelocityValue = builder.translation("tooltip.tinkerslevellingaddon.stat.velocity")
                 .defineInRange(VELOCITY, 0.1D, 0.1D, 10D);
+
+        builder.pop();
+    }
+
+    private static void shieldStatsValuesConfig(ForgeConfigSpec.Builder builder) {
+        builder.comment("Shield stat values rewarded on level ups").push("shieldValues");
+
+        shieldArmorToughnessValue = builder.translation("tooltip.tinkerslevellingaddon.stats.armor_toughness")
+                .defineInRange(ARMOR_TOUGHNESS, 0.1D, 0.1D, 10D);
+
+        shieldBlockAmountValue = builder.translation("tooltip.tinkerslevellingaddon.stats.block_amount")
+                .defineInRange(BLOCK_AMOUNT, 5.0D, 0.1D, 100D);
+
+        shieldBlockAngleValue = builder.translation("tooltip.tinkerslevellingaddon.stats.block_angle")
+                .defineInRange(BLOCK_ANGLE, 2, 1, 360);
+
+        shieldDurabilityValue = builder.translation("tooltip.tinkerslevellingaddon.stat.durability")
+                .defineInRange(DURABILITY, 30, 1, 1000);
+
+        shieldKnockbackResistanceValue = builder.translation("tooltip.tinkerslevellingaddon.stats.knockback_resistance")
+                .defineInRange(KNOCKBACK_RESISTANCE, 0.1D, 0.1D, 1D);
 
         builder.pop();
     }
@@ -829,6 +901,38 @@ public class Config {
         return (List<String>) statsRandomPool;
     }
 
+    public static List<String> getShieldSlotsOrder() {
+        List<? extends String> slotsOrder = shieldSlotTypeOrder.get();
+        if (slotsOrder.isEmpty()) {
+            slotsOrder = DEFAULT_SHIELD_SLOTS_ORDER;
+        }
+        return (List<String>) slotsOrder;
+    }
+
+    public static List<String> getShieldSlotsRandomPool() {
+        List<? extends String> slotsRandomPool = shieldSlotTypeRandomPool.get();
+        if (slotsRandomPool.isEmpty()) {
+            slotsRandomPool = DEFAULT_SHIELD_SLOTS_RANDOM_POOL;
+        }
+        return (List<String>) slotsRandomPool;
+    }
+
+    public static List<String> getShieldStatsOrder() {
+        List<? extends String> statsOrder = shieldStatTypeOrder.get();
+        if (statsOrder.isEmpty()) {
+            statsOrder = DEFAULT_SHIELD_STATS_ORDER;
+        }
+        return (List<String>) statsOrder;
+    }
+
+    public static List<String> getShieldStatsRandomPool() {
+        List<? extends String> statsRandomPool = shieldStatTypeRandomPool.get();
+        if (statsRandomPool.isEmpty()) {
+            statsRandomPool = DEFAULT_SHIELD_STATS_RANDOM_POOL;
+        }
+        return (List<String>) statsRandomPool;
+    }
+
     public static List<String> getStaffSlotsOrder() {
         List<? extends String> slotsOrder = staffSlotTypeOrder.get();
         if (slotsOrder.isEmpty()) {
@@ -930,6 +1034,25 @@ public class Config {
         }
         if (stat.equals(ToolStats.ATTACK_SPEED)) {
             return rangedAttackSpeedValue.get();
+        }
+        return 0;
+    }
+
+    public static double getShieldStatValue(FloatToolStat stat) {
+        if (stat.equals(ToolStats.ARMOR_TOUGHNESS)) {
+            return shieldArmorToughnessValue.get();
+        }
+        if (stat.equals(ToolStats.BLOCK_AMOUNT)) {
+            return shieldBlockAmountValue.get();
+        }
+        if (stat.equals(ToolStats.BLOCK_ANGLE)) {
+            return shieldBlockAngleValue.get();
+        }
+        if (stat.equals(ToolStats.DURABILITY)) {
+            return shieldDurabilityValue.get();
+        }
+        if (stat.equals(ToolStats.KNOCKBACK_RESISTANCE)) {
+            return shieldKnockbackResistanceValue.get();
         }
         return 0;
     }
