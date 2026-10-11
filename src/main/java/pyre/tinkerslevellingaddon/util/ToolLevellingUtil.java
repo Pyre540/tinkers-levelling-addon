@@ -430,6 +430,7 @@ public class ToolLevellingUtil {
                         toolCopy.createStack().getDisplayName()), player);
 
                 data.remove(PENDING_LEVEL_UP_KEY);
+                tool.rebuildStats();
             }
         }
     }
