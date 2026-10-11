@@ -51,6 +51,8 @@ import net.minecraftforge.fml.common.Mod;
 import org.jetbrains.annotations.Nullable;
 import pyre.tinkerslevellingaddon.config.Config;
 import pyre.tinkerslevellingaddon.util.ModUtil;
+import slimeknights.mantle.data.loadable.record.RecordLoadable;
+import slimeknights.mantle.data.loadable.record.SingletonLoader;
 import slimeknights.tconstruct.common.TinkerTags;
 import slimeknights.tconstruct.library.modifiers.Modifier;
 import slimeknights.tconstruct.library.modifiers.ModifierEntry;
@@ -75,12 +77,13 @@ import slimeknights.tconstruct.library.modifiers.hook.special.BlockTransformModi
 import slimeknights.tconstruct.library.modifiers.hook.special.PlantHarvestModifierHook;
 import slimeknights.tconstruct.library.modifiers.hook.special.ShearsModifierHook;
 import slimeknights.tconstruct.library.modifiers.hook.special.sling.SlingLaunchModifierHook;
-import slimeknights.tconstruct.library.modifiers.impl.NoLevelsModifier;
+import slimeknights.tconstruct.library.modifiers.modules.ModifierModule;
 import slimeknights.tconstruct.library.modifiers.modules.armor.ArmorWalkRadiusModule;
 import slimeknights.tconstruct.library.modifiers.modules.armor.CoverGroundWalkerModule;
 import slimeknights.tconstruct.library.modifiers.modules.armor.ReplaceBlockWalkerModule;
 import slimeknights.tconstruct.library.modifiers.modules.armor.ToolActionWalkerTransformModule;
-import slimeknights.tconstruct.library.module.ModuleHookMap;
+import slimeknights.tconstruct.library.module.HookProvider;
+import slimeknights.tconstruct.library.module.ModuleHook;
 import slimeknights.tconstruct.library.recipe.entitymelting.EntityMeltingRecipe;
 import slimeknights.tconstruct.library.recipe.entitymelting.EntityMeltingRecipeCache;
 import slimeknights.tconstruct.library.tools.SlotType;
@@ -123,13 +126,25 @@ import static pyre.tinkerslevellingaddon.util.WorldUtil.*;
 import static slimeknights.tconstruct.library.tools.capability.fluid.ToolTankHelper.TANK_HELPER;
 
 @Mod.EventBusSubscriber(modid = TinkersLevellingAddon.MOD_ID, bus = Mod.EventBusSubscriber.Bus.FORGE)
-public class ImprovableModifier extends NoLevelsModifier implements PlantHarvestModifierHook, ShearsModifierHook,
+public enum ImprovableModule implements ModifierModule, PlantHarvestModifierHook, ShearsModifierHook,
         BlockBreakModifierHook, BlockTransformModifierHook, ProjectileLaunchModifierHook, OnAttackedModifierHook,
         MeleeHitModifierHook, LauncherHitModifierHook, ElytraFlightModifierHook, ArmorWalkModifierHook,
         UsingToolModifierHook, InventoryTickModifierHook, EntityInteractionModifierHook, SlingLaunchModifierHook,
         BlockInteractionModifierHook, ProcessLootModifierHook, ModifierRemovalHook, VolatileDataModifierHook,
         ToolStatsModifierHook {
-    
+    INSTANCE;
+
+    private static final List<ModuleHook<?>> DEFAULT_HOOKS =
+            HookProvider.<ImprovableModule>defaultHooks(ModifierHooks.PLANT_HARVEST, ModifierHooks.SHEAR_ENTITY,
+            ModifierHooks.TOOL_USING, ModifierHooks.ENTITY_INTERACT, ModifierHooks.BLOCK_TRANSFORM,
+            ModifierHooks.BLOCK_BREAK, ModifierHooks.BLOCK_INTERACT, ModifierHooks.ON_ATTACKED,
+            ModifierHooks.MELEE_HIT, ModifierHooks.LAUNCHER_HIT, ModifierHooks.PROJECTILE_LAUNCH,
+            ModifierHooks.ELYTRA_FLIGHT, ModifierHooks.BOOT_WALK, ModifierHooks.SLING_LAUNCH,
+            ModifierHooks.INVENTORY_TICK, ModifierHooks.PROCESS_LOOT, ModifierHooks.VOLATILE_DATA,
+            ModifierHooks.TOOL_STATS, ModifierHooks.REMOVE);
+
+    public static final RecordLoadable<ImprovableModule> LOADER = new SingletonLoader<>(INSTANCE);
+
     public static final TextColor IMPROVABLE_MODIFIER_COLOR = TextColor.fromRgb(9337340);
     
     public static final ResourceLocation EXPERIENCE_KEY = ModUtil.getResource("experience");
@@ -139,19 +154,17 @@ public class ImprovableModifier extends NoLevelsModifier implements PlantHarvest
     public static final ResourceLocation PENDING_LEVEL_UP_KEY = ModUtil.getResource("pending_level_up");
 
     @Override
-    protected void registerHooks(ModuleHookMap.Builder hookBuilder) {
-        super.registerHooks(hookBuilder);
-        hookBuilder.addHook(this, ModifierHooks.PLANT_HARVEST, ModifierHooks.SHEAR_ENTITY,
-                ModifierHooks.TOOL_USING, ModifierHooks.ENTITY_INTERACT, ModifierHooks.BLOCK_TRANSFORM,
-                ModifierHooks.BLOCK_BREAK, ModifierHooks.BLOCK_INTERACT, ModifierHooks.ON_ATTACKED,
-                ModifierHooks.MELEE_HIT, ModifierHooks.LAUNCHER_HIT, ModifierHooks.PROJECTILE_LAUNCH,
-                ModifierHooks.ELYTRA_FLIGHT, ModifierHooks.BOOT_WALK, ModifierHooks.SLING_LAUNCH,
-                ModifierHooks.INVENTORY_TICK, ModifierHooks.PROCESS_LOOT, ModifierHooks.VOLATILE_DATA,
-                ModifierHooks.TOOL_STATS, ModifierHooks.REMOVE);
+    public RecordLoadable<? extends ModifierModule> getLoader() {
+        return LOADER;
     }
 
     @Override
-    public int getPriority() {
+    public List<ModuleHook<?>> getDefaultHooks() {
+        return DEFAULT_HOOKS;
+    }
+
+    @Override
+    public Integer getPriority() {
         return 300;
     }
 

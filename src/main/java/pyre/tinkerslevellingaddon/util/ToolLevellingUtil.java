@@ -16,7 +16,7 @@ import slimeknights.tconstruct.tools.data.ModifierIds;
 
 import java.util.*;
 
-import static pyre.tinkerslevellingaddon.ImprovableModifier.*;
+import static pyre.tinkerslevellingaddon.ImprovableModule.*;
 import static pyre.tinkerslevellingaddon.util.ToolUtil.hasImprovable;
 
 public class ToolLevellingUtil {

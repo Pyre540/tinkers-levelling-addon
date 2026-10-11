@@ -10,7 +10,7 @@ import net.minecraftforge.client.settings.KeyModifier;
 import net.minecraftforge.event.entity.player.ItemTooltipEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
-import pyre.tinkerslevellingaddon.ImprovableModifier;
+import pyre.tinkerslevellingaddon.ImprovableModule;
 import pyre.tinkerslevellingaddon.TinkersLevellingAddon;
 import pyre.tinkerslevellingaddon.config.Config;
 import pyre.tinkerslevellingaddon.util.ModUtil;
@@ -31,16 +31,16 @@ import static pyre.tinkerslevellingaddon.util.ToolLevellingUtil.NONE;
 public class TooltipEventHandler {
     
     private static final Component TOOLTIP_HOLD_ALT =  ModUtil.makeTranslation("tooltip", "hold_alt",
-            ModUtil.makeTranslation("key", "alt", ImprovableModifier.IMPROVABLE_MODIFIER_COLOR)
+            ModUtil.makeTranslation("key", "alt", ImprovableModule.IMPROVABLE_MODIFIER_COLOR)
                     .withStyle(s -> s.withItalic(true)));
     private static final Component TOOLTIP_MODIFIERS_GAINED =
-            ModUtil.makeTranslation("tooltip", "info.slots", ImprovableModifier.IMPROVABLE_MODIFIER_COLOR)
+            ModUtil.makeTranslation("tooltip", "info.slots", ImprovableModule.IMPROVABLE_MODIFIER_COLOR)
                     .withStyle(s -> s.withUnderlined(true));
     private static final Component TOOLTIP_STATS_GAINED =
-            ModUtil.makeTranslation("tooltip", "info.stats", ImprovableModifier.IMPROVABLE_MODIFIER_COLOR)
+            ModUtil.makeTranslation("tooltip", "info.stats", ImprovableModule.IMPROVABLE_MODIFIER_COLOR)
                     .withStyle(s -> s.withUnderlined(true));
     private static final Component TOOLTIP_NEXT_LEVEL =
-            ModUtil.makeTranslation("tooltip", "info.next_level", ImprovableModifier.IMPROVABLE_MODIFIER_COLOR)
+            ModUtil.makeTranslation("tooltip", "info.next_level", ImprovableModule.IMPROVABLE_MODIFIER_COLOR)
                     .withStyle(s -> s.withUnderlined(true));
 
     @SubscribeEvent
@@ -51,7 +51,7 @@ public class TooltipEventHandler {
         }
 
         ItemStack stack = event.getItemStack();
-        if (ModifierUtil.getModifierLevel(stack, Registration.IMPROVABLE.get().getId()) <= 0) {
+        if (ModifierUtil.getModifierLevel(stack, AddonModifierIds.IMPROVABLE) <= 0) {
             return;
         }
 
@@ -81,14 +81,14 @@ public class TooltipEventHandler {
 
     private static List<Component> prepareGeneralInfo(ToolStack tool) {
         List<Component> infoEntries = new ArrayList<>();
-        int level = tool.getPersistentData().getInt(ImprovableModifier.LEVEL_KEY);
+        int level = tool.getPersistentData().getInt(ImprovableModule.LEVEL_KEY);
         
         MutableComponent fullLevelName = ModUtil.makeTranslation("tooltip", "level.name", ChatFormatting.GRAY,
                 getLevelName(level), ModUtil.makeText(level, ChatFormatting.GRAY));
         infoEntries.add(ModUtil.makeTranslation("tooltip", "level", fullLevelName));
 
         if (ToolLevellingUtil.canLevelUp(level)) {
-            MutableComponent xp = ModUtil.makeText(tool.getPersistentData().getInt(ImprovableModifier.EXPERIENCE_KEY), ChatFormatting.GOLD);
+            MutableComponent xp = ModUtil.makeText(tool.getPersistentData().getInt(ImprovableModule.EXPERIENCE_KEY), ChatFormatting.GOLD);
             MutableComponent xpNeeded = ModUtil.makeText(ToolLevellingUtil.getXpNeededForLevel(level + 1, ToolLevellingUtil.isBroadTool(tool)), ChatFormatting.GOLD);
             MutableComponent xpValue = ModUtil.makeTranslation("tooltip", "xp.value", ChatFormatting.GRAY, xp, xpNeeded);
             infoEntries.add(ModUtil.makeTranslation("tooltip","xp", xpValue));
@@ -99,7 +99,7 @@ public class TooltipEventHandler {
     private static List<Component> prepareLevelInfo(ToolStack tool) {
         List<Component> infoEntries = new ArrayList<>();
 
-        String modifierHistory = tool.getPersistentData().getString(ImprovableModifier.SLOT_HISTORY_KEY);
+        String modifierHistory = tool.getPersistentData().getString(ImprovableModule.SLOT_HISTORY_KEY);
         if (!modifierHistory.isBlank()) {
             Map<String, Long> gainedModifiers = Arrays.stream(modifierHistory.split(";"))
                     .filter(s -> !s.equals(NONE))
@@ -112,7 +112,7 @@ public class TooltipEventHandler {
             }
         }
 
-        String statHistory = tool.getPersistentData().getString(ImprovableModifier.STAT_HISTORY_KEY);
+        String statHistory = tool.getPersistentData().getString(ImprovableModule.STAT_HISTORY_KEY);
         if (!statHistory.isBlank()) {
             if (!infoEntries.isEmpty()) {
                 infoEntries.add(Component.empty());
@@ -143,7 +143,7 @@ public class TooltipEventHandler {
 
     private static List<Component> prepareNextLevelInfo(ToolStack tool) {
         List<Component> infoEntries = new ArrayList<>();
-        int level = tool.getPersistentData().getInt(ImprovableModifier.LEVEL_KEY);
+        int level = tool.getPersistentData().getInt(ImprovableModule.LEVEL_KEY);
         boolean canLevelUp = ToolLevellingUtil.canLevelUp(level);
         boolean knowNextSlot = ToolLevellingUtil.canPredictNextSlot(tool);
         boolean knowNextStat = ToolLevellingUtil.canPredictNextStat(tool);

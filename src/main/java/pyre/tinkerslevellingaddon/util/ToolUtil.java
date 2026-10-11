@@ -19,7 +19,7 @@ import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.capability.IFluidHandler;
 import org.jetbrains.annotations.Nullable;
 import pyre.tinkerslevellingaddon.config.Config;
-import pyre.tinkerslevellingaddon.setup.Registration;
+import pyre.tinkerslevellingaddon.setup.AddonModifierIds;
 import slimeknights.tconstruct.library.json.LevelingValue;
 import slimeknights.tconstruct.library.modifiers.ModifierEntry;
 import slimeknights.tconstruct.library.modifiers.ModifierHooks;
@@ -144,7 +144,7 @@ public class ToolUtil {
     }
 
     public static boolean hasImprovable(ItemStack activeStack) {
-        return ModifierUtil.getModifierLevel(activeStack, Registration.IMPROVABLE.get().getId()) > 0;
+        return ModifierUtil.getModifierLevel(activeStack, AddonModifierIds.IMPROVABLE) > 0;
     }
 
     public static HitResult calculateHitResult(LivingEntity living) {

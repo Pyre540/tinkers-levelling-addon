@@ -6,7 +6,7 @@ import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.sounds.SoundEvent;
-import pyre.tinkerslevellingaddon.ImprovableModifier;
+import pyre.tinkerslevellingaddon.ImprovableModule;
 import pyre.tinkerslevellingaddon.config.Config;
 import pyre.tinkerslevellingaddon.util.ModUtil;
 
@@ -25,7 +25,7 @@ public class ClientPacketHandler {
                 MutableComponent levelComponent = ModUtil.makeText(level, ChatFormatting.GOLD);
                 message = ModUtil.makeTranslation("message", "level_up.generic", toolName, levelComponent);
             }
-            message.withStyle(style -> style.withColor(ImprovableModifier.IMPROVABLE_MODIFIER_COLOR));
+            message.withStyle(style -> style.withColor(ImprovableModule.IMPROVABLE_MODIFIER_COLOR));
             player.displayClientMessage(message, false);
         }
         SoundEvent soundEvent = Config.levelUpSound.get().getSoundEvent();

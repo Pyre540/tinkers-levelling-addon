@@ -9,6 +9,7 @@ import net.minecraftforge.fml.common.Mod;
 import org.slf4j.Logger;
 import pyre.tinkerslevellingaddon.command.ModCommands;
 import pyre.tinkerslevellingaddon.config.Config;
+import pyre.tinkerslevellingaddon.data.ModifierProvider;
 import pyre.tinkerslevellingaddon.data.ModifierRecipeProvider;
 import pyre.tinkerslevellingaddon.network.Messages;
 import pyre.tinkerslevellingaddon.setup.Registration;
@@ -32,6 +33,7 @@ public class TinkersLevellingAddon {
     static void gatherData(final GatherDataEvent event) {
         DataGenerator generator = event.getGenerator();
         PackOutput packOutput = generator.getPackOutput();
+        generator.addProvider(event.includeServer(), new ModifierProvider(packOutput));
         generator.addProvider(event.includeServer(), new ModifierRecipeProvider(packOutput));
     }
 }

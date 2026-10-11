@@ -20,11 +20,6 @@ public class ModifierRecipeProvider extends RecipeProvider implements ICondition
         super(generator);
     }
 
-    /*@Override
-    public String getName() {
-        return "Tinkers' Levelling Addon Modifier Recipes";
-    }*/
-
     @Override
     protected void buildRecipes(Consumer<FinishedRecipe> consumer) {
         String abilityFolder = "tools/modifiers/ability/";

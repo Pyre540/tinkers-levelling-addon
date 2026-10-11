@@ -13,7 +13,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.LivingEntity;
 import pyre.tinkerslevellingaddon.config.Config;
-import pyre.tinkerslevellingaddon.setup.Registration;
+import pyre.tinkerslevellingaddon.setup.AddonModifierIds;
 import pyre.tinkerslevellingaddon.util.ModUtil;
 import pyre.tinkerslevellingaddon.util.ToolLevellingUtil;
 import slimeknights.tconstruct.library.tools.helper.ModifierUtil;
@@ -25,7 +25,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static pyre.tinkerslevellingaddon.ImprovableModifier.*;
+import static pyre.tinkerslevellingaddon.ImprovableModule.*;
 import static pyre.tinkerslevellingaddon.command.ModCommands.PERMISSION_GAME_COMMANDS;
 import static pyre.tinkerslevellingaddon.command.ModCommands.TOOL_VALIDATION_ERROR;
 
@@ -57,7 +57,7 @@ public class LevelsCommand {
         }
         
         List<LivingEntity> successes = HeldModifiableItemIterator.apply(context, (living, stack) -> {
-            if (ModifierUtil.getModifierLevel(stack, Registration.IMPROVABLE.get().getId()) <= 0) {
+            if (ModifierUtil.getModifierLevel(stack, AddonModifierIds.IMPROVABLE) <= 0) {
                 return false;
             }
             
