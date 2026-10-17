@@ -1,4 +1,25 @@
 # CHANGELOG
+## 1.5.0 - 1.20.1
+**Requires Tinkers’ Construct 3.12.1.231+**
+
+### Changed
+- Capped experience required for level up at 2147483647.
+### Added
+- '**NONE**' slot/stat type to enable levels without rewards.
+- Separate config settings for shields.
+- support for shields stats: **Block Amount** and **Block Angle**.
+- Support for 10 modifiers with corresponding settings in server config: **brushing**, **bucketing** (in world placement only), **fishing**, **grappling**, **melting**, **slimeball**, **slurping**, **spilling**, **spitting**, **splashing**.
+- Brazilian Portuguese translation (Thanks @Sr.Xlr11).
+- Japanese translation (Thanks @kju8).
+- Chinese translations for modifier entries in books (Thanks @Niangao_yxCN).
+- Polish translations for modifier entries in books.
+### Fixed
+- Game crash when using AoE melee attacks (swipe, circle).
+- Game crash when dealing damage with thrown tool.
+- Tool gets experience when it hits same player who threw it.
+- Exp from AoE attacks is not calculated correctly.
+- Translation typos.
+
 ## 1.4.3 - 1.20.1
 **Requires Tinkers’ Construct 3.10.0.67+**
 
