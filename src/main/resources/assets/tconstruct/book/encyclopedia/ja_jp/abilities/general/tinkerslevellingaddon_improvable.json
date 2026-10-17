@@ -1,0 +1,14 @@
+{
+  "modifier_id": "tinkerslevellingaddon:improvable",
+  "text": [
+    {
+      "text": "道具がレベルアップするようになります。経験値は採掘、収穫、ダメージを与えるなどの道具ごとの適切な行動で得ることができます。"
+    },
+    {
+      "text": "レベルが上がると、追加のスロットやステータスを得ることができます。",
+      "paragraph": true
+    }
+  ],
+  "more_text_space": true,
+  "effects": ["単一レベル", "アビリティスロットが1つ必要"]
+}
