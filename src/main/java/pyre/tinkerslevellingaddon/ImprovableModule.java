@@ -586,7 +586,7 @@ public enum ImprovableModule implements ModifierModule, PlantHarvestModifierHook
                 !player.onGround() || (player.walkDist - player.walkDistO) >= player.getSpeed()) {
             return;
         }
-        double range = module.range().compute(toolStack.getVolatileData().getInt(IModifiable.EXPANDED));
+        double range = module.ranges().compute(toolStack.getVolatileData().getInt(IModifiable.EXPANDED));
         //value - 2 - can be moved to datagen in the future
         double rangeSq = (2 + range);
         rangeSq *= rangeSq;
@@ -597,7 +597,7 @@ public enum ImprovableModule implements ModifierModule, PlantHarvestModifierHook
     private void handleCircleAttack(ToolAttackContext context, IToolStackView toolStack, ServerPlayer player,
                                     float damageDealt, CircleWeaponAttack module) {
         //code based on CircleWeaponAttack.afterMeleeHit
-        double range = module.diameter().compute(toolStack.getVolatileData().getInt(IModifiable.EXPANDED));
+        double range = module.diameters().compute(toolStack.getVolatileData().getInt(IModifiable.EXPANDED));
         if (range <= 0) {
             return;
         }
