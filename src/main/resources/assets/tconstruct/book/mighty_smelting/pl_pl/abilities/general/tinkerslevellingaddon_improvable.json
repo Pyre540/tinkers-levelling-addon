@@ -1,0 +1,14 @@
+{
+  "modifier_id": "tinkerslevellingaddon:improvable",
+  "text": [
+    {
+      "text": "Grinduj! Ulepszaj! Przezwyciężaj!"
+    }
+  ],
+  "more_text_space": true,
+  "effects": [
+    "Umożliwia zdobywanie poziomów",
+    "Pojedynczy poziom",
+    "Wymaga 1 slotu umiejętności"
+  ]
+}

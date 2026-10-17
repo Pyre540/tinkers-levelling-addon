@@ -1,0 +1,17 @@
+{
+  "modifier_id": "tinkerslevellingaddon:improvable",
+  "text": [
+    {
+      "text": "Umożliwia zdobywanie punktów doświadczenia i awansowanie na kolejne poziomy. Punkty doświadczenia zdobywa się, wykonując czynności zgodne z przeznaczeniem danego narzędzia, takie jak wydobywanie surowców, zbieranie plonów, zadawanie obrażeń itp."
+    },
+    {
+      "text": "Po zdobyciu poziomu, narzędzie otrzymuje dodatkowy slot modyfikacji i/lub statystykę.",
+      "paragraph": true
+    }
+  ],
+  "more_text_space": true,
+  "effects": [
+    "Pojedynczy poziom",
+    "Wymaga 1 slotu umiejętności"
+  ]
+}
